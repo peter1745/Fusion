@@ -9,22 +9,22 @@ public:
 	SandboxApp(const Fusion::ApplicationSpecification& specification)
 		: Application(specification)
 	{
-		std::cout << "Construct" << std::endl;
+		FUSION_CLIENT_INFO("Constructor!");
 	}
 
 	virtual void OnInit() override
 	{
-		std::cout << "OnInit" << std::endl;
+		FUSION_CLIENT_INFO("OnInit!");
 	}
 
 	virtual void OnUpdate(float DeltaTime) override
 	{
-		std::cout << "OnUpdate: " << DeltaTime << std::endl;
+		FUSION_CLIENT_INFO("OnUpdate: {}", DeltaTime);
 	}
 
 	virtual void OnShutdown() override
 	{
-		std::cout << "OnShutdown" << std::endl;
+		FUSION_CLIENT_INFO("OnShutdown!");
 	}
 };
 

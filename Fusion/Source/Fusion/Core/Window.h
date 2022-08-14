@@ -27,7 +27,7 @@ namespace Fusion {
 		static Unique<Window> Create(const WindowSpecification& specification);
 
 	private:
-		virtual bool Init() = 0;
+		virtual void Init() = 0;
 		virtual void ProcessEvents() = 0;
 
 		friend class Application;

@@ -7,3 +7,4 @@
 # Directories
 .vs/
 Build/
+**/Logs

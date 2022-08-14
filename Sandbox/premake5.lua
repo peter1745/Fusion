@@ -23,7 +23,8 @@ project "Sandbox"
     includedirs
     {
         "%{wks.location}/Fusion/Source",
-        "%{IncludeDirs.glm}"
+        "%{IncludeDirs.glm}",
+        "%{IncludeDirs.spdlog}"
     }
 
     filter "system:windows"

@@ -10,7 +10,7 @@ namespace Fusion {
 #if defined(FUSION_PLATFORM_WINDOWS)
 		return MakeUnique<WindowsWindow>(specification);
 #else
-		static_assert(false);
+		FUSION_CORE_VERIFY(false);
 #endif
 	}
 

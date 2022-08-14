@@ -13,6 +13,9 @@
 #include <cstdint>
 #include <memory>
 
+#include "Logging.h"
+#include "Assert.h"
+
 namespace Fusion {
 
 	template<typename T>

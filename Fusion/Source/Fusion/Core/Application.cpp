@@ -13,12 +13,8 @@ namespace Fusion {
 		WindowSpec.Width = m_Specification.WindowWidth;
 		WindowSpec.Height = m_Specification.WindowHeight;
 		m_Window = Window::Create(WindowSpec);
-		
-		if (!m_Window->Init())
-		{
-			__debugbreak();
-			return;
-		}
+		m_Window->Init();
+
 	}
 
 	Application::~Application()

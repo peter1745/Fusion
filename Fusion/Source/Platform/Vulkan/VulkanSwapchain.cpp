@@ -97,11 +97,7 @@ namespace Fusion {
 		swapchainCreateInfo.clipped = VK_TRUE;
 		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		if (vkCreateSwapchainKHR(deviceInterface, &swapchainCreateInfo, nullptr, &m_Swapchain) != VK_SUCCESS)
-		{
-			__debugbreak();
-			return;
-		}
+		FUSION_CORE_VERIFY(vkCreateSwapchainKHR(deviceInterface, &swapchainCreateInfo, nullptr, &m_Swapchain) == VK_SUCCESS);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()

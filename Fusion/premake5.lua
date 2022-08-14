@@ -21,6 +21,7 @@ project "Fusion"
         "Source/",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.Vulkan}"
     }
 

@@ -22,11 +22,7 @@ namespace Fusion {
 
 	VulkanContext::VulkanContext(const Window* window)
 	{
-		if (c_EnableValidationLayers && !CheckValidationLayers())
-		{
-			__debugbreak();
-			return;
-		}
+		FUSION_CORE_VERIFY(c_EnableValidationLayers && CheckValidationLayers());
 
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -49,11 +45,7 @@ namespace Fusion {
 			instanceCreateInfo.ppEnabledLayerNames = c_ValidationLayers.data();
 		}
 
-		if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) != VK_SUCCESS)
-		{
-			__debugbreak();
-			return;
-		}
+		FUSION_CORE_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) == VK_SUCCESS);
 
 		GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
 
@@ -72,13 +64,7 @@ namespace Fusion {
 		// Setup Physical Device
 		uint32_t physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, nullptr);
-
-		if (physicalDeviceCount == 0)
-		{
-			// TODO
-			__debugbreak();
-			return;
-		}
+		FUSION_CORE_VERIFY(physicalDeviceCount != 0);
 
 		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, physicalDevices.data());
@@ -129,11 +115,7 @@ namespace Fusion {
 			deviceCreateInfo.ppEnabledLayerNames = c_ValidationLayers.data();
 		}
 
-		if (vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice) != VK_SUCCESS)
-		{
-			__debugbreak();
-			return;
-		}
+		FUSION_CORE_VERIFY(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice) == VK_SUCCESS);
 
 		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
 
