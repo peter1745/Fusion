@@ -9,7 +9,7 @@ namespace Fusion {
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowSpecification& specification);
+		WindowsWindow(const WindowSpecification& InSpecification);
 		virtual ~WindowsWindow();
 
 		virtual bool ShouldClose() const override;

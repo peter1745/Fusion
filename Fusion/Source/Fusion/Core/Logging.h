@@ -25,10 +25,10 @@ namespace Fusion {
 		inline static const Logger& GetClientLogger() { return s_ClientLogger; }
 
 		template<typename... TArgs>
-		static void PrintMessage(bool FusionLogger, Level level, TArgs&&... Args);
+		static void PrintMessage(bool IsFusionLogger, Level InLevel, TArgs&&... InArgs);
 
 		template<typename... TArgs>
-		static void PrintVerifyMessage(bool FusionLogger, std::string_view Prefix, TArgs&&... Args);
+		static void PrintVerifyMessage(bool IsFusionLogger, std::string_view InPrefix, TArgs&&... InArgs);
 
 	private:
 		static Logger s_FusionLogger;
@@ -53,41 +53,41 @@ namespace Fusion {
 
 
 	template<typename... TArgs>
-	void Logging::PrintMessage(bool FusionLogger, Level level, TArgs&&... Args)
+	void Logging::PrintMessage(bool IsFusionLogger, Level InLevel, TArgs&&... InArgs)
 	{
-		auto LoggerPtr = FusionLogger ? GetFusionLogger() : GetClientLogger();
-		switch (level)
+		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
+		switch (InLevel)
 		{
 		case Logging::Level::Trace:
-			LoggerPtr->trace("{0}", fmt::format(std::forward<TArgs>(Args)...));
+			LoggerPtr->trace("{0}", fmt::format(std::forward<TArgs>(InArgs)...));
 			break;
 		case Logging::Level::Info:
-			LoggerPtr->info("{0}", fmt::format(std::forward<TArgs>(Args)...));
+			LoggerPtr->info("{0}", fmt::format(std::forward<TArgs>(InArgs)...));
 			break;
 		case Logging::Level::Warn:
-			LoggerPtr->warn("{0}", fmt::format(std::forward<TArgs>(Args)...));
+			LoggerPtr->warn("{0}", fmt::format(std::forward<TArgs>(InArgs)...));
 			break;
 		case Logging::Level::Error:
-			LoggerPtr->error("{0}", fmt::format(std::forward<TArgs>(Args)...));
+			LoggerPtr->error("{0}", fmt::format(std::forward<TArgs>(InArgs)...));
 			break;
 		case Logging::Level::Fatal:
-			LoggerPtr->critical("{0}", fmt::format(std::forward<TArgs>(Args)...));
+			LoggerPtr->critical("{0}", fmt::format(std::forward<TArgs>(InArgs)...));
 			break;
 		}
 	}
 
 	template<typename... TArgs>
-	void Logging::PrintVerifyMessage(bool FusionLogger, std::string_view Prefix, TArgs&&... Args)
+	void Logging::PrintVerifyMessage(bool IsFusionLogger, std::string_view InPrefix, TArgs&&... InArgs)
 	{
-		auto LoggerPtr = FusionLogger ? GetFusionLogger() : GetClientLogger();
-		LoggerPtr->critical("{0}: {1}", Prefix, fmt::format(std::forward<TArgs>(Args)...));
+		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
+		LoggerPtr->critical("{0}: {1}", InPrefix, fmt::format(std::forward<TArgs>(InArgs)...));
 	}
 
 	template<>
-	inline void Logging::PrintVerifyMessage(bool FusionLogger, std::string_view Prefix)
+	inline void Logging::PrintVerifyMessage(bool IsFusionLogger, std::string_view InPrefix)
 	{
-		auto LoggerPtr = FusionLogger ? GetFusionLogger() : GetClientLogger();
-		LoggerPtr->critical("{0}", Prefix);
+		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
+		LoggerPtr->critical("{0}", InPrefix);
 	}
 
 }

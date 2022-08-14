@@ -24,7 +24,7 @@ namespace Fusion {
 		virtual void* GetNativeWindow() const = 0;
 
 	public:
-		static Unique<Window> Create(const WindowSpecification& specification);
+		static Unique<Window> Create(const WindowSpecification& InSpecification);
 
 	private:
 		virtual void Init() = 0;

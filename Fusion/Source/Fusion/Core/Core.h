@@ -19,8 +19,13 @@
 namespace Fusion {
 
 	template<typename T>
-	using Unique = std::unique_ptr<T>;
+	using Shared = std::shared_ptr<T>;
+	template<typename T, typename... TArgs>
+	Shared<T> MakeShared(TArgs&&... InArgs) { return std::make_shared<T>(std::forward<TArgs>(InArgs)...); }
 
+
+	template<typename T>
+	using Unique = std::unique_ptr<T>;
 	template<typename T, typename... TArgs>
 	Unique<T> MakeUnique(TArgs&&... InArgs) { return std::make_unique<T>(std::forward<TArgs>(InArgs)...); }
 

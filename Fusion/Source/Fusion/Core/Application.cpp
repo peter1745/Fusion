@@ -14,7 +14,6 @@ namespace Fusion {
 		WindowSpec.Height = m_Specification.WindowHeight;
 		m_Window = Window::Create(WindowSpec);
 		m_Window->Init();
-
 	}
 
 	Application::~Application()

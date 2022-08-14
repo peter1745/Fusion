@@ -6,8 +6,8 @@ namespace Fusion {
 
 	std::unique_ptr<VulkanContext> s_VulkanContext;
 
-	WindowsWindow::WindowsWindow(const WindowSpecification& specification)
-		: m_Specification(specification)
+	WindowsWindow::WindowsWindow(const WindowSpecification& InSpecification)
+		: m_Specification(InSpecification)
 	{
 	}
 
@@ -24,7 +24,7 @@ namespace Fusion {
 		m_NativeWindow = glfwCreateWindow(int(m_Specification.Width), int(m_Specification.Height), m_Specification.Title.data(), NULL, NULL);
 		FUSION_CORE_VERIFY(m_NativeWindow, "Failed to create GLFW window!");
 
-		//s_VulkanContext = std::make_unique<VulkanContext>(this);
+		s_VulkanContext = std::make_unique<VulkanContext>(this);
 	}
 
 	void WindowsWindow::ProcessEvents()

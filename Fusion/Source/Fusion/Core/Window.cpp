@@ -5,10 +5,10 @@
 
 namespace Fusion {
 
-	Unique<Window> Window::Create(const WindowSpecification& specification)
+	Unique<Window> Window::Create(const WindowSpecification& InSpecification)
 	{
 #if defined(FUSION_PLATFORM_WINDOWS)
-		return MakeUnique<WindowsWindow>(specification);
+		return MakeUnique<WindowsWindow>(InSpecification);
 #else
 		FUSION_CORE_VERIFY(false);
 #endif

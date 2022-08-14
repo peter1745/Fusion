@@ -18,9 +18,7 @@ namespace Fusion {
 	const bool c_EnableValidationLayers = false;
 #endif
 
-	const std::vector<const char*> c_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
-	VulkanContext::VulkanContext(const Window* window)
+	VulkanContext::VulkanContext(const Window* InWindow)
 	{
 		FUSION_CORE_VERIFY(c_EnableValidationLayers && CheckValidationLayers());
 
@@ -47,85 +45,21 @@ namespace Fusion {
 
 		FUSION_CORE_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) == VK_SUCCESS);
 
-		GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
+		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(InWindow->GetNativeWindow());
+		VkSurfaceKHR Surface = VK_NULL_HANDLE;
+		FUSION_CORE_VERIFY(glfwCreateWindowSurface(m_Instance, NativeWindow, nullptr, &Surface) == VK_SUCCESS);
 
-#ifdef FUSION_PLATFORM_WINDOWS
-		// Setup Surface
-		VkResult surfaceResult = glfwCreateWindowSurface(m_Instance, nativeWindow, nullptr, &m_Surface);
-		if (surfaceResult != VK_SUCCESS)
-		{
-			__debugbreak();
-			return;
-		}
-#else
-	#error Platform not supported!
-#endif
-
-		// Setup Physical Device
-		uint32_t physicalDeviceCount = 0;
-		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, nullptr);
-		FUSION_CORE_VERIFY(physicalDeviceCount != 0);
-
-		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-		vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, physicalDevices.data());
-
-		for (const auto& device : physicalDevices)
-		{
-			VkPhysicalDeviceProperties deviceProperties;
-			vkGetPhysicalDeviceProperties(device, &deviceProperties);
-
-			VkPhysicalDeviceFeatures deviceFeatures;
-			vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-			if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-				continue;
-
-			QueueFamilyIndices queueFamilyIndices = GetQueueFamilies(device);
-
-			if (queueFamilyIndices.GraphicsFamily == UINT32_MAX)
-				continue;
-
-			m_PhysicalDevice = device;
-			break;
-		}
-
-		// Setup Logical Device
-		QueueFamilyIndices queueFamilyIndices = GetQueueFamilies(m_PhysicalDevice);
-
-		float queuePriority = 1.0f;
-		VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
-		graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		graphicsQueueCreateInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily;
-		graphicsQueueCreateInfo.queueCount = 1;
-		graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
-
-		VkPhysicalDeviceFeatures deviceFeatures{};
-
-		VkDeviceCreateInfo deviceCreateInfo{};
-		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceCreateInfo.pQueueCreateInfos = &graphicsQueueCreateInfo;
-		deviceCreateInfo.queueCreateInfoCount = 1;
-		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-		deviceCreateInfo.enabledExtensionCount = uint32_t(c_DeviceExtensions.size());
-		deviceCreateInfo.ppEnabledExtensionNames = c_DeviceExtensions.data();
-
-		if (c_EnableValidationLayers)
-		{
-			deviceCreateInfo.enabledLayerCount = uint32_t(c_ValidationLayers.size());
-			deviceCreateInfo.ppEnabledLayerNames = c_ValidationLayers.data();
-		}
-
-		FUSION_CORE_VERIFY(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_LogicalDevice) == VK_SUCCESS);
-
-		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
-
-		m_Swapchain = std::make_shared<VulkanSwapchain>(m_Instance, m_LogicalDevice, m_PhysicalDevice, m_Surface, window);
+		m_Device = MakeShared<VulkanDevice>(m_Instance, Surface);
+		m_Swapchain = MakeShared<VulkanSwapchain>(m_Instance, m_Device, Surface);
+		m_Swapchain->InitSurface(NativeWindow);
+		m_Swapchain->Create();
 	}
 
 	VulkanContext::~VulkanContext()
 	{
-		vkDestroyDevice(m_LogicalDevice, nullptr);
-		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+		m_Swapchain.reset();
+		m_Device.reset();
+
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
@@ -157,27 +91,4 @@ namespace Fusion {
 		return true;
 	}
 
-	QueueFamilyIndices VulkanContext::GetQueueFamilies(VkPhysicalDevice device) const
-	{
-		QueueFamilyIndices queueFamilyIndices;
-		
-		uint32_t queueFamilyCount = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-		for (uint32_t i = 0; i < queueFamilyCount; i++)
-		{
-			const auto& queueFamily = queueFamilies[i];
-
-			VkBool32 surfaceSupported = VK_FALSE;
-			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &surfaceSupported);
-
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && surfaceSupported)
-				queueFamilyIndices.GraphicsFamily = i;
-		}
-
-		return queueFamilyIndices;
-	}
 }

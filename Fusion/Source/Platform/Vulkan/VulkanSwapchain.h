@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Fusion/Core/Window.h"
-
-#include <vulkan/vulkan.h>
+#include "VulkanDevice.h"
+#include <GLFW/glfw3.h>
 
 namespace Fusion {
 
@@ -10,10 +9,19 @@ namespace Fusion {
 	{
 	public:
 		// NOTE(Peter): Swapchain should be responsible for creating the surface
-		VulkanSwapchain(VkInstance instance, VkDevice deviceInterface, VkPhysicalDevice device, VkSurfaceKHR surface, const Window* window);
+		VulkanSwapchain(VkInstance InInstance, Shared<VulkanDevice> InDevice, VkSurfaceKHR InSurface);
 		~VulkanSwapchain();
 
+		void Create();
+		void InitSurface(GLFWwindow* NativeWindow);
+
 	private:
+		VkInstance m_Instance = VK_NULL_HANDLE;
+		Shared<VulkanDevice> m_Device;
+		VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
+		VkExtent2D m_ImageExtent = {};
+		uint32_t m_QueueIndex = UINT32_MAX;
+
 		VkSwapchainKHR m_Swapchain = VK_NULL_HANDLE;
 		VkSurfaceFormatKHR m_SurfaceFormat;
 		VkPresentModeKHR m_PresentMode;
