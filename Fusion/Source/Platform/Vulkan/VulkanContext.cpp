@@ -11,6 +11,8 @@
 
 namespace Fusion {
 
+	static VulkanContext* s_Instance = nullptr;
+
 #ifdef FUSION_DEBUG
 	const bool c_EnableValidationLayers = true;
 	const std::vector<const char*> c_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
@@ -20,6 +22,9 @@ namespace Fusion {
 
 	VulkanContext::VulkanContext(const Window* InWindow)
 	{
+		FUSION_CORE_VERIFY(s_Instance == nullptr);
+		s_Instance = this;
+
 		FUSION_CORE_VERIFY(c_EnableValidationLayers && CheckValidationLayers());
 
 		VkApplicationInfo appInfo{};
@@ -53,15 +58,25 @@ namespace Fusion {
 		m_Swapchain = MakeShared<VulkanSwapchain>(m_Instance, m_Device, Surface);
 		m_Swapchain->InitSurface(NativeWindow);
 		m_Swapchain->Create();
+
+		PipelineSpecification Specification;
+		Specification.RenderPass = m_Swapchain->GetRenderPass();
+
+		VulkanShaderSpecification ShaderSpec = { "Resources/Shaders/VertexShader.spv", "Resources/Shaders/FragmentShader.spv" };
+		Specification.PipelineShader = MakeShared<VulkanShader>(ShaderSpec, m_Device);
+		m_Pipeline = MakeShared<VulkanPipeline>(Specification, m_Device);
 	}
 
 	VulkanContext::~VulkanContext()
 	{
+		m_Pipeline.reset();
 		m_Swapchain.reset();
 		m_Device.reset();
 
 		vkDestroyInstance(m_Instance, nullptr);
 	}
+
+	VulkanContext& VulkanContext::Get() { return *s_Instance; }
 
 	bool VulkanContext::CheckValidationLayers() const
 	{

@@ -18,6 +18,8 @@
 
 namespace Fusion {
 
+	using Byte = uint8_t;
+
 	template<typename T>
 	using Shared = std::shared_ptr<T>;
 	template<typename T, typename... TArgs>

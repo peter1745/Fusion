@@ -19,7 +19,7 @@ public:
 
 	virtual void OnUpdate(float DeltaTime) override
 	{
-		FUSION_CLIENT_INFO("OnUpdate: {}", DeltaTime);
+		//FUSION_CLIENT_INFO("OnUpdate: {}", DeltaTime);
 	}
 
 	virtual void OnShutdown() override

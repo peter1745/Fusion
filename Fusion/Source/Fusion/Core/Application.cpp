@@ -1,9 +1,12 @@
 #include "FusionPCH.h"
 #include "Application.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
 
 #include <glm/glm.hpp>
 
 namespace Fusion {
+
+	static Shared<VulkanRenderer> s_VulkanRenderer = nullptr;
 
 	Application::Application(const ApplicationSpecification& InSpecification)
 		: m_Specification(InSpecification)
@@ -14,11 +17,13 @@ namespace Fusion {
 		WindowSpec.Height = m_Specification.WindowHeight;
 		m_Window = Window::Create(WindowSpec);
 		m_Window->Init();
+
+		s_VulkanRenderer = MakeShared<VulkanRenderer>();
 	}
 
 	Application::~Application()
 	{
-
+		s_VulkanRenderer.reset();
 	}
 
 	void Application::Run()
@@ -27,8 +32,13 @@ namespace Fusion {
 		OnInit();
 		while (m_Running)
 		{
-			// TODO(Peter): Event Processing
 			m_Window->ProcessEvents();
+
+			// Render
+			s_VulkanRenderer->BeginDraw();
+			s_VulkanRenderer->Draw(0.0f, 0.0f);
+			s_VulkanRenderer->EndDraw();
+			s_VulkanRenderer->Submit();
 
 			// Layers?
 			OnUpdate(m_TimeStep);

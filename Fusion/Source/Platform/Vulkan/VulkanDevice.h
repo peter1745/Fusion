@@ -23,6 +23,7 @@ namespace Fusion {
 
 		VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
 		VkDevice GetLogicalDevice() const { return m_LogicalDevice; }
+		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
 
 		const VulkanDeviceQueueIndices& GetQueueIndicies() const { return m_QueueIndices; }
 
