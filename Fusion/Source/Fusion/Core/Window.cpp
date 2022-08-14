@@ -5,9 +5,13 @@
 
 namespace Fusion {
 
-	std::unique_ptr<Window> Window::Create(const WindowProperties& properties)
+	Unique<Window> Window::Create(const WindowSpecification& specification)
 	{
-		return std::make_unique<WindowsWindow>(properties);
+#if defined(FUSION_PLATFORM_WINDOWS)
+		return MakeUnique<WindowsWindow>(specification);
+#else
+		static_assert(false);
+#endif
 	}
 
 }

@@ -20,6 +20,7 @@ project "Fusion"
     {
         "Source/",
         "%{IncludeDirs.GLFW}",
+        "%{IncludeDirs.glm}",
         "%{IncludeDirs.Vulkan}"
     }
 
@@ -27,11 +28,6 @@ project "Fusion"
 
     filter "system:windows"
         systemversion "latest"
-
-        links
-        {
-            "%{Libraries.Vulkan}"
-        }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

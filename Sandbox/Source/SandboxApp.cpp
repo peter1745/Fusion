@@ -1,19 +1,37 @@
-#include "Fusion/Core/Window.h"
+#include <Fusion.h>
+#include <Fusion/EntryPoint.h>
 
-#include <memory>
+#include <iostream>
 
-int main(int argc, char** argv)
+class SandboxApp : public Fusion::Application
 {
-	Fusion::WindowProperties windowProps;
-	windowProps.Title = "Fusion Sandbox App";
-	windowProps.Width = 1920;
-	windowProps.Height = 1080;
-	std::unique_ptr<Fusion::Window> window = Fusion::Window::Create(windowProps);
-
-	while (!window->ShouldClose())
+public:
+	SandboxApp(const Fusion::ApplicationSpecification& specification)
+		: Application(specification)
 	{
-		window->OnUpdate();
+		std::cout << "Construct" << std::endl;
 	}
 
-	return 0;
+	virtual void OnInit() override
+	{
+		std::cout << "OnInit" << std::endl;
+	}
+
+	virtual void OnUpdate(float DeltaTime) override
+	{
+		std::cout << "OnUpdate: " << DeltaTime << std::endl;
+	}
+
+	virtual void OnShutdown() override
+	{
+		std::cout << "OnShutdown" << std::endl;
+	}
+};
+
+Fusion::Application* Fusion::CreateApplication(int ArgC, char** ArgV)
+{
+	Fusion::ApplicationSpecification specification = {};
+	specification.Title = "Sandbox App";
+
+	return new SandboxApp(specification);
 }

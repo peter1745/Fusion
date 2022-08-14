@@ -16,12 +16,14 @@ project "Sandbox"
     links
     {
         "Fusion",
-        "GLFW"
+        "GLFW",
+        "%{Libraries.Vulkan}"
     }
 
     includedirs
     {
-        "%{wks.location}/Fusion/Source"
+        "%{wks.location}/Fusion/Source",
+        "%{IncludeDirs.glm}"
     }
 
     filter "system:windows"

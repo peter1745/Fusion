@@ -2,14 +2,13 @@
 
 #include "Core.h"
 
-#include <string_view>
-#include <memory>
+#include <string>
 
 namespace Fusion {
 
-	struct WindowProperties
+	struct WindowSpecification
 	{
-		std::string_view Title;
+		std::string Title;
 		uint32_t Width;
 		uint32_t Height;
 	};
@@ -18,14 +17,20 @@ namespace Fusion {
 	{
 	public:
 		virtual ~Window() = default;
-		virtual void OnUpdate() = 0;
+
 		virtual bool ShouldClose() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual void* GetNativeWindow() const = 0;
 
 	public:
-		static std::unique_ptr<Window> Create(const WindowProperties& properties);
+		static Unique<Window> Create(const WindowSpecification& specification);
+
+	private:
+		virtual bool Init() = 0;
+		virtual void ProcessEvents() = 0;
+
+		friend class Application;
 	};
 
 }

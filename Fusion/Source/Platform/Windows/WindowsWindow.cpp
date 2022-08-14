@@ -8,31 +8,39 @@ namespace Fusion {
 
 	std::unique_ptr<VulkanContext> s_VulkanContext;
 
-	WindowsWindow::WindowsWindow(const WindowProperties& properties)
-		: m_Properties(properties)
+	WindowsWindow::WindowsWindow(const WindowSpecification& specification)
+		: m_Specification(specification)
 	{
-		if (!glfwInit())
-			__debugbreak();
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-		m_NativeWindow = glfwCreateWindow(int(properties.Width), int(properties.Height), properties.Title.data(), NULL, NULL);
-
-		if (!m_NativeWindow)
-		{
-			__debugbreak();
-			glfwTerminate();
-			return;
-		}
-
-		s_VulkanContext = std::make_unique<VulkanContext>(this);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
 	}
 
-	void WindowsWindow::OnUpdate()
+	bool WindowsWindow::Init()
+	{
+		if (!glfwInit())
+		{
+			__debugbreak();
+			return false;
+		}
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		m_NativeWindow = glfwCreateWindow(int(m_Specification.Width), int(m_Specification.Height), m_Specification.Title.data(), NULL, NULL);
+
+		if (!m_NativeWindow)
+		{
+			__debugbreak();
+			glfwTerminate();
+			return false;
+		}
+
+		//s_VulkanContext = std::make_unique<VulkanContext>(this);
+		return true;
+	}
+
+	void WindowsWindow::ProcessEvents()
 	{
 		glfwPollEvents();
 	}

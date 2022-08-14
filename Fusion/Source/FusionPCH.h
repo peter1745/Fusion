@@ -8,3 +8,9 @@
 #include <array>
 #include <fstream>
 #include <sstream>
+
+#include "Fusion/Core/Core.h"
+
+#if defined(FUSION_PLATFORM_WINDOWS)
+	#include <Windows.h>
+#endif

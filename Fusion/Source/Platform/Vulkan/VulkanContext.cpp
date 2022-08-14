@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 //#include <GLFW/glfw3native.h>
 
+#include <glm/glm.hpp>
+
 #include <iostream>
 
 namespace Fusion {
@@ -15,6 +17,8 @@ namespace Fusion {
 #else
 	const bool c_EnableValidationLayers = false;
 #endif
+
+	const std::vector<const char*> c_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	VulkanContext::VulkanContext(const Window* window)
 	{
@@ -51,9 +55,11 @@ namespace Fusion {
 			return;
 		}
 
+		GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(window->GetNativeWindow());
+
 #ifdef FUSION_PLATFORM_WINDOWS
 		// Setup Surface
-		VkResult surfaceResult = glfwCreateWindowSurface(m_Instance, static_cast<GLFWwindow*>(window->GetNativeWindow()), nullptr, &m_Surface);
+		VkResult surfaceResult = glfwCreateWindowSurface(m_Instance, nativeWindow, nullptr, &m_Surface);
 		if (surfaceResult != VK_SUCCESS)
 		{
 			__debugbreak();
@@ -114,6 +120,8 @@ namespace Fusion {
 		deviceCreateInfo.pQueueCreateInfos = &graphicsQueueCreateInfo;
 		deviceCreateInfo.queueCreateInfoCount = 1;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+		deviceCreateInfo.enabledExtensionCount = uint32_t(c_DeviceExtensions.size());
+		deviceCreateInfo.ppEnabledExtensionNames = c_DeviceExtensions.data();
 
 		if (c_EnableValidationLayers)
 		{
@@ -128,6 +136,8 @@ namespace Fusion {
 		}
 
 		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
+
+		m_Swapchain = std::make_shared<VulkanSwapchain>(m_Instance, m_LogicalDevice, m_PhysicalDevice, m_Surface, window);
 	}
 
 	VulkanContext::~VulkanContext()
@@ -165,7 +175,7 @@ namespace Fusion {
 		return true;
 	}
 
-	QueueFamilyIndices VulkanContext::GetQueueFamilies(const VkPhysicalDevice& device) const
+	QueueFamilyIndices VulkanContext::GetQueueFamilies(VkPhysicalDevice device) const
 	{
 		QueueFamilyIndices queueFamilyIndices;
 		
@@ -188,5 +198,4 @@ namespace Fusion {
 
 		return queueFamilyIndices;
 	}
-
 }
