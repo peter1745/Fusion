@@ -18,12 +18,13 @@ namespace Fusion {
 		m_Window = Window::Create(WindowSpec);
 		m_Window->Init();
 
-		s_VulkanRenderer = MakeShared<VulkanRenderer>();
+		s_VulkanRenderer = Shared<VulkanRenderer>::Create();
 	}
 
 	Application::~Application()
 	{
-		s_VulkanRenderer.reset();
+		s_VulkanRenderer = nullptr;
+		m_Window = nullptr;
 	}
 
 	void Application::Run()

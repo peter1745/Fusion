@@ -31,12 +31,12 @@ namespace Fusion {
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Fusion Vulkan App";
 		appInfo.pEngineName = "Fusion";
-		appInfo.apiVersion = VK_API_VERSION_1_2;
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo instanceCreateInfo{};
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		
+
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 		instanceCreateInfo.enabledExtensionCount = glfwExtensionCount;
@@ -54,24 +54,16 @@ namespace Fusion {
 		VkSurfaceKHR Surface = VK_NULL_HANDLE;
 		FUSION_CORE_VERIFY(glfwCreateWindowSurface(m_Instance, NativeWindow, nullptr, &Surface) == VK_SUCCESS);
 
-		m_Device = MakeShared<VulkanDevice>(m_Instance, Surface);
-		m_Swapchain = MakeShared<VulkanSwapchain>(m_Instance, m_Device, Surface);
+		m_Device = Shared<VulkanDevice>::Create(m_Instance, Surface);
+		m_Swapchain = Shared<VulkanSwapchain>::Create(m_Instance, m_Device, Surface);
 		m_Swapchain->InitSurface(NativeWindow);
 		m_Swapchain->Create();
-
-		PipelineSpecification Specification;
-		Specification.RenderPass = m_Swapchain->GetRenderPass();
-
-		VulkanShaderSpecification ShaderSpec = { "Resources/Shaders/VertexShader.spv", "Resources/Shaders/FragmentShader.spv" };
-		Specification.PipelineShader = MakeShared<VulkanShader>(ShaderSpec, m_Device);
-		m_Pipeline = MakeShared<VulkanPipeline>(Specification, m_Device);
 	}
 
 	VulkanContext::~VulkanContext()
 	{
-		m_Pipeline.reset();
-		m_Swapchain.reset();
-		m_Device.reset();
+		m_Swapchain = nullptr;
+		m_Device = nullptr;
 
 		vkDestroyInstance(m_Instance, nullptr);
 	}

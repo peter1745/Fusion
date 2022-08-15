@@ -15,16 +15,11 @@
 
 #include "Logging.h"
 #include "Assert.h"
+#include "Fusion/Memory/Shared.h"
 
 namespace Fusion {
 
 	using Byte = uint8_t;
-
-	template<typename T>
-	using Shared = std::shared_ptr<T>;
-	template<typename T, typename... TArgs>
-	Shared<T> MakeShared(TArgs&&... InArgs) { return std::make_shared<T>(std::forward<TArgs>(InArgs)...); }
-
 
 	template<typename T>
 	using Unique = std::unique_ptr<T>;

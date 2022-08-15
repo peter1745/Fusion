@@ -8,8 +8,8 @@ namespace Fusion {
 
 	struct PipelineSpecification
 	{
-		VkRenderPass RenderPass;
 		Shared<VulkanShader> PipelineShader;
+		VkFormat ColorAttachmentFormat;
 	};
 
 	class VulkanPipeline

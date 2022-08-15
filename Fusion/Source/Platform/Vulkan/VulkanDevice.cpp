@@ -46,7 +46,6 @@ namespace Fusion {
 
 		FUSION_CORE_VERIFY(m_PhysicalDevice != VK_NULL_HANDLE);
 		FUSION_CORE_VERIFY(m_QueueIndices.GraphicsQueue == m_QueueIndices.PresentQueue);
-		
 
 		// Setup Logical Device
 		float QueuePriority = 1.0f;
@@ -56,15 +55,22 @@ namespace Fusion {
 		GraphicsQueueCreateInfo.queueCount = 1;
 		GraphicsQueueCreateInfo.pQueuePriorities = &QueuePriority;
 
-		VkPhysicalDeviceFeatures DeviceFeatures = {};
+		VkPhysicalDeviceVulkan13Features Vulkan13DeviceFeatures = {};
+		Vulkan13DeviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		Vulkan13DeviceFeatures.dynamicRendering = VK_TRUE;
+		Vulkan13DeviceFeatures.synchronization2 = VK_TRUE;
+
+		VkPhysicalDeviceFeatures2 PhysicalDeviceFeatures2 = {};
+		PhysicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		PhysicalDeviceFeatures2.pNext = &Vulkan13DeviceFeatures;
 
 		VkDeviceCreateInfo DeviceCreateInfo = {};
 		DeviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		DeviceCreateInfo.pQueueCreateInfos = &GraphicsQueueCreateInfo;
 		DeviceCreateInfo.queueCreateInfoCount = 1;
-		DeviceCreateInfo.pEnabledFeatures = &DeviceFeatures;
 		DeviceCreateInfo.enabledExtensionCount = uint32_t(c_DeviceExtensions.size());
 		DeviceCreateInfo.ppEnabledExtensionNames = c_DeviceExtensions.data();
+		DeviceCreateInfo.pNext = &PhysicalDeviceFeatures2;
 
 		if (c_EnableValidationLayers)
 		{

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "VulkanDevice.h"
+#include "VulkanPipeline.h"
+#include "VulkanRenderPass.h"
 
 namespace Fusion {
 
@@ -19,9 +21,10 @@ namespace Fusion {
 		static VulkanRenderer& Get();
 
 	private:
-		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
-		VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;
-
+		std::vector<VkCommandPool> m_CommandPools;
+		std::vector<VkCommandBuffer> m_CommandBuffers;
+		Shared<VulkanRenderPass> m_SwapchainRenderPass;
+		Shared<VulkanPipeline> m_TrianglePipeline = nullptr;
 	};
 
 }

@@ -4,6 +4,8 @@ namespace Fusion {
 
 	class GraphicsContext
 	{
+	public:
+
 
 	};
 

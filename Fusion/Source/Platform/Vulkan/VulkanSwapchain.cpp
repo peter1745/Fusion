@@ -13,19 +13,18 @@ namespace Fusion {
 	VulkanSwapchain::~VulkanSwapchain()
 	{
 		VkDevice LogicalDevice = m_Device->GetLogicalDevice();
-		vkDestroyFence(LogicalDevice, m_FrameInFlightFence, nullptr);
-		vkDestroySemaphore(LogicalDevice, m_RenderFinishedSemaphore, nullptr);
-		vkDestroySemaphore(LogicalDevice, m_ImageAvailableSemaphore, nullptr);
 
-		for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
-			vkDestroyFramebuffer(LogicalDevice, m_Framebuffers[i], nullptr);
-		m_Framebuffers.clear();
+		for (uint32_t i = 0; i < m_MaxFramesInFlight; i++)
+		{
+			vkDestroyFence(LogicalDevice, m_FrameInFlightFences[i], nullptr);
+			vkDestroySemaphore(LogicalDevice, m_RenderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(LogicalDevice, m_ImageAvailableSemaphores[i], nullptr);
+		}
 
-		vkDestroyRenderPass(LogicalDevice, m_RenderPass, nullptr);
+		// Destroy framebuffers
 
 		for (uint32_t i = 0; i < m_ImageViews.size(); i++)
 			vkDestroyImageView(LogicalDevice, m_ImageViews[i], nullptr);
-		m_ImageViews.clear();
 
 		vkDestroySwapchainKHR(LogicalDevice, m_Swapchain, nullptr);
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
@@ -37,6 +36,8 @@ namespace Fusion {
 		uint32_t ImageCount = m_SurfaceCapabilities.minImageCount + 1;
 		if (m_SurfaceCapabilities.maxImageCount > 0 && ImageCount > m_SurfaceCapabilities.maxImageCount)
 			ImageCount = m_SurfaceCapabilities.maxImageCount;
+
+		m_MaxFramesInFlight = ImageCount;
 
 		// Create the vulkan swapchain
 		{
@@ -65,7 +66,6 @@ namespace Fusion {
 			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_Swapchain, &ImageCount, nullptr) == VK_SUCCESS);
 			m_Images.resize(ImageCount);
 			m_ImageViews.resize(ImageCount);
-			m_Framebuffers.resize(ImageCount);
 			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_Swapchain, &ImageCount, m_Images.data()) == VK_SUCCESS);
 		}
 
@@ -89,79 +89,25 @@ namespace Fusion {
 			}
 		}
 
-		// Create Default Render Pass
+		// Create Semaphores & Fences
 		{
-			VkAttachmentDescription ColorAttachmentDescription = {};
-			ColorAttachmentDescription.format = m_ImageFormat.format;
-			ColorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-			ColorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			ColorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			ColorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			ColorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
+			m_RenderFinishedSemaphores.resize(m_MaxFramesInFlight);
+			m_FrameInFlightFences.resize(m_MaxFramesInFlight);
 
-			VkAttachmentReference ColorAttachmentReference = {};
-			ColorAttachmentReference.attachment = 0;
-			ColorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			VkSemaphoreCreateInfo SemaphoreCreateInfo = {};
+			SemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			VkSubpassDescription SubpassDescription = {};
-			SubpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			SubpassDescription.colorAttachmentCount = 1;
-			SubpassDescription.pColorAttachments = &ColorAttachmentReference;
-
-			VkSubpassDependency SubpassDependency = {};
-			SubpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-			SubpassDependency.dstSubpass = 0;
-			SubpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			SubpassDependency.srcAccessMask = 0;
-			SubpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			SubpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-			VkRenderPassCreateInfo RenderPassCreateInfo = {};
-			RenderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-			RenderPassCreateInfo.attachmentCount = 1;
-			RenderPassCreateInfo.pAttachments = &ColorAttachmentDescription;
-			RenderPassCreateInfo.subpassCount = 1;
-			RenderPassCreateInfo.pSubpasses = &SubpassDescription;
-			RenderPassCreateInfo.dependencyCount = 1;
-			RenderPassCreateInfo.pDependencies = &SubpassDependency;
-
-			vkCreateRenderPass(m_Device->GetLogicalDevice(), &RenderPassCreateInfo, nullptr, &m_RenderPass);
-		}
-
-		// Create Image Framebuffers
-		{
-			for (uint32_t i = 0; i < m_Framebuffers.size(); i++)
-			{
-				VkFramebufferCreateInfo FramebufferCreateInfo = {};
-				FramebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-				FramebufferCreateInfo.renderPass = m_RenderPass;
-				FramebufferCreateInfo.attachmentCount = 1;
-				FramebufferCreateInfo.pAttachments = &m_ImageViews[i];
-				FramebufferCreateInfo.width = m_ImageExtent.width;
-				FramebufferCreateInfo.height = m_ImageExtent.height;
-				FramebufferCreateInfo.layers = 1;
-
-				vkCreateFramebuffer(m_Device->GetLogicalDevice(), &FramebufferCreateInfo, nullptr, &m_Framebuffers[i]);
-			}
-		}
-
-		// Create Semaphores
-		{
-			VkSemaphoreCreateInfo ImageAvailableSemaphoreCreateInfo = {};
-			ImageAvailableSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			vkCreateSemaphore(m_Device->GetLogicalDevice(), &ImageAvailableSemaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphore);
-
-			VkSemaphoreCreateInfo RenderFinishedSemaphoreCreateInfo = {};
-			RenderFinishedSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			vkCreateSemaphore(m_Device->GetLogicalDevice(), &RenderFinishedSemaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphore);
-		}
-
-		// Create Fence
-		{
 			VkFenceCreateInfo FrameInFlightCreateInfo = {};
 			FrameInFlightCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			FrameInFlightCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-			vkCreateFence(m_Device->GetLogicalDevice(), &FrameInFlightCreateInfo, nullptr, &m_FrameInFlightFence);
+
+			for (uint32_t i = 0; i < m_MaxFramesInFlight; i++)
+			{
+				vkCreateSemaphore(m_Device->GetLogicalDevice(), &SemaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]);
+				vkCreateSemaphore(m_Device->GetLogicalDevice(), &SemaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
+				vkCreateFence(m_Device->GetLogicalDevice(), &FrameInFlightCreateInfo, nullptr, &m_FrameInFlightFences[i]);
+			}
 		}
 	}
 
@@ -170,13 +116,6 @@ namespace Fusion {
 		VkPhysicalDevice PhysicalDevice = m_Device->GetPhysicalDevice();
 
 		FUSION_CORE_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice, m_Surface, &m_SurfaceCapabilities) == VK_SUCCESS);
-
-		// Get graphics queue index
-		{
-			const auto& QueueIndicies = m_Device->GetQueueIndicies();
-			FUSION_CORE_VERIFY(QueueIndicies.IsValid());
-			m_QueueIndex = QueueIndicies.GraphicsQueue;
-		}
 
 		// Find surface format and color format
 		{
@@ -243,9 +182,9 @@ namespace Fusion {
 	void VulkanSwapchain::AquireNextFrame()
 	{
 		VkDevice LogicalDevice = m_Device->GetLogicalDevice();
-		vkWaitForFences(LogicalDevice, 1, &m_FrameInFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(LogicalDevice, 1, &m_FrameInFlightFence);
-		vkAcquireNextImageKHR(LogicalDevice, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphore, VK_NULL_HANDLE, &m_CurrentImageIndex);
+		vkWaitForFences(LogicalDevice, 1, &m_FrameInFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+		vkResetFences(LogicalDevice, 1, &m_FrameInFlightFences[m_CurrentFrame]);
+		vkAcquireNextImageKHR(LogicalDevice, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
 	}
 
 	void VulkanSwapchain::SwapBuffers()
@@ -253,11 +192,13 @@ namespace Fusion {
 		VkPresentInfoKHR PresentInfo = {};
 		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		PresentInfo.waitSemaphoreCount = 1;
-		PresentInfo.pWaitSemaphores = &m_RenderFinishedSemaphore;
+		PresentInfo.pWaitSemaphores = &m_RenderFinishedSemaphores[m_CurrentFrame];
 		PresentInfo.swapchainCount = 1;
 		PresentInfo.pSwapchains = &m_Swapchain;
 		PresentInfo.pImageIndices = &m_CurrentImageIndex;
 		vkQueuePresentKHR(m_Device->GetGraphicsQueue(), &PresentInfo);
+
+		m_CurrentFrame = (m_CurrentFrame + 1) % m_MaxFramesInFlight;
 	}
 
 }

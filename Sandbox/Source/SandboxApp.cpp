@@ -1,5 +1,6 @@
 #include <Fusion.h>
 #include <Fusion/EntryPoint.h>
+#include <Fusion/Memory/Shared.h>
 
 #include <iostream>
 

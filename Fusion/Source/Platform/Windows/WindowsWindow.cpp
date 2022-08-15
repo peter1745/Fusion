@@ -13,6 +13,7 @@ namespace Fusion {
 
 	WindowsWindow::~WindowsWindow()
 	{
+		s_VulkanContext = nullptr;
 	}
 
 	void WindowsWindow::Init()

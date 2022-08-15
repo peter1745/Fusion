@@ -15,20 +15,18 @@ namespace Fusion {
 		void Create();
 		void InitSurface(GLFWwindow* NativeWindow);
 
-		VkRenderPass GetRenderPass() const { return m_RenderPass; }
-
-		VkFramebuffer GetFramebuffer(uint32_t InImageIndex) const
-		{
-			FUSION_CORE_VERIFY(InImageIndex < m_Framebuffers.size());
-			return m_Framebuffers[InImageIndex];
-		}
-
 		uint32_t GetCurrentFrameIndex() const { return m_CurrentImageIndex; }
 		VkExtent2D GetSwapchainExtent() const { return m_ImageExtent; }
+		const std::vector<VkImageView>& GetImageViews() const { return m_ImageViews; }
+		VkImage GetCurrentImage() const { return m_Images[m_CurrentImageIndex]; }
+		VkImageView GetCurrentImageView() const { return m_ImageViews[m_CurrentImageIndex]; }
+		VkFormat GetSwapchainFormat() const { return m_ImageFormat.format; }
 
-		VkSemaphore GetImageAvailableSemaphore() const { return m_ImageAvailableSemaphore; }
-		VkSemaphore GetRenderFinishedSemaphore() const { return m_RenderFinishedSemaphore; }
-		VkFence GetFrameInFlightFence() const { return m_FrameInFlightFence; }
+		VkSemaphore GetImageAvailableSemaphore() const { return m_ImageAvailableSemaphores[m_CurrentFrame]; }
+		VkSemaphore GetRenderFinishedSemaphore() const { return m_RenderFinishedSemaphores[m_CurrentFrame]; }
+		VkFence GetFrameInFlightFence() const { return m_FrameInFlightFences[m_CurrentFrame]; }
+		uint32_t GetMaxFramesInFlight() const { return m_MaxFramesInFlight; }
+		uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
 
 		void AquireNextFrame();
 		void SwapBuffers();
@@ -38,22 +36,20 @@ namespace Fusion {
 		Shared<VulkanDevice> m_Device;
 		VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 		VkExtent2D m_ImageExtent = {};
-		uint32_t m_QueueIndex = UINT32_MAX;
+		uint32_t m_MaxFramesInFlight = 0;
+		uint32_t m_CurrentFrame = 0;
 
 		VkSwapchainKHR m_Swapchain = VK_NULL_HANDLE;
 		VkSurfaceFormatKHR m_ImageFormat;
 		VkPresentModeKHR m_PresentMode;
 		VkSurfaceCapabilitiesKHR m_SurfaceCapabilities;
 
-		VkRenderPass m_RenderPass;
-
 		std::vector<VkImage> m_Images;
 		std::vector<VkImageView> m_ImageViews;
-		std::vector<VkFramebuffer> m_Framebuffers;
 
-		VkSemaphore m_ImageAvailableSemaphore;
-		VkSemaphore m_RenderFinishedSemaphore;
-		VkFence m_FrameInFlightFence;
+		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
+		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkFence> m_FrameInFlightFences;
 
 		uint32_t m_CurrentImageIndex = 0;
 	};

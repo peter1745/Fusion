@@ -79,6 +79,13 @@ namespace Fusion {
 
 		FUSION_CORE_VERIFY(vkCreatePipelineLayout(InDevice->GetLogicalDevice(), &LayoutCreateInfo, nullptr, &m_Layout) == VK_SUCCESS);
 
+		VkPipelineRenderingCreateInfo DynamicRenderingCreateInfo = {};
+		DynamicRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		DynamicRenderingCreateInfo.colorAttachmentCount = 1;
+		DynamicRenderingCreateInfo.pColorAttachmentFormats = &m_Specification.ColorAttachmentFormat;
+		DynamicRenderingCreateInfo.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+		DynamicRenderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+
 		// Create the pipeline
 		VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo = {};
 		GraphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -93,10 +100,11 @@ namespace Fusion {
 		GraphicsPipelineCreateInfo.pColorBlendState = &ColorBlendAttachmentCreateInfo;
 		GraphicsPipelineCreateInfo.pDynamicState = &DynamicStateCreateInfo;
 		GraphicsPipelineCreateInfo.layout = m_Layout;
-		GraphicsPipelineCreateInfo.renderPass = InSpecification.RenderPass;
+		GraphicsPipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 		GraphicsPipelineCreateInfo.subpass = 0;
 		GraphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		GraphicsPipelineCreateInfo.basePipelineIndex = -1;
+		GraphicsPipelineCreateInfo.pNext = &DynamicRenderingCreateInfo;
 
 		FUSION_CORE_VERIFY(vkCreateGraphicsPipelines(InDevice->GetLogicalDevice(), VK_NULL_HANDLE, 1, &GraphicsPipelineCreateInfo, nullptr, &m_Pipeline) == VK_SUCCESS);
 	}

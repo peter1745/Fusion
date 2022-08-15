@@ -25,7 +25,6 @@ namespace Fusion {
 
 		Shared<VulkanDevice> GetDevice() const { return m_Device; }
 		Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
-		Shared<VulkanPipeline> GetGraphicsPipeline() const { return m_Pipeline; }
 
 	public:
 		static VulkanContext& Get();
@@ -38,7 +37,6 @@ namespace Fusion {
 
 		Shared<VulkanDevice> m_Device = nullptr;
 		Shared<VulkanSwapchain> m_Swapchain = nullptr;
-		Shared<VulkanPipeline> m_Pipeline = nullptr;
 	};
 
 }
