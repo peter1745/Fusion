@@ -3,6 +3,22 @@
 
 namespace Fusion {
 
+	static VkFormat ShaderDataTypeToVkFormat(ShaderDataType InType)
+	{
+		switch (InType)
+		{
+		case ShaderDataType::Float: return VK_FORMAT_R32_SFLOAT;
+		case ShaderDataType::Float2: return VK_FORMAT_R32G32_SFLOAT;
+		case ShaderDataType::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
+		case ShaderDataType::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+		/*case ShaderDataType::Mat3x3: return VK_FORMAT_R32_SFLOAT;
+		case ShaderDataType::Mat4x4: return VK_FORMAT_R32_SFLOAT;*/
+		}
+		
+		FUSION_CORE_VERIFY(false);
+		return VK_FORMAT_UNDEFINED;
+	}
+
 	VulkanPipeline::VulkanPipeline(const PipelineSpecification& InSpecification, const Shared<VulkanDevice>& InDevice)
 		: m_Specification(InSpecification), m_Device(InDevice)
 	{
@@ -14,12 +30,27 @@ namespace Fusion {
 		DynamicStateCreateInfo.pDynamicStates = DynamicStates;
 
 		// Vertex Input State
+		VkVertexInputBindingDescription VertexInputDescription = {};
+		VertexInputDescription.binding = 0;
+		VertexInputDescription.stride = InSpecification.Layout.GetStride();
+		VertexInputDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		const auto& VertexLayoutAttributes = InSpecification.Layout.GetAttributes();
+		std::vector<VkVertexInputAttributeDescription> VertexAttributeDescriptions(VertexLayoutAttributes.size());
+		for (uint32_t i = 0; i < VertexLayoutAttributes.size(); i++)
+		{
+			VertexAttributeDescriptions[i].binding = 0;
+			VertexAttributeDescriptions[i].location = VertexLayoutAttributes[i].Location;
+			VertexAttributeDescriptions[i].format = ShaderDataTypeToVkFormat(VertexLayoutAttributes[i].Type);
+			VertexAttributeDescriptions[i].offset = VertexLayoutAttributes[i].Offset;
+		}
+
 		VkPipelineVertexInputStateCreateInfo VertexInputStateCreateInfo = {};
 		VertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		VertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-		VertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
-		VertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-		VertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+		VertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
+		VertexInputStateCreateInfo.pVertexBindingDescriptions = &VertexInputDescription;
+		VertexInputStateCreateInfo.vertexAttributeDescriptionCount = VertexAttributeDescriptions.size();
+		VertexInputStateCreateInfo.pVertexAttributeDescriptions = VertexAttributeDescriptions.data();
 
 		VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo = {};
 		InputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

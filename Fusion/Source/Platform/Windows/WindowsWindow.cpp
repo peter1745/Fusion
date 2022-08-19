@@ -21,7 +21,7 @@ namespace Fusion {
 		FUSION_CORE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		m_NativeWindow = glfwCreateWindow(int(m_Specification.Width), int(m_Specification.Height), m_Specification.Title.data(), NULL, NULL);
 		FUSION_CORE_VERIFY(m_NativeWindow, "Failed to create GLFW window!");
 

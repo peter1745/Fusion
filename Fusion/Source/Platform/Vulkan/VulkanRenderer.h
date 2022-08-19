@@ -3,6 +3,8 @@
 #include "VulkanDevice.h"
 #include "VulkanPipeline.h"
 #include "VulkanRenderPass.h"
+#include "VulkanVertexBuffer.h"
+#include "VulkanIndexBuffer.h"
 
 namespace Fusion {
 
@@ -17,6 +19,8 @@ namespace Fusion {
 		void EndDraw();
 		void Submit();
 
+		VkCommandBuffer GetCurrentCommandBuffer() const;
+
 	public:
 		static VulkanRenderer& Get();
 
@@ -25,6 +29,8 @@ namespace Fusion {
 		std::vector<VkCommandBuffer> m_CommandBuffers;
 		Shared<VulkanRenderPass> m_SwapchainRenderPass;
 		Shared<VulkanPipeline> m_TrianglePipeline = nullptr;
+		Shared<VulkanVertexBuffer> m_TriangleVertexBuffer = nullptr;
+		Shared<VulkanIndexBuffer> m_TriangleIndexBuffer = nullptr;
 	};
 
 }

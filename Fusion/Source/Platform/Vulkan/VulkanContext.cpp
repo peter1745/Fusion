@@ -1,12 +1,9 @@
 #include "FusionPCH.h"
 #include "VulkanContext.h"
+#include "VulkanAllocator.h"
 
-//#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
-//#include <GLFW/glfw3native.h>
-
 #include <glm/glm.hpp>
-
 #include <iostream>
 
 namespace Fusion {
@@ -58,10 +55,14 @@ namespace Fusion {
 		m_Swapchain = Shared<VulkanSwapchain>::Create(m_Instance, m_Device, Surface);
 		m_Swapchain->InitSurface(NativeWindow);
 		m_Swapchain->Create();
+
+		VulkanAllocator::Initialize(m_Instance, m_Device);
 	}
 
 	VulkanContext::~VulkanContext()
 	{
+		VulkanAllocator::Shutdown();
+
 		m_Swapchain = nullptr;
 		m_Device = nullptr;
 

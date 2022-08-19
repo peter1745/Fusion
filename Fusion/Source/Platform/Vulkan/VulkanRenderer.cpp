@@ -2,9 +2,20 @@
 #include "VulkanRenderer.h"
 #include "VulkanContext.h"
 
+#include "Fusion/Renderer/RenderData.h"
+
 namespace Fusion {
 
 	static VulkanRenderer* s_Instance = nullptr;
+
+	static Vertex s_TriangleVertices[] = {
+		{ {  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // Top-Right
+		{ {  0.5f,  0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // Bottom-Right
+		{ { -0.5f,  0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // Bottom-Left
+		{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // Top-Left
+	};
+
+	static uint32_t s_TriangleIndices[] = { 0, 1, 2, 2, 3, 0 };
 
 	static VkImageSubresourceRange GetImageSubresourceRange(VkImageAspectFlags InAspectFlags)
 	{
@@ -36,8 +47,13 @@ namespace Fusion {
 		{
 			PipelineSpecification TrianglePipelineSpec = {};
 			ShaderSpecification ShaderSpec = { "Resources/Shaders/VertexShader.spv", "Resources/Shaders/FragmentShader.spv" };
+
 			TrianglePipelineSpec.PipelineShader = Shared<VulkanShader>::Create(ShaderSpec, Device);
 			TrianglePipelineSpec.ColorAttachmentFormat = Swapchain->GetSwapchainFormat();
+			TrianglePipelineSpec.Layout = VertexBufferLayout({
+				VertexBufferAttribute{ 0, ShaderDataType::Float3, offsetof(Vertex, Position) },
+				VertexBufferAttribute{ 1, ShaderDataType::Float4, offsetof(Vertex, Color) }
+			});
 			m_TrianglePipeline = Shared<VulkanPipeline>::Create(TrianglePipelineSpec, Device);
 		}
 
@@ -62,6 +78,9 @@ namespace Fusion {
 				FUSION_CORE_VERIFY(vkAllocateCommandBuffers(Device->GetLogicalDevice(), &CommandBufferAllocateInfo, &m_CommandBuffers[i]) == VK_SUCCESS);
 			}
 		}
+
+		m_TriangleVertexBuffer = Shared<VulkanVertexBuffer>::Create(4 * sizeof(Vertex), s_TriangleVertices);
+		m_TriangleIndexBuffer = Shared<VulkanIndexBuffer>::Create(6, s_TriangleIndices);
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -81,7 +100,10 @@ namespace Fusion {
 	{
 		auto Device = VulkanContext::Get().GetDevice();
 		auto Swapchain = VulkanContext::Get().GetSwapchain();
-		Swapchain->AquireNextFrame();
+
+		// If we fail to aquire the next image we need to bail
+		if (!Swapchain->AquireNextFrame())
+			return;
 
 		uint32_t CurrentFrame = Swapchain->GetCurrentFrame();
 
@@ -115,6 +137,9 @@ namespace Fusion {
 
 		m_SwapchainRenderPass->Begin(CurrentCommandBuffer);
 		vkCmdBindPipeline(CurrentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_TrianglePipeline->GetPipeline());
+
+		m_TriangleVertexBuffer->Bind(CurrentCommandBuffer);
+		m_TriangleIndexBuffer->Bind(CurrentCommandBuffer);
 	}
 
 	void VulkanRenderer::EndDraw()
@@ -171,6 +196,12 @@ namespace Fusion {
 		Swapchain->SwapBuffers();
 	}
 
+	VkCommandBuffer VulkanRenderer::GetCurrentCommandBuffer() const
+	{
+		auto Swapchain = VulkanContext::Get().GetSwapchain();
+		return m_CommandBuffers[Swapchain->GetCurrentFrame()];
+	}
+
 	void VulkanRenderer::Draw(float InWidth, float InHeight)
 	{
 		auto Swapchain = VulkanContext::Get().GetSwapchain();
@@ -192,7 +223,7 @@ namespace Fusion {
 		VkCommandBuffer CurrentCommandBuffer = m_CommandBuffers[Swapchain->GetCurrentFrame()];
 		vkCmdSetViewport(CurrentCommandBuffer, 0, 1, &Viewport);
 		vkCmdSetScissor(CurrentCommandBuffer, 0, 1, &Scissor);
-		vkCmdDraw(CurrentCommandBuffer, 3, 1, 0, 0);
+		vkCmdDrawIndexed(CurrentCommandBuffer, m_TriangleIndexBuffer->GetCount(), 1, 0, 0, 0);
 	}
 
 	VulkanRenderer& VulkanRenderer::Get() { return *s_Instance; }

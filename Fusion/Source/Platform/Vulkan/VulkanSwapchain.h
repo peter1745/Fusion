@@ -12,8 +12,9 @@ namespace Fusion {
 		VulkanSwapchain(VkInstance InInstance, Shared<VulkanDevice> InDevice, VkSurfaceKHR InSurface);
 		~VulkanSwapchain();
 
-		void Create();
+		void Create(bool InWasInvalidated = false);
 		void InitSurface(GLFWwindow* NativeWindow);
+		void Invalidate();
 
 		uint32_t GetCurrentFrameIndex() const { return m_CurrentImageIndex; }
 		VkExtent2D GetSwapchainExtent() const { return m_ImageExtent; }
@@ -28,7 +29,7 @@ namespace Fusion {
 		uint32_t GetMaxFramesInFlight() const { return m_MaxFramesInFlight; }
 		uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
 
-		void AquireNextFrame();
+		bool AquireNextFrame();
 		void SwapBuffers();
 
 	private:

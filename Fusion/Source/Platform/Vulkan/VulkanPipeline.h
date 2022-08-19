@@ -2,6 +2,7 @@
 
 #include "VulkanDevice.h"
 #include "VulkanShader.h"
+#include "Fusion/Renderer/VertexBufferLayout.h"
 #include <vulkan/vulkan.h>
 
 namespace Fusion {
@@ -10,6 +11,7 @@ namespace Fusion {
 	{
 		Shared<VulkanShader> PipelineShader;
 		VkFormat ColorAttachmentFormat;
+		VertexBufferLayout Layout;
 	};
 
 	class VulkanPipeline

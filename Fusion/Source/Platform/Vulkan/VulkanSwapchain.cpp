@@ -1,5 +1,6 @@
 #include "FusionPCH.h"
 #include "VulkanSwapchain.h"
+#include "Fusion/Core/Application.h"
 
 #include <glm/glm.hpp>
 
@@ -21,8 +22,6 @@ namespace Fusion {
 			vkDestroySemaphore(LogicalDevice, m_ImageAvailableSemaphores[i], nullptr);
 		}
 
-		// Destroy framebuffers
-
 		for (uint32_t i = 0; i < m_ImageViews.size(); i++)
 			vkDestroyImageView(LogicalDevice, m_ImageViews[i], nullptr);
 
@@ -30,7 +29,7 @@ namespace Fusion {
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 	}
 
-	void VulkanSwapchain::Create()
+	void VulkanSwapchain::Create(bool InWasInvalidated)
 	{
 		// Get image count
 		uint32_t ImageCount = m_SurfaceCapabilities.minImageCount + 1;
@@ -90,6 +89,7 @@ namespace Fusion {
 		}
 
 		// Create Semaphores & Fences
+		if (!InWasInvalidated)
 		{
 			m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
 			m_RenderFinishedSemaphores.resize(m_MaxFramesInFlight);
@@ -179,12 +179,39 @@ namespace Fusion {
 		}
 	}
 
-	void VulkanSwapchain::AquireNextFrame()
+	void VulkanSwapchain::Invalidate()
+	{
+		VkDevice LogicalDevice = m_Device->GetLogicalDevice();
+
+		// Ensure we aren't accessing any resources
+		vkDeviceWaitIdle(LogicalDevice);
+
+		// Destroy image views and swapchain
+		for (uint32_t i = 0; i < m_ImageViews.size(); i++)
+			vkDestroyImageView(LogicalDevice, m_ImageViews[i], nullptr);
+		vkDestroySwapchainKHR(LogicalDevice, m_Swapchain, nullptr);
+
+		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeWindow());
+		InitSurface(NativeWindow);
+		Create(true);
+	}
+
+	bool VulkanSwapchain::AquireNextFrame()
 	{
 		VkDevice LogicalDevice = m_Device->GetLogicalDevice();
 		vkWaitForFences(LogicalDevice, 1, &m_FrameInFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+		VkResult result = vkAcquireNextImageKHR(LogicalDevice, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			Invalidate();
+			return false;
+		}
+
+		FUSION_CORE_VERIFY(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Unable to aquire the next swapchain image!");
+
 		vkResetFences(LogicalDevice, 1, &m_FrameInFlightFences[m_CurrentFrame]);
-		vkAcquireNextImageKHR(LogicalDevice, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+		return true;
 	}
 
 	void VulkanSwapchain::SwapBuffers()
@@ -196,7 +223,16 @@ namespace Fusion {
 		PresentInfo.swapchainCount = 1;
 		PresentInfo.pSwapchains = &m_Swapchain;
 		PresentInfo.pImageIndices = &m_CurrentImageIndex;
-		vkQueuePresentKHR(m_Device->GetGraphicsQueue(), &PresentInfo);
+		VkResult result = vkQueuePresentKHR(m_Device->GetGraphicsQueue(), &PresentInfo);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+		{
+			Invalidate();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			FUSION_CORE_VERIFY(false, "Error when trying to present current frame!");
+		}
 
 		m_CurrentFrame = (m_CurrentFrame + 1) % m_MaxFramesInFlight;
 	}

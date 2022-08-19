@@ -6,11 +6,15 @@
 
 namespace Fusion {
 
+	static Application* s_Application = nullptr;
 	static Shared<VulkanRenderer> s_VulkanRenderer = nullptr;
 
 	Application::Application(const ApplicationSpecification& InSpecification)
 		: m_Specification(InSpecification)
 	{
+		FUSION_CORE_VERIFY(s_Application == nullptr);
+		s_Application = this;
+
 		WindowSpecification WindowSpec = {};
 		WindowSpec.Title = m_Specification.Title;
 		WindowSpec.Width = m_Specification.WindowWidth;
@@ -54,5 +58,7 @@ namespace Fusion {
 		}
 		OnShutdown();
 	}
+
+	Application& Application::Get() { return *s_Application; }
 
 }

@@ -24,6 +24,11 @@ namespace Fusion {
 
 		void Run();
 
+		const Unique<Window>& GetWindow() const { return m_Window; }
+
+	public:
+		static Application& Get();
+
 	private:
 		virtual void OnInit() {}
 		virtual void OnUpdate(float DeltaTime) {}
