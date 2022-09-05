@@ -1,49 +1,37 @@
-project "Fusion"
+project "glad"
     kind "StaticLib"
-    language "C++"
-    cppdialect "C++20"
+    language "C"
     staticruntime "Off"
 
     targetdir (BuildDir .. "/%{prj.name}")
     objdir (IntermediatesDir .. "/%{prj.name}")
 
-    pchheader "FusionPCH.h"
-    pchsource "Source/FusionPCH.cpp"
-
     files
     {
-        "Source/**.cpp",
-        "Source/**.h"
+        "src/gl.c",
+        "include/glad/gl.h",
+        "include/KHR/khrplatform.h"
     }
 
     includedirs
     {
-        "Source/",
-        "%{IncludeDirs.GLFW}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.glad}"
+        "include"
     }
-
-    defines { "GLFW_INCLUDE_NONE" }
 
     filter "system:windows"
         systemversion "latest"
 
     filter "configurations:Debug"
-        defines "FUSION_DEBUG"
         runtime "Debug"
         symbols "On"
         conformancemode "On"
 
     filter "configurations:Release"
-        defines "FUSION_RELEASE"
         runtime "Release"
         optimize "On"
         conformancemode "On"
 
     filter "configurations:Distribution"
-        defines "FUSION_DIST"
         runtime "Release"
         optimize "Full"
         conformancemode "On"

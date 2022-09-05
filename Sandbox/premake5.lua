@@ -17,7 +17,7 @@ project "Sandbox"
     {
         "Fusion",
         "GLFW",
-        "%{Libraries.Vulkan}"
+        "glad"
     }
 
     includedirs

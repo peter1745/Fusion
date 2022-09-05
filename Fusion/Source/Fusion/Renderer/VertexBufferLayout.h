@@ -37,6 +37,20 @@ namespace Fusion {
 		uint32_t Location;
 		ShaderDataType Type;
 		uint32_t Offset;
+
+		uint32_t GetComponentCount() const
+		{
+			switch (Type)
+			{
+			case ShaderDataType::Float: return 1;
+			case ShaderDataType::Float2: return 2;
+			case ShaderDataType::Float3: return 3;
+			case ShaderDataType::Float4: return 4;
+			}
+
+			FUSION_CORE_VERIFY(false, "Unhandled Type!");
+			return 0;
+		}
 	};
 
 	class VertexBufferLayout

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 namespace Fusion {
 
 	struct ShaderSpecification
@@ -13,7 +15,7 @@ namespace Fusion {
 	public:
 		virtual ~Shader() = default;
 
-		virtual const ShaderSpecification& GetSpecification() const = 0;
+		virtual void Bind() const = 0;
 	};
 
 }

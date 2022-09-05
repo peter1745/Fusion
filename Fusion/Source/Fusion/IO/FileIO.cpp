@@ -22,4 +22,16 @@ namespace Fusion {
 		return true;
 	}
 
+	bool FileIO::ReadFileText(const std::filesystem::path& InPath, std::string& OutText)
+	{
+		std::ifstream Stream(InPath);
+		if (!Stream.is_open())
+			return false;
+
+		std::stringstream StrStream;
+		StrStream << Stream.rdbuf();
+		OutText = StrStream.str();
+		return true;
+	}
+
 }

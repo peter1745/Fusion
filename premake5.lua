@@ -8,11 +8,14 @@ workspace "Fusion"
 
     flags { "MultiProcessorCompile" }
 
+    toolset "clang"
+
 BuildDir = "%{wks.location}/Build/%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 IntermediatesDir = "%{wks.location}/Build/Intermediates/%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "ThirdParty"
 include "ThirdParty/GLFW"
+include "ThirdParty/glad"
 group ""
 
 include "Fusion"

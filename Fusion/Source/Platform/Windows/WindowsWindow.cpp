@@ -1,10 +1,7 @@
 #include "FusionPCH.h"
 #include "WindowsWindow.h"
-#include "Platform/Vulkan/VulkanContext.h"
 
 namespace Fusion {
-
-	std::unique_ptr<VulkanContext> s_VulkanContext;
 
 	WindowsWindow::WindowsWindow(const WindowSpecification& InSpecification)
 		: m_Specification(InSpecification)
@@ -13,23 +10,23 @@ namespace Fusion {
 
 	WindowsWindow::~WindowsWindow()
 	{
-		s_VulkanContext = nullptr;
 	}
 
 	void WindowsWindow::Init()
 	{
 		FUSION_CORE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 		m_NativeWindow = glfwCreateWindow(int(m_Specification.Width), int(m_Specification.Height), m_Specification.Title.data(), NULL, NULL);
 		FUSION_CORE_VERIFY(m_NativeWindow, "Failed to create GLFW window!");
-
-		s_VulkanContext = std::make_unique<VulkanContext>(this);
 	}
 
 	void WindowsWindow::ProcessEvents()
 	{
+		glfwSwapBuffers(m_NativeWindow);
 		glfwPollEvents();
 	}
 
