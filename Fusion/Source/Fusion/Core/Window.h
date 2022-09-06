@@ -29,6 +29,7 @@ namespace Fusion {
 	private:
 		virtual void Init() = 0;
 		virtual void ProcessEvents() = 0;
+		virtual void SwapBuffers() = 0;
 
 		friend class Application;
 	};

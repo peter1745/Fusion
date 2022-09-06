@@ -5,7 +5,6 @@
 #include "Fusion/Renderer/VertexBuffer.h"
 #include "Fusion/Renderer/IndexBuffer.h"
 #include "Fusion/Renderer/Shader.h"
-#include "Fusion/Renderer/RenderCommandBuffer.h"
 
 #include <chrono>
 
@@ -54,8 +53,6 @@ namespace Fusion {
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 		Shared<Shader> m_Shader = nullptr;
-
-		Shared<RenderCommandBuffer> m_CommandBuffer = nullptr;
 	};
 
 	Application* CreateApplication(int ArgC, char** ArgV);

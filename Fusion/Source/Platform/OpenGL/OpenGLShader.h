@@ -11,7 +11,7 @@ namespace Fusion {
 	public:
 		OpenGLShader(const ShaderSpecification& InSpecification);
 
-		virtual void Bind() const override;
+		uint32_t GetShaderID() const { return m_ShaderID; }
 
 	private:
 		uint32_t LoadAndCompileShader(const std::filesystem::path& InPath, GLShaderType InType) const;

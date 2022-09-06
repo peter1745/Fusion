@@ -15,7 +15,8 @@ namespace Fusion {
 	public:
 		virtual ~Shader() = default;
 
-		virtual void Bind() const = 0;
+	public:
+		static Shared<Shader> Create(const ShaderSpecification& InSpecification);
 	};
 
 }

@@ -10,8 +10,9 @@ namespace Fusion {
 		OpenGLVertexBuffer(uint32_t InSize, void* InData, const VertexBufferLayout& InLayout);
 		~OpenGLVertexBuffer();
 
-		virtual void Bind() override;
-		virtual void Unbind() override;
+		uint32_t GetVertexArrayID() const { return m_VertexArrayID; }
+		uint32_t GetBufferID() const { return m_BufferID; }
+		virtual const VertexBufferLayout& GetLayout() const override { return m_Layout; }
 
 	private:
 		uint32_t m_VertexArrayID = 0;

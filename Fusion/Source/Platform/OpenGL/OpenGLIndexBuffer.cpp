@@ -12,15 +12,5 @@ namespace Fusion {
 		glNamedBufferData(m_BufferID, InCount * sizeof(uint32_t), InData, GL_STATIC_DRAW);
 	}
 
-	void OpenGLIndexBuffer::Bind()
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
-	}
-
-	void OpenGLIndexBuffer::Unbind()
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
-
 }
 

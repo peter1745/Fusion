@@ -82,11 +82,12 @@ namespace Fusion {
 
 		Shared& operator=(const Shared<T>& InOther)
 		{
-			InOther.IncreaseReferenceCount();
 			DecreaseReferenceCount();
 
 			m_Ptr = InOther.m_Ptr;
 			m_Storage = InOther.m_Storage;
+
+			IncreaseReferenceCount();
 			return *this;
 		}
 
@@ -105,12 +106,12 @@ namespace Fusion {
 		template<typename TOther>
 		Shared& operator=(const Shared<TOther>& InOther)
 		{
-			InOther.IncreaseReferenceCount();
 			DecreaseReferenceCount();
 
 			m_Ptr = static_cast<T*>(InOther.m_Ptr);
 			m_Storage = InOther.m_Storage;
 
+			IncreaseReferenceCount();
 			return *this;
 		}
 

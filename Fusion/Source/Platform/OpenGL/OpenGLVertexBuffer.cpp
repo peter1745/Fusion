@@ -28,11 +28,8 @@ namespace Fusion {
 
 		const auto& Attributes = InLayout.GetAttributes();
 
-		uint32_t BufferedOffset = 0;
 		for (uint32_t i = 0; i < Attributes.size(); i++)
 		{
-			BufferedOffset += Attributes[i].Offset;
-
 			glEnableVertexArrayAttrib(m_VertexArrayID, i);
 			glVertexArrayAttribFormat(m_VertexArrayID, i, Attributes[i].GetComponentCount(), ShaderDataTypeToGLType(Attributes[i].Type), GL_FALSE, Attributes[i].Offset);
 			glVertexArrayAttribBinding(m_VertexArrayID, i, 0);
@@ -41,17 +38,6 @@ namespace Fusion {
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-	}
-
-	void OpenGLVertexBuffer::Bind()
-	{
-		glBindVertexArray(m_VertexArrayID);
-		glVertexArrayVertexBuffer(m_VertexArrayID, 0, m_BufferID, 0, m_Layout.GetStride());
-	}
-
-	void OpenGLVertexBuffer::Unbind()
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 }

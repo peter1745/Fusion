@@ -26,8 +26,12 @@ namespace Fusion {
 
 	void WindowsWindow::ProcessEvents()
 	{
-		glfwSwapBuffers(m_NativeWindow);
 		glfwPollEvents();
+	}
+
+	void WindowsWindow::SwapBuffers()
+	{
+		glfwSwapBuffers(m_NativeWindow);
 	}
 
 	bool WindowsWindow::ShouldClose() const

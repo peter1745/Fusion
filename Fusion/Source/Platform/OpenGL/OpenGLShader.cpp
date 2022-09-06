@@ -52,11 +52,6 @@ namespace Fusion {
 		}
 	}
 
-	void OpenGLShader::Bind() const
-	{
-		glUseProgram(m_ShaderID);
-	}
-
 	uint32_t OpenGLShader::LoadAndCompileShader(const std::filesystem::path& InPath, GLShaderType InType) const
 	{
 		std::string SourceString;

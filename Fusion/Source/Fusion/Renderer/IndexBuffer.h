@@ -5,10 +5,11 @@ namespace Fusion {
 	class IndexBuffer
 	{
 	public:
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
+		virtual ~IndexBuffer() = default;
 		virtual uint32_t GetCount() const = 0;
 
+	public:
+		static Shared<IndexBuffer> Create(uint32_t InCount, uint32_t* InData);
 	};
 
 }

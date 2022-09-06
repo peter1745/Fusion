@@ -7,9 +7,10 @@ namespace Fusion {
 	class VertexBuffer
 	{
 	public:
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
+		virtual const VertexBufferLayout& GetLayout() const = 0;
 
+	public:
+		static Shared<VertexBuffer> Create(uint32_t InSize, void* InData, const VertexBufferLayout& InLayout);
 	};
 
 }

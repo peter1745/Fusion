@@ -20,6 +20,7 @@ namespace Fusion {
 	private:
 		virtual void Init() override;
 		virtual void ProcessEvents() override;
+		virtual void SwapBuffers() override;
 
 	private:
 		GLFWwindow* m_NativeWindow = nullptr;
