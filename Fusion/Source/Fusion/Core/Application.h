@@ -48,11 +48,6 @@ namespace Fusion {
 		TimePoint m_LastFrameTime;
 
 		Shared<GraphicsContext> m_GraphicsContext = nullptr;
-
-		// TEMP
-		Shared<VertexBuffer> m_VertexBuffer = nullptr;
-		Shared<IndexBuffer> m_IndexBuffer = nullptr;
-		Shared<Shader> m_Shader = nullptr;
 	};
 
 	Application* CreateApplication(int ArgC, char** ArgV);

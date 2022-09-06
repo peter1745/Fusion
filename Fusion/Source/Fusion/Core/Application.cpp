@@ -4,9 +4,6 @@
 #include "Fusion/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLContext.h"
-#include "Platform/OpenGL/OpenGLVertexBuffer.h"
-#include "Platform/OpenGL/OpenGLIndexBuffer.h"
-#include "Platform/OpenGL/OpenGLShader.h"
 
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -25,7 +22,7 @@ namespace Fusion {
 		WindowSpec.Title = m_Specification.Title;
 		WindowSpec.Width = m_Specification.WindowWidth;
 		WindowSpec.Height = m_Specification.WindowHeight;
-		m_Window = Window::Create(WindowSpec);
+		m_Window = MakeUnique<Window>(WindowSpec);
 		m_Window->Init();
 
 		m_GraphicsContext = Shared<OpenGLContext>::Create(m_Window);

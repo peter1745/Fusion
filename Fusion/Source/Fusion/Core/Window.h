@@ -4,6 +4,8 @@
 
 #include <string>
 
+struct GLFWwindow;
+
 namespace Fusion {
 
 	struct WindowSpecification
@@ -16,21 +18,24 @@ namespace Fusion {
 	class Window
 	{
 	public:
-		virtual ~Window() = default;
+		Window(const WindowSpecification& InSpecification);
+		~Window();
 
-		virtual bool ShouldClose() const = 0;
-		virtual uint32_t GetWidth() const = 0;
-		virtual uint32_t GetHeight() const = 0;
-		virtual void* GetNativeWindow() const = 0;
-
-	public:
-		static Unique<Window> Create(const WindowSpecification& InSpecification);
+		bool ShouldClose() const;
+		uint32_t GetWidth() const { return m_Specification.Width; }
+		uint32_t GetHeight() const { return m_Specification.Height; }
+		void* GetNativeWindow() const { return m_NativeWindow; }
 
 	private:
-		virtual void Init() = 0;
-		virtual void ProcessEvents() = 0;
-		virtual void SwapBuffers() = 0;
+		void Init();
+		void ProcessEvents();
+		void SwapBuffers();
 
+	private:
+		GLFWwindow* m_NativeWindow = nullptr;
+		WindowSpecification m_Specification;
+
+	private:
 		friend class Application;
 	};
 
