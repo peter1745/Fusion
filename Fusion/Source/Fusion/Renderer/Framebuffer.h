@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Fusion/Memory/Shared.h"
+
 #include <vector>
 
 namespace Fusion {

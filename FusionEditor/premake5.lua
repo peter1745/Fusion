@@ -23,12 +23,14 @@ project "FusionEditor"
 
     includedirs
     {
+        "%{wks.location}/FusionEditor/Source",
         "%{wks.location}/Fusion/Source",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.ImGui}",
         "%{IncludeDirs.ImGui}/ImGui", -- Fix for ImGui includes
+        "%{IncludeDirs.EnTT}"
     }
 
     filter "system:windows"

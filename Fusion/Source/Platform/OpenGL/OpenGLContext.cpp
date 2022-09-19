@@ -46,6 +46,9 @@ namespace Fusion {
 		}
 
 		FUSION_CORE_ERROR("---------------");
+
+		if (severity == GL_DEBUG_SEVERITY_HIGH)
+			FUSION_CORE_VERIFY(false);
 	}
 
 	OpenGLContext::OpenGLContext(const Unique<Window>& InWindow)

@@ -13,7 +13,9 @@ project "Fusion"
     files
     {
         "Source/**.cpp",
-        "Source/**.h"
+        "Source/**.h",
+
+        "%{wks.location}/ThirdParty/stb_image/include/stb_image/stb_image.cpp"
     }
 
     includedirs
@@ -22,7 +24,9 @@ project "Fusion"
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.glad}"
+        "%{IncludeDirs.glad}",
+        "%{IncludeDirs.EnTT}",
+        "%{IncludeDirs.stb_image}"
     }
 
     defines { "GLFW_INCLUDE_NONE" }

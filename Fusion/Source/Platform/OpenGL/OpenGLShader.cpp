@@ -1,9 +1,14 @@
 #include "FusionPCH.h"
 #include "OpenGLShader.h"
+#include "OpenGLTexture.h"
+#include "OpenGLCommandBuffer.h"
 
+#include "Fusion/Renderer/Renderer.h"
 #include "Fusion/IO/FileIO.h"
 
 #include <glad/gl.h>
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Fusion {
 
@@ -50,6 +55,61 @@ namespace Fusion {
 
 			glDeleteProgram(m_ShaderID);
 		}
+	}
+
+	void OpenGLShader::Set(const std::string& InName, float InValue)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InValue]()
+		{
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniform1f(Location, Value);
+		});
+	}
+
+	void OpenGLShader::Set(const std::string& InName, const glm::vec2& InValue)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InValue]()
+		{
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniform2f(Location, Value.x, Value.y);
+		});
+	}
+
+	void OpenGLShader::Set(const std::string& InName, const glm::vec3& InValue)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InValue]()
+		{
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniform3f(Location, Value.x, Value.y, Value.z);
+		});
+	}
+
+	void OpenGLShader::Set(const std::string& InName, const glm::vec4& InValue)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InValue]()
+		{
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniform4f(Location, Value.x, Value.y, Value.z, Value.w);
+		});
+	}
+
+	void OpenGLShader::Set(const std::string& InName, const glm::mat4& InValue, bool InTranspose)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InValue, Transpose = InTranspose]()
+		{
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniformMatrix4fv(Location, 1, Transpose ? GL_TRUE : GL_FALSE, glm::value_ptr(Value));
+		});
+	}
+
+	void OpenGLShader::Set(const std::string& InName, const Shared<Texture2D>& InTexture)
+	{
+		Renderer::GetActiveCommandBuffer().As<OpenGLCommandBuffer>()->RecordCommand([ShaderID = m_ShaderID, Name = InName, Value = InTexture]()
+		{
+			Shared<OpenGLTexture2D> GLTexture = Value.As<OpenGLTexture2D>();
+			GLint Location = glGetUniformLocation(ShaderID, Name.c_str());
+			glUniform1i(Location, GLTexture->GetTextureSlot());
+		});
 	}
 
 	uint32_t OpenGLShader::LoadAndCompileShader(const std::filesystem::path& InPath, GLShaderType InType) const

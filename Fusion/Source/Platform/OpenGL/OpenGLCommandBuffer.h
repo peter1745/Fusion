@@ -20,11 +20,6 @@ namespace Fusion {
 
 		virtual void End() override;
 		virtual void Execute() override;
-	private:
-		typedef void(*RenderCommandFunc)(void*);
-
-	private:
-		void* Allocate(RenderCommandFunc InFunc, uint32_t InSize);
 
 		template<typename TFunc>
 		void RecordCommand(TFunc&& InCommand)
@@ -39,6 +34,11 @@ namespace Fusion {
 			auto StorageBuffer = Allocate(RenderCommand, sizeof(InCommand));
 			new(StorageBuffer) TFunc(std::forward<TFunc>(InCommand));
 		}
+	private:
+		typedef void(*RenderCommandFunc)(void*);
+
+	private:
+		void* Allocate(RenderCommandFunc InFunc, uint32_t InSize);
 
 	private:
 		Byte* m_CommandBuffer = nullptr;

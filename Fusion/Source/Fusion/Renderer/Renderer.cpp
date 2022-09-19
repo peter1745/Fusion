@@ -46,4 +46,6 @@ namespace Fusion {
 		s_Data->ActiveCommandBuffer->Execute();
 	}
 
+	Shared<CommandBuffer> Renderer::GetActiveCommandBuffer() { return s_Data->ActiveCommandBuffer.As<CommandBuffer>(); }
+
 }
