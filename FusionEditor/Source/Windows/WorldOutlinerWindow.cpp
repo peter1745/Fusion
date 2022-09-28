@@ -4,6 +4,8 @@
 
 #include "Fusion/World/Components/AllComponents.h"
 
+#include <ImGui/imgui_internal.h>
+
 namespace FusionEditor {
 
 	WorldOutlinerWindow::WorldOutlinerWindow(Fusion::World* InWorld)
@@ -42,25 +44,29 @@ namespace FusionEditor {
 
 	void WorldOutlinerWindow::RenderActorNode(const Fusion::Shared<Fusion::Actor>& InActor)
 	{
-		if (ImGui::TreeNode(InActor->Name.c_str()))
-		{
+		const bool WasOpen = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(InActor->Name.c_str()));
+		const bool IsOpen = ImGui::TreeNode(InActor->Name.c_str());
+
+		if (IsOpen != WasOpen)
 			WindowManager::Get()->GetWindowOfType<ActorDetailsWindow>()->SetCurrentActor(InActor);
 
-			Fusion::RelationshipComponent* RelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(InActor->GetActorID());
-			Fusion::ActorID CurrentChildID = RelationshipComp->FirstChildID;
+		if (!IsOpen)
+			return;
 
-			while (CurrentChildID != Fusion::ActorID::Invalid)
-			{
-				auto ChildActor = m_World->FindActorWithID(CurrentChildID);
-				Fusion::RelationshipComponent* ChildRelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(ChildActor->GetActorID());
+		Fusion::RelationshipComponent* RelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(InActor->GetActorID());
+		Fusion::ActorID CurrentChildID = RelationshipComp->FirstChildID;
 
-				RenderActorNode(ChildActor);
+		while (CurrentChildID != Fusion::ActorID::Invalid)
+		{
+			auto ChildActor = m_World->FindActorWithID(CurrentChildID);
+			Fusion::RelationshipComponent* ChildRelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(ChildActor->GetActorID());
 
-				CurrentChildID = ChildRelationshipComp->NextSiblingID;
-			}
+			RenderActorNode(ChildActor);
 
-			ImGui::TreePop();
+			CurrentChildID = ChildRelationshipComp->NextSiblingID;
 		}
+
+		ImGui::TreePop();
 	}
 
 }

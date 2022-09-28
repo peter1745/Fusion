@@ -31,71 +31,32 @@ namespace FusionEditor {
 	static Shared<ViewportWindow> s_ViewportWindow;
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
-		: Application(specification)
+		: Application(specification), m_ViewportCamera(float(GetWindow()->GetWidth()), float(GetWindow()->GetHeight()))
 	{
 	}
 
 	void FusionEditorApp::OnInit()
 	{
 		InitImGui();
-
-		{
-			ShaderSpecification ShaderSpec;
-			ShaderSpec.VertexFilePath = "Resources/Shaders/TextureVertexShader.glsl";
-			ShaderSpec.FragmentFilePath = "Resources/Shaders/TextureFragmentShader.glsl";
-			m_Shader = Shader::Create(ShaderSpec);
-		}
-
-		{
-			ShaderSpecification ShaderSpec;
-			ShaderSpec.FilePath = "Resources/Shaders/PBR.glsl";
-			m_PBRShader = Shader::Create(ShaderSpec);
-		}
-
+				
 		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
 
-		VertexBufferLayout VertexLayout({
-			{ 0, ShaderDataType::Float3, offsetof(VertexData, Position) },
-			{ 1, ShaderDataType::Float2, offsetof(VertexData, TextureCoordinate) }
-		});
-		m_VertexBuffer = VertexBuffer::Create(4 * sizeof(VertexData), s_TriangleVertices, VertexLayout);
-
-		m_IndexBuffer = IndexBuffer::Create(6 * sizeof(uint32_t), s_TriangleIndices);
-
-		FramebufferSpecification FramebufferSpec;
-		FramebufferSpec.Width = GetWindow()->GetWidth();
-		FramebufferSpec.Height = GetWindow()->GetHeight();
-		FramebufferSpec.ColorAttachments.push_back({ EFramebufferAttachmentFormat::RGBA8 });
-		FramebufferSpec.DepthAttachment.Format = EFramebufferAttachmentFormat::Depth24Stencil8;
-		m_ViewportFramebuffer = Framebuffer::Create(FramebufferSpec);
-
-		m_Texture = Texture2D::LoadFromFile("Resources/Textures/Test.png");
-		m_Texture->Bind(0);
-
 		DummyWorld();
+
+		m_WorldRenderer = MakeUnique<WorldRenderer>(m_World.get(), GetWindow()->GetWidth(), GetWindow()->GetHeight());
 
 		InitWindows();
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
+		// Update
+		m_ViewportCamera.OnUpdate(DeltaTime);
+
 		// Scene Rendering
-		m_ViewportFramebuffer->Bind();
-		// m_WorldRenderer->Begin(m_ViewportCamera);
-		// m_WorldRenderer->Render();
-		// m_WorldRenderer->End();
-
-		Renderer::Begin();
-		/*Renderer::GetActiveCommandBuffer()->CmdBindShader(m_Shader);
-		m_Shader->Set("MainTexture", m_Texture);
-		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer, m_Shader);*/
-
-		Renderer::GetActiveCommandBuffer()->CmdBindShader(m_PBRShader);
-		//m_Shader->Set("MainTexture", m_Texture);
-		Renderer::DrawIndexed(m_CubeMesh->GetVertexBuffer(), m_CubeMesh->GetIndexBuffer(), m_PBRShader);
-
-		Renderer::End();
-		m_ViewportFramebuffer->Unbind();
+		m_WorldRenderer->Begin(m_ViewportCamera, m_ViewportCamera.GetViewMatrix());
+		m_WorldRenderer->Render();
+		m_WorldRenderer->End();
 
 		DrawUI();
 	}
@@ -169,7 +130,7 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_ViewportWindow = m_WindowManager->RegisterWindow<ViewportWindow>(true, m_ViewportFramebuffer);
+		m_ViewportWindow = m_WindowManager->RegisterWindow<ViewportWindow>(true, m_WorldRenderer->GetFinalImage());
 
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
@@ -241,9 +202,9 @@ namespace FusionEditor {
 	{
 		m_World = MakeUnique<World>();
 
-		auto Actor01 = m_World->CreateActor("TextureActor");
-		auto* SpriteComp = Actor01->AddComponent<Fusion::SpriteComponent>();
-		SpriteComp->Texture = Texture2D::LoadFromFile("Resources/Textures/Test.png");
+		auto Actor01 = m_World->CreateActor("MeshActor");
+		auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
+		SpriteComp->Mesh = m_CubeMesh;
 	}
 
 }

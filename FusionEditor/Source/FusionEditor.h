@@ -3,10 +3,13 @@
 #include <Fusion.h>
 #include <Fusion/Renderer/Texture.h>
 #include <Fusion/World/World.h>
+#include <Fusion/Renderer/WorldRenderer.h>
 #include <Fusion/Renderer/Mesh.h>
 
 #include "Windows/WindowManager.h"
 #include "Windows/ViewportWindow.h"
+
+#include "Renderer/ViewportCamera.h"
 
 namespace FusionEditor {
 
@@ -31,18 +34,14 @@ namespace FusionEditor {
 		void DummyWorld();
 
 	private:
-		Shared<Framebuffer> m_ViewportFramebuffer = nullptr;
-		Shared<VertexBuffer> m_VertexBuffer = nullptr;
-		Shared<IndexBuffer> m_IndexBuffer = nullptr;
-		Shared<Shader> m_Shader = nullptr;
-		Shared<Shader> m_PBRShader = nullptr;
-		Shared<Texture2D> m_Texture = nullptr;
-
 		Shared<Mesh> m_CubeMesh = nullptr;
 
 		Unique<World> m_World = nullptr;
+		Unique<WorldRenderer> m_WorldRenderer = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
 		Shared<ViewportWindow> m_ViewportWindow = nullptr;
+
+		ViewportCamera m_ViewportCamera;
 	};
 
 }

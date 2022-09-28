@@ -8,7 +8,7 @@ namespace Fusion {
 	template<typename... TComponents>
 	struct ComponentGroup {};
 
-	using AllComponents = ComponentGroup<TransformComponent, SpriteComponent, CameraComponent>;
+	using AllComponents = ComponentGroup<TransformComponent, SpriteComponent, CameraComponent, MeshComponent>;
 
 	namespace ComponentUtils {
 

@@ -38,4 +38,11 @@ namespace FusionEditor {
 		static void RenderOrthographicParameters(Fusion::CameraComponent* InComp);
 	};
 
+	template<>
+	class ComponentUI<Fusion::MeshComponent>
+	{
+	public:
+		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp);
+	};
+
 }

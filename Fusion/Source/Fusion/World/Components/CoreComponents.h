@@ -2,6 +2,8 @@
 
 #include "BaseComponent.h"
 #include "Fusion/World/Actor.h"
+#include "Fusion/Renderer/Camera.h"
+#include "Fusion/Renderer/Mesh.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -29,10 +31,11 @@ namespace Fusion {
 		ActorID ParentID = ActorID::Invalid;
 	};
 
-	enum class EProjectionType { PerspectiveProjection, OrthographicProjection };
-	
 	struct CameraComponent : public BaseComponent
 	{
+		Camera CameraInstance;
+		bool IsMainCamera = true;
+
 		EProjectionType ProjectionType = EProjectionType::PerspectiveProjection;
 
 		// General Parameters
@@ -44,6 +47,11 @@ namespace Fusion {
 
 		// Orthographic Parameters
 		float OrthographicSize = 10.0f;
+	};
+
+	struct MeshComponent : public BaseComponent
+	{
+		Shared<Mesh> Mesh = nullptr;
 	};
 
 }

@@ -59,4 +59,12 @@ namespace FusionEditor {
 		ImGui::DragFloat("Orthographic Size", &InComp->OrthographicSize);
 	}
 
+	void ComponentUI<Fusion::MeshComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)
+	{
+		if (!UI::BeginComponentHeader("Mesh", InComp->IsActive))
+			return;
+
+		UI::EndHeader();
+	}
+
 }

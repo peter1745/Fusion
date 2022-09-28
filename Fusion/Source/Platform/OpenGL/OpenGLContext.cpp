@@ -62,9 +62,11 @@ namespace Fusion {
 		glDebugMessageCallback(OpenGLDebugHandler, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-		glFrontFace(GL_CW);
+		glFrontFace(GL_CCW);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	OpenGLContext::~OpenGLContext()

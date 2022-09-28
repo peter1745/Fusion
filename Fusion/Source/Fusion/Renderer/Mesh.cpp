@@ -84,7 +84,7 @@ namespace Fusion {
 				const tinygltf::Buffer& IndicesBuffer = ModelData.buffers[IndicesBufferView.buffer];
 				const uint16_t* IndicesData = reinterpret_cast<const uint16_t*>(&IndicesBuffer.data[IndicesBufferView.byteOffset + IndicesAccessor.byteOffset]);
 				for (size_t i = 0; i < IndicesAccessor.count / 3; i++)
-					Indices.push_back({ IndicesData[i], IndicesData[i + 1], IndicesData[i + 2] });
+					Indices.push_back({ IndicesData[i * 3 + 0], IndicesData[i * 3 + 1], IndicesData[i * 3 + 2] });
 			}
 
 			return Shared<Mesh>::Create(Vertices, Indices);
