@@ -9,6 +9,7 @@
 
 #include "Windows/WorldOutlinerWindow.h"
 #include "Windows/ActorDetailsWindow.h"
+#include "Fusion/Renderer/Mesh.h"
 
 namespace FusionEditor {
 
@@ -38,10 +39,20 @@ namespace FusionEditor {
 	{
 		InitImGui();
 
-		ShaderSpecification ShaderSpec;
-		ShaderSpec.VertexFilePath = "Resources/Shaders/TextureVertexShader.glsl";
-		ShaderSpec.FragmentFilePath = "Resources/Shaders/TextureFragmentShader.glsl";
-		m_Shader = Shader::Create(ShaderSpec);
+		{
+			ShaderSpecification ShaderSpec;
+			ShaderSpec.VertexFilePath = "Resources/Shaders/TextureVertexShader.glsl";
+			ShaderSpec.FragmentFilePath = "Resources/Shaders/TextureFragmentShader.glsl";
+			m_Shader = Shader::Create(ShaderSpec);
+		}
+
+		{
+			ShaderSpecification ShaderSpec;
+			ShaderSpec.FilePath = "Resources/Shaders/PBR.glsl";
+			m_PBRShader = Shader::Create(ShaderSpec);
+		}
+
+		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
 
 		VertexBufferLayout VertexLayout({
 			{ 0, ShaderDataType::Float3, offsetof(VertexData, Position) },
@@ -49,7 +60,7 @@ namespace FusionEditor {
 		});
 		m_VertexBuffer = VertexBuffer::Create(4 * sizeof(VertexData), s_TriangleVertices, VertexLayout);
 
-		m_IndexBuffer = IndexBuffer::Create(6, s_TriangleIndices);
+		m_IndexBuffer = IndexBuffer::Create(6 * sizeof(uint32_t), s_TriangleIndices);
 
 		FramebufferSpecification FramebufferSpec;
 		FramebufferSpec.Width = GetWindow()->GetWidth();
@@ -61,7 +72,7 @@ namespace FusionEditor {
 		m_Texture = Texture2D::LoadFromFile("Resources/Textures/Test.png");
 		m_Texture->Bind(0);
 
-		m_World = MakeUnique<World>();
+		DummyWorld();
 
 		InitWindows();
 	}
@@ -70,10 +81,19 @@ namespace FusionEditor {
 	{
 		// Scene Rendering
 		m_ViewportFramebuffer->Bind();
+		// m_WorldRenderer->Begin(m_ViewportCamera);
+		// m_WorldRenderer->Render();
+		// m_WorldRenderer->End();
+
 		Renderer::Begin();
-		Renderer::GetActiveCommandBuffer()->CmdBindShader(m_Shader);
+		/*Renderer::GetActiveCommandBuffer()->CmdBindShader(m_Shader);
 		m_Shader->Set("MainTexture", m_Texture);
-		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer, m_Shader);
+		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer, m_Shader);*/
+
+		Renderer::GetActiveCommandBuffer()->CmdBindShader(m_PBRShader);
+		//m_Shader->Set("MainTexture", m_Texture);
+		Renderer::DrawIndexed(m_CubeMesh->GetVertexBuffer(), m_CubeMesh->GetIndexBuffer(), m_PBRShader);
+
 		Renderer::End();
 		m_ViewportFramebuffer->Unbind();
 
@@ -95,7 +115,9 @@ namespace FusionEditor {
 		IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		IO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		ImGui::StyleColorsDark();
+		IO.FontDefault = IO.Fonts->AddFontFromFileTTF("Resources/Fonts/Roboto-Regular.ttf", 16.0f);
+
+		InitImGuiStyle();
 
 		auto& Style = ImGui::GetStyle();
 		if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -104,9 +126,44 @@ namespace FusionEditor {
 			Style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
+		IO.ConfigWindowsMoveFromTitleBarOnly = true;
+
 		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(GetWindow()->GetNativeWindow());
 		ImGui_ImplGlfw_InitForOpenGL(NativeWindow, true);
 		ImGui_ImplOpenGL3_Init("#version 410");
+	}
+
+	void FusionEditorApp::InitImGuiStyle()
+	{
+		auto& UIStyle = ImGui::GetStyle();
+		UIStyle.WindowPadding = { 2.0f, 2.0f };
+		UIStyle.WindowBorderSize = 0.0f;
+		UIStyle.WindowTitleAlign = { 0.5f, 0.5f };
+		UIStyle.WindowRounding = 2.0f;
+		UIStyle.DisplaySafeAreaPadding = { 0.0f, 6.0f };
+		UIStyle.WindowMenuButtonPosition = ImGuiDir_None;
+
+		UIStyle.Colors[ImGuiCol_TitleBg] = ImVec4(0.09f, 0.09f, 0.09f, 1.0f);
+		UIStyle.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.09f, 0.09f, 0.09f, 1.0f);
+		UIStyle.Colors[ImGuiCol_Header] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		UIStyle.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.18f, 0.18f, 0.19f, 1.0f);
+		UIStyle.Colors[ImGuiCol_HeaderActive] = ImVec4(0.82f, 0.75f, 0.53f, 1.0f);
+
+		UIStyle.Colors[ImGuiCol_Tab] = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
+		UIStyle.Colors[ImGuiCol_TabActive] = ImVec4(0.2f, 0.2f, 0.19f, 1.0f);
+		UIStyle.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.09f, 0.09f, 0.08f, 1.0f);
+		UIStyle.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.14f, 0.14f, 0.13f, 1.0f);
+		UIStyle.Colors[ImGuiCol_TabHovered] = ImVec4(0.22f, 0.37f, 1.0f, 0.58f);
+		UIStyle.TabRounding = 2.0f;
+
+		UIStyle.FramePadding = { 16.0f, 8.0f };
+		UIStyle.FrameRounding = 2.0f;
+		UIStyle.FrameBorderSize = 0.0f;
+
+		UIStyle.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
+
+		UIStyle.ItemInnerSpacing = { 6.0f, 4.0f };
+		UIStyle.IndentSpacing = 16.0f;
 	}
 
 	void FusionEditorApp::InitWindows()
@@ -178,6 +235,15 @@ namespace FusionEditor {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+	}
+
+	void FusionEditorApp::DummyWorld()
+	{
+		m_World = MakeUnique<World>();
+
+		auto Actor01 = m_World->CreateActor("TextureActor");
+		auto* SpriteComp = Actor01->AddComponent<Fusion::SpriteComponent>();
+		SpriteComp->Texture = Texture2D::LoadFromFile("Resources/Textures/Test.png");
 	}
 
 }

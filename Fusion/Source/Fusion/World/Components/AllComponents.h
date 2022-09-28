@@ -1,13 +1,14 @@
 #pragma once
 
 #include "CoreComponents.h"
+#include "Components2D.h"
 
 namespace Fusion {
 
 	template<typename... TComponents>
 	struct ComponentGroup {};
 
-	using AllComponents = ComponentGroup<TransformComponent>;
+	using AllComponents = ComponentGroup<TransformComponent, SpriteComponent, CameraComponent>;
 
 	namespace ComponentUtils {
 

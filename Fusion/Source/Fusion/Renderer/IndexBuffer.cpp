@@ -5,9 +5,9 @@
 
 namespace Fusion {
 
-	Shared<IndexBuffer> IndexBuffer::Create(uint32_t InCount, uint32_t* InData)
+	Shared<IndexBuffer> IndexBuffer::Create(uint32_t InSize, void* InData)
 	{
-		return Shared<OpenGLIndexBuffer>::Create(InCount, InData);
+		return Shared<OpenGLIndexBuffer>::Create(InSize, InData);
 	}
 
 }

@@ -5,11 +5,11 @@
 
 namespace Fusion {
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t InCount, uint32_t* InData)
-		: m_Count(InCount), m_BufferID(0)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t InSize, void* InData)
+		: m_Size(InSize), m_BufferID(0)
 	{
 		glCreateBuffers(1, &m_BufferID);
-		glNamedBufferData(m_BufferID, InCount * sizeof(uint32_t), InData, GL_STATIC_DRAW);
+		glNamedBufferData(m_BufferID, InSize, InData, GL_STATIC_DRAW);
 	}
 
 }

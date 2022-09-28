@@ -15,6 +15,9 @@ namespace FusionEditor {
 		virtual void RenderContents() override;
 
 	private:
+		void RenderActorNode(const Fusion::Shared<Fusion::Actor>& InActor);
+
+	private:
 		Fusion::World* m_World = nullptr;
 	};
 

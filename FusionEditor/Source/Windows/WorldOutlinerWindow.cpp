@@ -19,7 +19,7 @@ namespace FusionEditor {
 
 	void WorldOutlinerWindow::RenderContents()
 	{
-		auto AllActors = m_World->FindAllActorsWith<Fusion::TransformComponent>();
+		auto AllActors = m_World->FindAllActorsWith<Fusion::RelationshipComponent>();
 
 		if (ImGui::BeginPopupContextWindow("WorldOutlinerContextWindow"))
 		{
@@ -31,10 +31,35 @@ namespace FusionEditor {
 
 		for (auto& Actor : AllActors)
 		{
-			if (ImGui::Button(Actor->Name.c_str()))
+			Fusion::RelationshipComponent* RelationshipComp = Actor->FindComponent<Fusion::RelationshipComponent>();
+
+			if (RelationshipComp->ParentID != Fusion::ActorID::Invalid)
+				continue;
+
+			RenderActorNode(Actor);
+		}
+	}
+
+	void WorldOutlinerWindow::RenderActorNode(const Fusion::Shared<Fusion::Actor>& InActor)
+	{
+		if (ImGui::TreeNode(InActor->Name.c_str()))
+		{
+			WindowManager::Get()->GetWindowOfType<ActorDetailsWindow>()->SetCurrentActor(InActor);
+
+			Fusion::RelationshipComponent* RelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(InActor->GetActorID());
+			Fusion::ActorID CurrentChildID = RelationshipComp->FirstChildID;
+
+			while (CurrentChildID != Fusion::ActorID::Invalid)
 			{
-				WindowManager::Get()->GetWindowOfType<ActorDetailsWindow>()->SetCurrentActor(Actor);
+				auto ChildActor = m_World->FindActorWithID(CurrentChildID);
+				Fusion::RelationshipComponent* ChildRelationshipComp = m_World->FindActorComponent<Fusion::RelationshipComponent>(ChildActor->GetActorID());
+
+				RenderActorNode(ChildActor);
+
+				CurrentChildID = ChildRelationshipComp->NextSiblingID;
 			}
+
+			ImGui::TreePop();
 		}
 	}
 

@@ -1,10 +1,12 @@
 #include "ActorDetailsWindow.h"
-#include "ComponentRenderers/ComponentRenderer.h"
+#include "UI/ComponentRenderer.h"
 
 #include "Fusion/World/World.h"
 #include "Fusion/World/Components/AllComponents.h"
 
 namespace FusionEditor {
+
+	using namespace Fusion;
 
 	ActorDetailsWindow::ActorDetailsWindow()
 		: EditorWindow("ActorDetailsWindowID")
@@ -22,12 +24,23 @@ namespace FusionEditor {
 		if (!m_CurrentActor)
 			return;
 
-		ImGui::Text(m_CurrentActor->Name.c_str());
+		RenderComponentMenu();
 
-		Fusion::ComponentUtils::All(m_CurrentActor, [InActor = m_CurrentActor](auto* InComp)
+		ComponentUtils::All(m_CurrentActor, [InActor = m_CurrentActor]<typename TComponent>(TComponent* InComp)
 		{
-			ComponentRenderer<std::remove_pointer_t<decltype(InComp)>>::Render(InActor, InComp);
+			ComponentUI<TComponent>::Render(InActor, InComp);
 		});
+	}
+
+	void ActorDetailsWindow::RenderComponentMenu()
+	{
+		if (!ImGui::BeginPopupContextWindow("AddComponentPopupMenu"))
+			return;
+
+		RenderComponentMenuItem<SpriteComponent>("Sprite");
+		RenderComponentMenuItem<CameraComponent>("Camera");
+
+		ImGui::EndPopup();
 	}
 
 }

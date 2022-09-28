@@ -9,6 +9,7 @@ namespace Fusion {
 
 	struct ShaderSpecification
 	{
+		std::filesystem::path FilePath;
 		std::filesystem::path VertexFilePath;
 		std::filesystem::path FragmentFilePath;
 	};

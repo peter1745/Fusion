@@ -17,6 +17,19 @@ namespace FusionEditor {
 		virtual void RenderContents() override;
 
 	private:
+		void RenderComponentMenu();
+
+		template<typename TComponent>
+		void RenderComponentMenuItem(std::string_view InDisplayName)
+		{
+			if (m_CurrentActor->FindComponent<TComponent>() != nullptr)
+				return;
+
+			if (ImGui::MenuItem(InDisplayName.data()))
+				m_CurrentActor->AddComponent<TComponent>();
+		}
+
+	private:
 		Fusion::Shared<Fusion::Actor> m_CurrentActor = nullptr;
 	};
 

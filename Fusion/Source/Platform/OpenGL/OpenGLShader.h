@@ -21,8 +21,10 @@ namespace Fusion {
 		virtual void Set(const std::string& InName, const Shared<Texture2D>& InTexture) override;
 
 	private:
+		void CreateProgram(uint32_t InVertexShaderID, uint32_t InFragmentShaderID);
+		std::array<uint32_t, 2> LoadAndCompileShaders(const std::filesystem::path& InPath) const;
 		uint32_t LoadAndCompileShader(const std::filesystem::path& InPath, GLShaderType InType) const;
-
+		uint32_t CompileShader(std::string_view InSource, GLShaderType InType) const;
 	private:
 		uint32_t m_ShaderID = 0;
 	};

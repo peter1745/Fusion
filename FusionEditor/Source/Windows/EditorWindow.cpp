@@ -13,11 +13,8 @@ namespace FusionEditor {
 	{
 		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
 		//ImGui::SetNextWindowSize(ImVec2(float(m_Width), float(m_Height)), ImGuiCond_Once);
-		if (!ImGui::Begin(WindowTitle.c_str(), &InOpen))
-			return;
-
-		RenderContents();
-
+		if (ImGui::Begin(WindowTitle.c_str(), &InOpen))
+			RenderContents();
 		ImGui::End();
 	}
 

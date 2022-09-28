@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Logging.h"
+#include "Fusion/IO/Logging.h"
 #include "Assert.h"
 #include "Fusion/Memory/Shared.h"
 

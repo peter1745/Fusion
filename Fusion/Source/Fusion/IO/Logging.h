@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Core.h"
+#include "Fusion/Core/Core.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+
+#include "CustomLogFormatters.h"
 
 namespace Fusion {
 

@@ -11,7 +11,10 @@ namespace Fusion {
 	class World
 	{
 	public:
-		Shared<Actor> CreateActor(const std::string& InName);
+		World();
+
+		Shared<Actor> CreateActor(const std::string& InName, const Shared<Actor>& InParent = nullptr);
+		Shared<Actor> FindActorWithID(ActorID InActorID) const;
 
 		template<typename TComponent, typename... TComponentParams>
 		TComponent* AddActorComponent(ActorID InActorID, TComponentParams&&... InComponentParams)

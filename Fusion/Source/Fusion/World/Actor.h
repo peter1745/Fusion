@@ -7,6 +7,9 @@ namespace Fusion {
 	class ActorID
 	{
 	public:
+		static const uint64_t Invalid = 0;
+
+	public:
 		ActorID();
 		ActorID(uint64_t InActorID);
 		ActorID(const ActorID& InOther);

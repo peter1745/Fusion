@@ -26,7 +26,8 @@ project "Fusion"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.glad}",
         "%{IncludeDirs.EnTT}",
-        "%{IncludeDirs.stb_image}"
+        "%{IncludeDirs.stb_image}",
+        "%{IncludeDirs.TinyGLTF}"
     }
 
     defines { "GLFW_INCLUDE_NONE" }
