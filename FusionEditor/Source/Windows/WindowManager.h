@@ -69,6 +69,8 @@ namespace FusionEditor {
 
 	private:
 		void RenderWindows();
+		void OnRender();
+		void OnUpdate(float InDeltaTime);
 
 	private:
 		std::unordered_map<uint32_t, WindowData> m_Windows;

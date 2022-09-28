@@ -51,6 +51,7 @@ namespace Fusion {
 
 			for (const tinygltf::Primitive& Primitive : MeshData.primitives)
 			{
+				// NOTE(Peter): We really shouldn't assume that *every* mesh has normals or texture coords
 				const bool HasNormals = Primitive.attributes.find("NORMAL") != Primitive.attributes.end();
 				const bool HasTextureCoords = Primitive.attributes.find("TEXCOORD_0") != Primitive.attributes.end();
 				

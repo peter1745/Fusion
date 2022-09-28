@@ -31,7 +31,7 @@ namespace FusionEditor {
 		if (!UI::BeginComponentHeader("Camera", InComp->IsActive))
 			return;
 
-		UI::Dropdown("Projection Type", &InComp->ProjectionType, { "Perspective", "Orthographic" });
+		/*UI::Dropdown("Projection Type", &InComp->ProjectionType, { "Perspective", "Orthographic" });
 
 		switch (InComp->ProjectionType)
 		{
@@ -44,19 +44,19 @@ namespace FusionEditor {
 		}
 
 		ImGui::DragFloat("Near Plane", &InComp->NearPlane);
-		ImGui::DragFloat("Far Plane", &InComp->FarPlane);
+		ImGui::DragFloat("Far Plane", &InComp->FarPlane);*/
 
 		UI::EndHeader();
 	}
 
 	void ComponentUI<Fusion::CameraComponent>::RenderPerspectiveParameters(Fusion::CameraComponent* InComp)
 	{
-		ImGui::DragFloat("Vertical FOV", &InComp->VerticalFOV);
+		//ImGui::DragFloat("Vertical FOV", &InComp->VerticalFOV);
 	}
 
 	void ComponentUI<Fusion::CameraComponent>::RenderOrthographicParameters(Fusion::CameraComponent* InComp)
 	{
-		ImGui::DragFloat("Orthographic Size", &InComp->OrthographicSize);
+		//ImGui::DragFloat("Orthographic Size", &InComp->OrthographicSize);
 	}
 
 	void ComponentUI<Fusion::MeshComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)

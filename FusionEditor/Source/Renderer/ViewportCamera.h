@@ -7,7 +7,10 @@ namespace FusionEditor {
 	class ViewportCamera : public Fusion::Camera
 	{
 	public:
-		ViewportCamera(float InWidth, float InHeight);
+		ViewportCamera();
+		ViewportCamera(uint32_t InWidth, uint32_t InHeight);
+
+		void SetViewportSize(uint32_t InWidth, uint32_t InHeight);
 
 		void OnUpdate(float InDeltaTime);
 

@@ -7,6 +7,7 @@
 #include <ImGui/backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 
+#include "Windows/GameViewportWindow.h"
 #include "Windows/WorldOutlinerWindow.h"
 #include "Windows/ActorDetailsWindow.h"
 #include "Fusion/Renderer/Mesh.h"
@@ -28,10 +29,10 @@ namespace FusionEditor {
 
 	static uint32_t s_TriangleIndices[] = { 0, 1, 2, 2, 3, 0 };
 
-	static Shared<ViewportWindow> s_ViewportWindow;
+	static Shared<EditorViewportWindow> s_ViewportWindow;
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
-		: Application(specification), m_ViewportCamera(float(GetWindow()->GetWidth()), float(GetWindow()->GetHeight()))
+		: Application(specification)
 	{
 	}
 
@@ -43,20 +44,13 @@ namespace FusionEditor {
 
 		DummyWorld();
 
-		m_WorldRenderer = MakeUnique<WorldRenderer>(m_World.get(), GetWindow()->GetWidth(), GetWindow()->GetHeight());
-
 		InitWindows();
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
-		// Update
-		m_ViewportCamera.OnUpdate(DeltaTime);
-
-		// Scene Rendering
-		m_WorldRenderer->Begin(m_ViewportCamera, m_ViewportCamera.GetViewMatrix());
-		m_WorldRenderer->Render();
-		m_WorldRenderer->End();
+		m_WindowManager->OnUpdate(DeltaTime);
+		m_WindowManager->OnRender();
 
 		DrawUI();
 	}
@@ -130,7 +124,8 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_ViewportWindow = m_WindowManager->RegisterWindow<ViewportWindow>(true, m_WorldRenderer->GetFinalImage());
+		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
+		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
 
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);

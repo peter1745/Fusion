@@ -14,6 +14,9 @@ namespace Fusion {
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
+
+		virtual void Resize(uint32_t InNewWidth, uint32_t InNewHeight) override;
+
 		virtual uint32_t GetColorAttachmentID(uint32_t InColorAttachmentIndex) const
 		{
 			FUSION_CORE_VERIFY(InColorAttachmentIndex < m_ColorAttchmentIDs.size());

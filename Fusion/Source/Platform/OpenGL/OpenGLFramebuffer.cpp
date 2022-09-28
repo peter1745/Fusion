@@ -39,6 +39,20 @@ namespace Fusion {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void OpenGLFramebuffer::Resize(uint32_t InNewWidth, uint32_t InNewHeight)
+	{
+		if (InNewWidth == 0 || InNewHeight == 0)
+		{
+			FUSION_CORE_WARN("Failed to resize framebuffer, have a width or height of 0!");
+			return;
+		}
+
+		m_Specification.Width = InNewWidth;
+		m_Specification.Height = InNewHeight;
+
+		Recreate();
+	}
+
 	void OpenGLFramebuffer::Recreate()
 	{
 		if (m_FramebufferID)

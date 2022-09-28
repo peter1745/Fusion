@@ -29,6 +29,19 @@ namespace FusionEditor {
 				m_CurrentActor->AddComponent<TComponent>();
 		}
 
+		template<typename TComponent, typename TFunc>
+		void RenderComponentMenuItem(std::string_view InDisplayName, TFunc InFunc)
+		{
+			if (m_CurrentActor->FindComponent<TComponent>() != nullptr)
+				return;
+
+			if (ImGui::MenuItem(InDisplayName.data()))
+			{
+				TComponent* Comp = m_CurrentActor->AddComponent<TComponent>();
+				InFunc(Comp);
+			}
+		}
+
 	private:
 		Fusion::Shared<Fusion::Actor> m_CurrentActor = nullptr;
 	};

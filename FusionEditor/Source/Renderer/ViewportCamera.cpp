@@ -9,10 +9,20 @@ namespace FusionEditor {
 
 	using namespace Fusion;
 
-	ViewportCamera::ViewportCamera(float InWidth, float InHeight)
+	ViewportCamera::ViewportCamera()
 		: Camera(EProjectionType::PerspectiveProjection)
 	{
-		SetProjectionMatrix(glm::perspectiveFov(70.0f, InWidth, InHeight, 0.1f, 1000.0f));
+	}
+
+	ViewportCamera::ViewportCamera(uint32_t InWidth, uint32_t InHeight)
+		: Camera(EProjectionType::PerspectiveProjection)
+	{
+		SetProjectionMatrix(glm::perspectiveFov(glm::radians(70.0f), float(InWidth), float(InHeight), 0.1f, 1000.0f));
+	}
+
+	void ViewportCamera::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
+	{
+		SetProjectionMatrix(glm::perspectiveFov(glm::radians(70.0f), float(InWidth), float(InHeight), 0.1f, 1000.0f));
 	}
 
 	void ViewportCamera::OnUpdate(float InDeltaTime)

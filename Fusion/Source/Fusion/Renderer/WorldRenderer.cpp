@@ -6,14 +6,14 @@
 
 namespace Fusion {
 
-	WorldRenderer::WorldRenderer(World* InWorld, uint32_t InFramebufferWidth, uint32_t InFramebufferHeight)
+	WorldRenderer::WorldRenderer(World* InWorld, uint32_t InViewportWidth, uint32_t InViewportHeight)
 		: m_World(InWorld)
 	{
 		{
 			// TODO(Peter): The framebuffer should be owned by the viewport in the future
 			FramebufferSpecification FramebufferSpec;
-			FramebufferSpec.Width = InFramebufferWidth;
-			FramebufferSpec.Height = InFramebufferHeight;
+			FramebufferSpec.Width = InViewportWidth;
+			FramebufferSpec.Height = InViewportHeight;
 
 			FramebufferAttachment ColorAttachment = { EFramebufferAttachmentFormat::RGBA8 };
 			FramebufferSpec.ColorAttachments.push_back(ColorAttachment);
@@ -62,6 +62,11 @@ namespace Fusion {
 	{
 		Renderer::End();
 		m_Framebuffer->Unbind();
+	}
+
+	void WorldRenderer::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
+	{
+		m_Framebuffer->Resize(InWidth, InHeight);
 	}
 
 }

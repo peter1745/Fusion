@@ -10,7 +10,13 @@ namespace FusionEditor {
 	{
 	public:
 		void SetTitle(const std::string& InTitle) { m_Title = InTitle; }
-		void Render(bool& InOpen);
+		void RenderUI(bool& InOpen);
+
+		virtual void OnRender() {}
+		virtual void OnUpdate(float InDeltaTime) {}
+
+		uint32_t GetWindowWidth() const { return m_Width; }
+		uint32_t GetWindowHeight() const { return m_Height; }
 
 	protected:
 		EditorWindow(const std::string& InWindowID, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);

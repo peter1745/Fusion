@@ -34,6 +34,8 @@ namespace Fusion {
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
+		virtual void Resize(uint32_t InNewWidth, uint32_t InNewHeight) = 0;
+
 		virtual uint32_t GetColorAttachmentID(uint32_t InColorAttachmentIndex) const = 0;
 
 	public:

@@ -7,7 +7,7 @@
 #include <Fusion/Renderer/Mesh.h>
 
 #include "Windows/WindowManager.h"
-#include "Windows/ViewportWindow.h"
+#include "Windows/EditorViewportWindow.h"
 
 #include "Renderer/ViewportCamera.h"
 
@@ -37,11 +37,8 @@ namespace FusionEditor {
 		Shared<Mesh> m_CubeMesh = nullptr;
 
 		Unique<World> m_World = nullptr;
-		Unique<WorldRenderer> m_WorldRenderer = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
-		Shared<ViewportWindow> m_ViewportWindow = nullptr;
-
-		ViewportCamera m_ViewportCamera;
+		Shared<EditorViewportWindow> m_ViewportWindow = nullptr;
 	};
 
 }

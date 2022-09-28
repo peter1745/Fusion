@@ -68,6 +68,8 @@ namespace Fusion {
 			return Result;
 		}
 
+		Shared<Actor> GetMainCameraActor() const;
+
 	private:
 		entt::registry m_Registry;
 		std::unordered_map<ActorID, entt::entity> m_ActorIDMap;

@@ -2,7 +2,7 @@
 
 #include "BaseComponent.h"
 #include "Fusion/World/Actor.h"
-#include "Fusion/Renderer/Camera.h"
+#include "Fusion/Renderer/WorldCamera.h"
 #include "Fusion/Renderer/Mesh.h"
 
 #include <glm/glm.hpp>
@@ -33,20 +33,8 @@ namespace Fusion {
 
 	struct CameraComponent : public BaseComponent
 	{
-		Camera CameraInstance;
+		WorldCamera CameraInstance;
 		bool IsMainCamera = true;
-
-		EProjectionType ProjectionType = EProjectionType::PerspectiveProjection;
-
-		// General Parameters
-		float NearPlane = 0.1f;
-		float FarPlane = 1000.0f;
-
-		// Perspective Parameters
-		float VerticalFOV = 70.0f;
-
-		// Orthographic Parameters
-		float OrthographicSize = 10.0f;
 	};
 
 	struct MeshComponent : public BaseComponent

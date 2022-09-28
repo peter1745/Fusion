@@ -60,4 +60,22 @@ namespace Fusion {
 		return nullptr;
 	}
 
+	Shared<Actor> World::GetMainCameraActor() const
+	{
+		auto EnttView = m_Registry.view<ActorComponent, CameraComponent>();
+
+		for (auto EnttID : EnttView)
+		{
+			const auto& CameraComp = m_Registry.get<CameraComponent>(EnttID);
+
+			if (!CameraComp.IsMainCamera || !CameraComp.IsActive)
+				continue;
+
+			const auto& ActorComp = m_Registry.get<ActorComponent>(EnttID);
+			return m_Actors.at(ActorComp.ID);
+		}
+
+		return nullptr;
+	}
+
 }
