@@ -3,14 +3,21 @@
 #include <Fusion/Memory/Shared.h>
 
 #include <ImGui/imgui.h>
-#include <ImGui/backends/imgui_impl_glfw.h>
-#include <ImGui/backends/imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
+#include <ImGui/backends/imgui_impl_win32.h>
+#include <ImGui/backends/imgui_impl_dx11.h>
 
 #include "Windows/GameViewportWindow.h"
 #include "Windows/WorldOutlinerWindow.h"
 #include "Windows/ActorDetailsWindow.h"
-#include "Fusion/Renderer/Mesh.h"
+#include <Fusion/Renderer/Mesh.h>
+
+
+#ifdef FUSION_PLATFORM_WINDOWS
+	#include <d3d11.h>
+	#include <Platform/D3D11/D3D11Context.h>
+	#include <Platform/Windows/WindowsWindow.h>
+	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
 namespace FusionEditor {
 
@@ -34,23 +41,26 @@ namespace FusionEditor {
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 		: Application(specification)
 	{
+#ifdef FUSION_PLATFORM_WINDOWS
+		static_cast<WindowsWindow*>(GetWindow().get())->RegisterMessageProc(ImGui_ImplWin32_WndProcHandler);
+#endif
 	}
 
 	void FusionEditorApp::OnInit()
 	{
 		InitImGui();
 				
-		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
-
+		//m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
+		
 		DummyWorld();
-
+		
 		InitWindows();
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
-		m_WindowManager->OnUpdate(DeltaTime);
-		m_WindowManager->OnRender();
+		//m_WindowManager->OnUpdate(DeltaTime);
+		//m_WindowManager->OnRender();
 
 		DrawUI();
 	}
@@ -83,9 +93,22 @@ namespace FusionEditor {
 
 		IO.ConfigWindowsMoveFromTitleBarOnly = true;
 
-		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(GetWindow()->GetNativeWindow());
-		ImGui_ImplGlfw_InitForOpenGL(NativeWindow, true);
-		ImGui_ImplOpenGL3_Init("#version 410");
+		ImGui_ImplWin32_Init(GetWindow()->GetWindowHandle());
+
+		switch (Renderer::CurrentAPI())
+		{
+		case ERendererAPI::D3D11:
+		{
+			Shared<D3D11Context> Context = m_Renderer->GetContext().As<D3D11Context>();
+			ImGui_ImplDX11_Init(Context->GetDevice(), Context->GetDeviceContext());
+			break;
+		}
+		case ERendererAPI::OpenGL:
+		{
+			//ImGui_ImplOpenGL3_Init("#version 410");
+			break;
+		}
+		}
 	}
 
 	void FusionEditorApp::InitImGuiStyle()
@@ -124,8 +147,8 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
-		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
+		//m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
+		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
 
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
@@ -135,12 +158,23 @@ namespace FusionEditor {
 	{
 		// Begin ImGui Rendering
 		{
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+			switch (Renderer::CurrentAPI())
+			{
+			case ERendererAPI::D3D11:
+			{
+				ImGui_ImplDX11_NewFrame();
+				break;
+			}
+			case ERendererAPI::OpenGL:
+			{
+				//ImGui_ImplOpenGL3_NewFrame();
+				break;
+			}
+			}
 
-			// NOTE(Peter): This is mainly to clear the framebuffer
-			Renderer::Begin();
+			ImGui_ImplWin32_NewFrame();
+
+			ImGui::NewFrame();
 		}
 
 		ImGuiViewport* MainViewport = ImGui::GetMainViewport();
@@ -167,29 +201,46 @@ namespace FusionEditor {
 
 		// End ImGui Rendering
 		{
-			Fusion::Renderer::End();
-
 			auto& IO = ImGui::GetIO();
 			const auto& Window = GetWindow();
 			IO.DisplaySize = ImVec2((float)Window->GetWidth(), (float)Window->GetHeight());
 
 			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			switch (Renderer::CurrentAPI())
+			{
+			case ERendererAPI::D3D11:
+			{
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+				break;
+			}
+			case ERendererAPI::OpenGL:
+			{
+				//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+				break;
+			}
+			}
 
 			if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+
+			/*if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
 				GLFWwindow* ContextBackup = glfwGetCurrentContext();
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(ContextBackup);
-			}
+			}*/
 		}
 	}
 
 	void FusionEditorApp::ShutdownImGui()
 	{
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
+		ImGui_ImplDX11_Shutdown();
+		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 	}
 
@@ -198,8 +249,8 @@ namespace FusionEditor {
 		m_World = MakeUnique<World>();
 
 		auto Actor01 = m_World->CreateActor("MeshActor");
-		auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
-		SpriteComp->Mesh = m_CubeMesh;
+		//auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
+		//SpriteComp->Mesh = m_CubeMesh;
 	}
 
 }

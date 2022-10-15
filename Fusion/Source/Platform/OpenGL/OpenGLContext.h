@@ -9,6 +9,7 @@ namespace Fusion {
 	public:
 		OpenGLContext(const Unique<Window>& InWindow);
 		~OpenGLContext();
+
 	};
 
 }

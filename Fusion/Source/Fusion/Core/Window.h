@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "Fusion/Events/Event.h"
 
 #include <string>
-
-struct GLFWwindow;
 
 namespace Fusion {
 
@@ -18,22 +17,24 @@ namespace Fusion {
 	class Window
 	{
 	public:
-		Window(const WindowSpecification& InSpecification);
-		~Window();
+		using EventCallbackFunc = std::function<void(Event&)>;
 
-		bool ShouldClose() const;
-		uint32_t GetWidth() const { return m_Specification.Width; }
-		uint32_t GetHeight() const { return m_Specification.Height; }
-		void* GetNativeWindow() const { return m_NativeWindow; }
+		virtual ~Window() = default;
+
+		virtual uint32_t GetWidth() const = 0;
+		virtual uint32_t GetHeight() const = 0;
+
+		virtual void SetEventCallback(const EventCallbackFunc& InCallbackFunc) = 0;
+
+		virtual void* GetWindowHandle() const = 0;
+		virtual bool ShouldClose() const = 0;
 
 	private:
-		void Init();
-		void ProcessEvents();
-		void SwapBuffers();
+		virtual void Init() = 0;
+		virtual void ProcessEvents() = 0;
 
 	private:
-		GLFWwindow* m_NativeWindow = nullptr;
-		WindowSpecification m_Specification;
+		static Unique<Window> Create(const WindowSpecification& InSpecification);
 
 	private:
 		friend class Application;

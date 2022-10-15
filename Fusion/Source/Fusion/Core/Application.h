@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "Fusion/Renderer/GraphicsContext.h"
-#include "Fusion/Renderer/VertexBuffer.h"
-#include "Fusion/Renderer/IndexBuffer.h"
-#include "Fusion/Renderer/Shader.h"
+#include "Fusion/Renderer/Renderer.h"
 
 #include <chrono>
 
@@ -38,6 +35,8 @@ namespace Fusion {
 		virtual void OnUpdate(float DeltaTime) {}
 		virtual void OnShutdown() {}
 
+		void OnEvent(Event& InEvent);
+
 	private:
 		ApplicationSpecification m_Specification;
 		Unique<Window> m_Window = nullptr;
@@ -47,7 +46,9 @@ namespace Fusion {
 		float m_TimeStep = 0.0f;
 		TimePoint m_LastFrameTime;
 
-		Shared<GraphicsContext> m_GraphicsContext = nullptr;
+	protected:
+		Shared<Renderer> m_Renderer = nullptr;
+
 	};
 
 	Application* CreateApplication(int ArgC, char** ArgV);

@@ -1,5 +1,5 @@
 project "FusionEditor"
-    kind "ConsoleApp"
+    kind "WindowedApp"
     language "C++"
     cppdialect "C++20"
     staticruntime "Off"
@@ -15,10 +15,10 @@ project "FusionEditor"
 
     links
     {
+        "ImGui",
         "Fusion",
         "GLFW",
         "glad",
-        "ImGui"
     }
 
     includedirs
@@ -35,6 +35,13 @@ project "FusionEditor"
 
     filter "system:windows"
         systemversion "latest"
+
+        links
+        {
+            "d3d11.lib",
+            "dxgi.lib",
+            "d3dcompiler.lib"
+        }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

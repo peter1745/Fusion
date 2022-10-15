@@ -17,6 +17,8 @@
 #include "Assert.h"
 #include "Fusion/Memory/Shared.h"
 
+#define FUSION_BIND_FUNC(Func) [this](auto&&... InArgs) -> decltype(auto) { return this->Func(std::forward<decltype(InArgs)>(InArgs)...); }
+
 namespace Fusion {
 
 	using Byte = uint8_t;

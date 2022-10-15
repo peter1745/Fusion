@@ -51,11 +51,20 @@ namespace Fusion {
 			FUSION_CORE_VERIFY(false);
 	}
 
+#ifdef FUSION_PLATFORM_WINDOWS
+	static HGLRC s_GLContext = NULL;
+#endif
+
 	OpenGLContext::OpenGLContext(const Unique<Window>& InWindow)
 	{
-		glfwMakeContextCurrent(static_cast<GLFWwindow*>(InWindow->GetNativeWindow()));
-		int status = gladLoadGL((GLADloadfunc)glfwGetProcAddress);
+#ifdef FUSION_PLATFORM_WINDOWS
+		HWND WindowHandle = static_cast<HWND>(InWindow->GetWindowHandle());
+		HDC WindowDrawContext = GetDC(WindowHandle);
+		s_GLContext = wglCreateContext(WindowDrawContext);
+		FUSION_CORE_VERIFY(s_GLContext && wglMakeCurrent(WindowDrawContext, s_GLContext), "Failed to make OpenGL Context");
+		int status = gladLoadGL((GLADloadfunc)wglGetProcAddress);
 		FUSION_CORE_VERIFY(status > 0);
+#endif
 
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -71,7 +80,11 @@ namespace Fusion {
 
 	OpenGLContext::~OpenGLContext()
 	{
-
+#ifdef FUSION_PLATFORM_WINDOWS
+		wglMakeCurrent(NULL, NULL);
+		wglDeleteContext(s_GLContext);
+		s_GLContext = NULL;
+#endif
 	}
 
 }
