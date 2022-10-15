@@ -9,7 +9,12 @@ namespace Fusion {
 
 	struct ApplicationSpecification
 	{
-		std::string_view Title;
+#ifdef _UNICODE
+		std::wstring Title;
+#else
+		std::string Title;
+#endif
+
 		uint32_t WindowWidth = 1920;
 		uint32_t WindowHeight = 1080;
 	};

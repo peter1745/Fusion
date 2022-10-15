@@ -17,8 +17,7 @@ project "FusionEditor"
     {
         "ImGui",
         "Fusion",
-        "GLFW",
-        "glad",
+        "GLFW"
     }
 
     includedirs

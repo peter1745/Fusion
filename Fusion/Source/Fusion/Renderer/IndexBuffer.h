@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Fusion/Memory/Shared.h"
+
 namespace Fusion {
 
-	class IndexBuffer
+	class IndexBuffer : public SharedObject
 	{
 	public:
 		virtual ~IndexBuffer() = default;

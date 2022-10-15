@@ -2,7 +2,7 @@ include "Dependencies.lua"
 
 workspace "Fusion"
     architecture "x86_64"
-    startproject "Sandbox"
+    startproject "FusionEditor"
 
     configurations { "Debug", "Release", "Distribution" }
 
@@ -15,7 +15,6 @@ IntermediatesDir = "%{wks.location}/Build/Intermediates/%{cfg.system}-%{cfg.arch
 
 group "ThirdParty"
 include "ThirdParty/GLFW"
-include "ThirdParty/glad"
 include "ThirdParty/ImGui/ImGui"
 group ""
 

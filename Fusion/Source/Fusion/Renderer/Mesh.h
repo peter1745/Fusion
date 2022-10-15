@@ -22,7 +22,7 @@ namespace Fusion {
 		uint32_t Vertex2;
 	};
 
-	class Mesh
+	class Mesh : public SharedObject
 	{
 	public:
 		Mesh(const std::vector<Vertex>& InVertices, const std::vector<Index>& InIndices);

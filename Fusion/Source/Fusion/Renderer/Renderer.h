@@ -8,9 +8,9 @@
 
 namespace Fusion {
 
-	enum class ERendererAPI { None = -1, D3D11, OpenGL };
+	enum class ERendererAPI { None = -1, D3D11 };
 
-	class Renderer
+	class Renderer : public SharedObject
 	{
 	public:
 		virtual ~Renderer() = default;

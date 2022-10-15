@@ -17,7 +17,6 @@ namespace Fusion {
 		{
 		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return Shared<D3D11Renderer>::Create();
-		case ERendererAPI::OpenGL: return nullptr;
 		}
 
 		FUSION_CORE_VERIFY(false);

@@ -5,7 +5,6 @@
 #include "Fusion/Renderer/Renderer.h"
 #include "Fusion/Events/WindowEvents.h"
 
-#include <glad/gl.h>
 #include <glm/glm.hpp>
 
 namespace Fusion {

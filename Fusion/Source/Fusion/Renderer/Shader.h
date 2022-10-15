@@ -14,7 +14,7 @@ namespace Fusion {
 		std::filesystem::path FragmentFilePath;
 	};
 
-	class Shader
+	class Shader : public SharedObject
 	{
 	public:
 		virtual ~Shader() = default;

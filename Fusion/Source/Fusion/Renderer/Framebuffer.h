@@ -26,7 +26,7 @@ namespace Fusion {
 		FramebufferAttachment DepthAttachment;
 	};
 
-	class Framebuffer
+	class Framebuffer : public SharedObject
 	{
 	public:
 		virtual ~Framebuffer() = default;

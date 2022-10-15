@@ -42,6 +42,7 @@ namespace FusionEditor {
 		: Application(specification)
 	{
 #ifdef FUSION_PLATFORM_WINDOWS
+		// NOTE(Peter): We have to call the ImGui Win32 Message Proc from Fusions Message Proc, but Fusion has no knowledge of ImGui
 		static_cast<WindowsWindow*>(GetWindow().get())->RegisterMessageProc(ImGui_ImplWin32_WndProcHandler);
 #endif
 	}
@@ -103,11 +104,6 @@ namespace FusionEditor {
 			ImGui_ImplDX11_Init(Context->GetDevice(), Context->GetDeviceContext());
 			break;
 		}
-		case ERendererAPI::OpenGL:
-		{
-			//ImGui_ImplOpenGL3_Init("#version 410");
-			break;
-		}
 		}
 	}
 
@@ -165,11 +161,6 @@ namespace FusionEditor {
 				ImGui_ImplDX11_NewFrame();
 				break;
 			}
-			case ERendererAPI::OpenGL:
-			{
-				//ImGui_ImplOpenGL3_NewFrame();
-				break;
-			}
 			}
 
 			ImGui_ImplWin32_NewFrame();
@@ -214,11 +205,6 @@ namespace FusionEditor {
 				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 				break;
 			}
-			case ERendererAPI::OpenGL:
-			{
-				//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-				break;
-			}
 			}
 
 			if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -258,7 +244,12 @@ namespace FusionEditor {
 Fusion::Application* Fusion::CreateApplication(int ArgC, char** ArgV)
 {
 	Fusion::ApplicationSpecification specification = {};
+
+#ifdef _UNICODE
+	specification.Title = L"Fusion Editor";
+#else
 	specification.Title = "Fusion Editor";
+#endif
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

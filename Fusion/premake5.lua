@@ -24,7 +24,6 @@ project "Fusion"
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.glad}",
         "%{IncludeDirs.EnTT}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.TinyGLTF}"

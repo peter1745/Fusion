@@ -1,12 +1,14 @@
 #pragma once
 
+#include "Fusion/Memory/Shared.h"
+
 #include <string>
 
 #include <imgui.h>
 
 namespace FusionEditor {
 	
-	class EditorWindow
+	class EditorWindow : public Fusion::SharedObject
 	{
 	public:
 		void SetTitle(const std::string& InTitle) { m_Title = InTitle; }

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Fusion/Core/Core.h"
+#include "Fusion/Memory/Shared.h"
 
 #include <filesystem>
 
 namespace Fusion {
 
-	class Texture2D
+	class Texture2D : public SharedObject
 	{
 	public:
 		virtual ~Texture2D() = default;

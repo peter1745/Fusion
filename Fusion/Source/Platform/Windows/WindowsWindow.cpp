@@ -61,7 +61,7 @@ namespace Fusion {
 		HWND WindowHandle = CreateWindowEx(
 			NULL,
 			L"Fusion Window Class",
-			L"My Title",
+			m_Specification.Title.c_str(),
 			WS_OVERLAPPEDWINDOW,
 			CenterX, CenterY,
 			Width, Height,

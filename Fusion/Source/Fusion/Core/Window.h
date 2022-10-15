@@ -9,7 +9,11 @@ namespace Fusion {
 
 	struct WindowSpecification
 	{
+#ifdef _UNICODE
+		std::wstring Title;
+#else
 		std::string Title;
+#endif
 		uint32_t Width;
 		uint32_t Height;
 	};

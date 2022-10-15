@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Fusion/Core/Core.h"
+#include "Fusion/Memory/Shared.h"
 
 namespace Fusion {
 
@@ -22,7 +23,7 @@ namespace Fusion {
 
 	class World;
 
-	class Actor
+	class Actor : public SharedObject
 	{
 	public:
 		const ActorID& GetActorID() const { return m_ActorID; }

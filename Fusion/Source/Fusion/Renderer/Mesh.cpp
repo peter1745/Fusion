@@ -97,13 +97,17 @@ namespace Fusion {
 	Mesh::Mesh(const std::vector<Vertex>& InVertices, const std::vector<Index>& InIndices)
 		: m_Vertices(InVertices), m_Indices(InIndices)
 	{
-		VertexBufferLayout Layout = {
+		VertexBufferInfo CreateInfo;
+		CreateInfo.BufferSize = m_Vertices.size() * sizeof(Vertex);
+		CreateInfo.Data = static_cast<void*>(m_Vertices.data());
+		CreateInfo.Layout = {
 			{ 0, ShaderDataType::Float3, offsetof(Vertex, Position) },
 			{ 1, ShaderDataType::Float3, offsetof(Vertex, Normal) },
 			{ 2, ShaderDataType::Float2, offsetof(Vertex, TextureCoordinate) }
 		};
 
-		m_VertexBuffer = VertexBuffer::Create(m_Vertices.size() * sizeof(Vertex), m_Vertices.data(), Layout);
+		CreateInfo.Usage = EBufferUsage::Immutable;
+		m_VertexBuffer = VertexBuffer::Create(CreateInfo);
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.size() * 3 * sizeof(uint32_t), m_Indices.data());
 	}
 
