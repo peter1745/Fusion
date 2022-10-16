@@ -5,7 +5,15 @@ namespace Fusion {
 
 	D3D11Context::D3D11Context(const Unique<Window>& InWindow)
 	{
-		D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL, D3D11_SDK_VERSION, &m_Device, NULL, &m_DeviceContext);
+		s_CurrentContext = this;
+
+		uint32_t DeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+
+#ifdef FUSION_DEBUG
+		DeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+		D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, DeviceFlags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_DeviceContext);
 
 		DXGI_SWAP_CHAIN_DESC SwapChainDesc;
 		ZeroMemory(&SwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -17,9 +25,9 @@ namespace Fusion {
 		SwapChainDesc.SampleDesc.Count = 1;
 		SwapChainDesc.SampleDesc.Quality = 0;
 		SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		SwapChainDesc.BufferCount = 1;
+		SwapChainDesc.BufferCount = 3;
 		SwapChainDesc.OutputWindow = static_cast<HWND>(InWindow->GetWindowHandle());
-		SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		SwapChainDesc.Windowed = true;
 
@@ -51,8 +59,9 @@ namespace Fusion {
 	void D3D11Context::ClearBackBuffer(const glm::vec4& InColor)
 	{
 		// NOTE(Peter): ImGui changes the render targets while rendering, so we have to set it back every frame
-		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, NULL);
+		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, nullptr);
 		m_DeviceContext->ClearRenderTargetView(m_BackBufferView, glm::value_ptr(InColor));
+		//m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
 	void D3D11Context::Present()
@@ -64,9 +73,25 @@ namespace Fusion {
 	{
 		FUSION_RELEASE_COM(m_BackBufferView);
 
-		m_DXGISwapChain->ResizeBuffers(1, InWidth, InHeight, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+		m_DXGISwapChain->ResizeBuffers(0, InWidth, InHeight, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
 
 		CreateBackBufferView();
+
+		/*D3D11_TEXTURE2D_DESC DepthStencilDesc;
+		ZeroMemory(&DepthStencilDesc, sizeof(D3D11_TEXTURE2D_DESC));
+		DepthStencilDesc.Width = InWidth;
+		DepthStencilDesc.Height = InHeight;
+		DepthStencilDesc.MipLevels = 1;
+		DepthStencilDesc.ArraySize = 1;
+		DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		DepthStencilDesc.SampleDesc.Count = 1;
+		DepthStencilDesc.SampleDesc.Quality = 0;
+		DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+		DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		DepthStencilDesc.CPUAccessFlags = 0;
+		DepthStencilDesc.MiscFlags = 0;
+		m_Device->CreateTexture2D(&DepthStencilDesc, NULL, &m_DepthStencilBuffer);
+		m_Device->CreateDepthStencilView(m_DepthStencilBuffer, NULL, &m_DepthStencilView);*/
 
 		D3D11_VIEWPORT Viewport;
 		ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
@@ -74,16 +99,41 @@ namespace Fusion {
 		Viewport.TopLeftY = 0;
 		Viewport.Width = static_cast<float>(InWidth);
 		Viewport.Height = static_cast<float>(InHeight);
+		Viewport.MinDepth = 0.0f;
+		Viewport.MaxDepth = 1.0f;
 		m_DeviceContext->RSSetViewports(1, &Viewport);
+
+		D3D11_RASTERIZER_DESC RasterizerDesc;
+		ZeroMemory(&RasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+		RasterizerDesc.AntialiasedLineEnable = false;
+		RasterizerDesc.CullMode = D3D11_CULL_NONE;
+		RasterizerDesc.DepthBias = 0;
+		RasterizerDesc.DepthBiasClamp = 0.0f;
+		RasterizerDesc.DepthClipEnable = true;
+		RasterizerDesc.FillMode = D3D11_FILL_SOLID;
+		RasterizerDesc.FrontCounterClockwise = true;
+		RasterizerDesc.MultisampleEnable = false;
+		RasterizerDesc.ScissorEnable = false;
+		RasterizerDesc.SlopeScaledDepthBias = 0.0f;
+
+		ID3D11RasterizerState* RasterizerState;
+		m_Device->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
+		m_DeviceContext->RSSetState(RasterizerState);
+		RasterizerState->Release();
+	}
+
+	void D3D11Context::SetRenderTargets(ID3D11RenderTargetView* InRenderTarget, ID3D11DepthStencilView* InDepthStencil)
+	{
+		m_DeviceContext->OMSetRenderTargets(1, &InRenderTarget, InDepthStencil);
 	}
 
 	void D3D11Context::CreateBackBufferView()
 	{
 		ID3D11Texture2D* BackBufferTexture;
 		m_DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&BackBufferTexture));
-		m_Device->CreateRenderTargetView(BackBufferTexture, NULL, &m_BackBufferView);
+		m_Device->CreateRenderTargetView(BackBufferTexture, nullptr, &m_BackBufferView);
 		FUSION_RELEASE_COM(BackBufferTexture);
-		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, NULL);
+		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, nullptr);
 	}
 
 }

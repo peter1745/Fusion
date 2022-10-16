@@ -51,7 +51,7 @@ namespace FusionEditor {
 	{
 		InitImGui();
 				
-		//m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
+		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
 		
 		DummyWorld();
 		
@@ -60,8 +60,8 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
-		//m_WindowManager->OnUpdate(DeltaTime);
-		//m_WindowManager->OnRender();
+		m_WindowManager->OnUpdate(DeltaTime);
+		m_WindowManager->OnRender();
 
 		DrawUI();
 	}
@@ -143,8 +143,8 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		//m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
-		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
+		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
+		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
 
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
@@ -235,8 +235,8 @@ namespace FusionEditor {
 		m_World = MakeUnique<World>();
 
 		auto Actor01 = m_World->CreateActor("MeshActor");
-		//auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
-		//SpriteComp->Mesh = m_CubeMesh;
+		auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
+		SpriteComp->Mesh = m_CubeMesh;
 	}
 
 }

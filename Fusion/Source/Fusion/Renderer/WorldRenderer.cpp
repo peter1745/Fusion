@@ -6,28 +6,9 @@
 
 namespace Fusion {
 
-	WorldRenderer::WorldRenderer(World* InWorld, uint32_t InViewportWidth, uint32_t InViewportHeight)
+	WorldRenderer::WorldRenderer(World* InWorld)
 		: m_World(InWorld)
 	{
-		//{
-		//	// TODO(Peter): The framebuffer should be owned by the viewport in the future
-		//	FramebufferSpecification FramebufferSpec;
-		//	FramebufferSpec.Width = InViewportWidth;
-		//	FramebufferSpec.Height = InViewportHeight;
-
-		//	FramebufferAttachment ColorAttachment = { EFramebufferAttachmentFormat::RGBA8 };
-		//	FramebufferSpec.ColorAttachments.push_back(ColorAttachment);
-
-		//	FramebufferSpec.DepthAttachment.Format = EFramebufferAttachmentFormat::Depth24Stencil8;
-
-		//	m_Framebuffer = Framebuffer::Create(FramebufferSpec);
-		//}
-
-		//{
-		//	ShaderSpecification ShaderSpec;
-		//	ShaderSpec.FilePath = "Resources/Shaders/PBR.glsl";
-		//	m_PBRShader = Shader::Create(ShaderSpec);
-		//}
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
@@ -62,11 +43,6 @@ namespace Fusion {
 	{
 		/*Renderer::End();
 		m_Framebuffer->Unbind();*/
-	}
-
-	void WorldRenderer::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
-	{
-		//m_Framebuffer->Resize(InWidth, InHeight);
 	}
 
 }

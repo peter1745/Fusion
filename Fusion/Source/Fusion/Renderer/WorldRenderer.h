@@ -2,7 +2,6 @@
 
 #include "Fusion/World/World.h"
 #include "Fusion/Renderer/Camera.h"
-#include "Fusion/Renderer/Framebuffer.h"
 #include "Fusion/Renderer/Shader.h"
 
 namespace Fusion {
@@ -10,7 +9,7 @@ namespace Fusion {
 	class WorldRenderer
 	{
 	public:
-		WorldRenderer(World* InWorld, uint32_t InViewportWidth, uint32_t InViewportHeight);
+		WorldRenderer(World* InWorld);
 
 		// TODO(Peter): The view matrix should eventually either be part of Camera or passed somewhere else.
 		//				The reason I haven't put the view matrix in Camera is because in play mode it's just 
@@ -19,13 +18,8 @@ namespace Fusion {
 		void Render();
 		void End();
 
-		Shared<Framebuffer> GetFinalImage() const { return m_Framebuffer; }
-
-		void SetViewportSize(uint32_t InWidth, uint32_t InHeight);
-
 	private:
 		World* m_World = nullptr;
-		Shared<Framebuffer> m_Framebuffer = nullptr;
 		Shared<Shader> m_PBRShader = nullptr;
 	};
 

@@ -6,13 +6,12 @@
 namespace FusionEditor {
 
 	GameViewportWindow::GameViewportWindow(Fusion::World* InWorld)
-		: EditorWindow("GameViewport", 500, 300), m_World(InWorld)
+		: ViewportWindowBase("GameViewport", InWorld)
 	{
 		SetTitle("Game Viewport");
-		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld, 500, 300);
 	}
 
-	void GameViewportWindow::OnRender()
+	void GameViewportWindow::RenderWorld()
 	{
 		auto CameraActor = m_World->GetMainCameraActor();
 
@@ -21,7 +20,6 @@ namespace FusionEditor {
 
 		const Fusion::TransformComponent* CameraTransform = CameraActor->FindComponent<Fusion::TransformComponent>();
 		Fusion::CameraComponent* CameraComp = CameraActor->FindComponent<Fusion::CameraComponent>();
-		CameraComp->CameraInstance.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 
 		glm::mat4 ViewMatrix = glm::translate(glm::mat4(1.0f), CameraTransform->Location) * glm::toMat4(CameraTransform->Rotation);
 		ViewMatrix = glm::inverse(ViewMatrix);
@@ -31,23 +29,11 @@ namespace FusionEditor {
 		m_WorldRenderer->End();
 	}
 
-	void GameViewportWindow::OnUpdate(float InDeltaTime)
+	void GameViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)
 	{
-		if (m_ViewportWidth != GetWindowWidth() || m_ViewportHeight != GetWindowHeight())
-		{
-			m_ViewportWidth = GetWindowWidth();
-			m_ViewportHeight = GetWindowHeight();
-
-			m_WorldRenderer->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-		}
+		auto CameraActor = m_World->GetMainCameraActor();
+		if (CameraActor)
+			CameraActor->FindComponent<Fusion::CameraComponent>()->CameraInstance.SetViewportSize(InWidth, InHeight);
 	}
-
-	void GameViewportWindow::RenderContents()
-	{
-		auto FinalImage = m_WorldRenderer->GetFinalImage();
-		ImTextureID ColorAttachmentImageID = reinterpret_cast<ImTextureID>(FinalImage->GetColorAttachmentID(0));
-		ImGui::Image(ColorAttachmentImageID, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-	}
-
 
 }

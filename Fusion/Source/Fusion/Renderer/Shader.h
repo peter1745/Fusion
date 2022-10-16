@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.h"
+#include "VertexBufferLayout.h"
 
 #include <filesystem>
 #include <glm/glm.hpp>
@@ -10,14 +11,23 @@ namespace Fusion {
 	struct ShaderSpecification
 	{
 		std::filesystem::path FilePath;
-		std::filesystem::path VertexFilePath;
-		std::filesystem::path FragmentFilePath;
+
+		// TODO(Peter): Rename to ShaderInputLayout
+		VertexBufferLayout InputLayout;
+	};
+
+	enum class EShaderType
+	{
+		Vertex, Pixel
 	};
 
 	class Shader : public SharedObject
 	{
 	public:
 		virtual ~Shader() = default;
+
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
 
 		virtual void Set(const std::string& InName, float InValue) = 0;
 		virtual void Set(const std::string& InName, const glm::vec2& InValue) = 0;

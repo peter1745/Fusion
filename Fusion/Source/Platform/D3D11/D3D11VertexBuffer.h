@@ -12,10 +12,8 @@ namespace Fusion {
 
 		virtual void Resize(uint32_t InNewSize) override;
 		virtual void SetData(void* InData, uint32_t InSize) override;
-		virtual const VertexBufferLayout& GetLayout() const override { return m_Layout; }
 
 	private:
-		VertexBufferLayout m_Layout;
 		EBufferUsage m_Usage;
 		uint32_t m_Size;
 

@@ -34,7 +34,7 @@ namespace Fusion {
 
 	struct VertexBufferAttribute
 	{
-		uint32_t Location;
+		const char* Name;
 		ShaderDataType Type;
 		uint32_t Offset;
 

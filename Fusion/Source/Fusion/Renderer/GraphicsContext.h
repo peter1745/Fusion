@@ -16,7 +16,7 @@ namespace Fusion {
 		template<typename TContext>
 		inline static Shared<TContext> Get() { return Shared<GraphicsContext>(s_CurrentContext).As<TContext>(); }
 
-	private:
+	protected:
 		inline static GraphicsContext* s_CurrentContext = nullptr;
 	};
 

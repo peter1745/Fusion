@@ -11,8 +11,8 @@ namespace Fusion {
 
 		WindowsWindow(const WindowSpecification& InSpecification);
 
-		virtual uint32_t GetWidth() const override { return 0; }
-		virtual uint32_t GetHeight() const override { return 0; }
+		virtual uint32_t GetWidth() const override { return m_Specification.Width; }
+		virtual uint32_t GetHeight() const override { return m_Specification.Height; }
 
 		virtual void SetEventCallback(const EventCallbackFunc& InCallbackFunc) { m_EventCallbackFunc = InCallbackFunc; }
 
