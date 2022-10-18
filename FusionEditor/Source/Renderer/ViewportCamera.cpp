@@ -17,12 +17,14 @@ namespace FusionEditor {
 	ViewportCamera::ViewportCamera(uint32_t InWidth, uint32_t InHeight)
 		: Camera(EProjectionType::PerspectiveProjection)
 	{
-		SetProjectionMatrix(glm::perspectiveFov(glm::radians(70.0f), float(InWidth), float(InHeight), 0.1f, 1000.0f));
+		glm::mat4 mat = glm::perspectiveRH_ZO(glm::radians(70.0f), float(InWidth) / float(InHeight), 0.1f, 100.0f);
+		SetProjectionMatrix(mat);
 	}
 
 	void ViewportCamera::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
 	{
-		SetProjectionMatrix(glm::perspectiveFov(glm::radians(70.0f), float(InWidth), float(InHeight), 0.1f, 1000.0f));
+		glm::mat4 mat = glm::perspectiveRH_ZO(glm::radians(70.0f), float(InWidth) / float(InHeight), 0.1f, 100.0f);
+		SetProjectionMatrix(mat);
 	}
 
 	/*
@@ -74,6 +76,9 @@ namespace FusionEditor {
 
 		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Location) * glm::toMat4(glm::quat(glm::radians(m_Rotation)));
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);*/
+
+		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Location);// *glm::toMat4(glm::quat(glm::radians(m_Rotation)));
+		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
 }

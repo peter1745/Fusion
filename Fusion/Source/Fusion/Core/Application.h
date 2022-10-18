@@ -9,12 +9,7 @@ namespace Fusion {
 
 	struct ApplicationSpecification
 	{
-#ifdef _UNICODE
-		std::wstring Title;
-#else
 		std::string Title;
-#endif
-
 		uint32_t WindowWidth = 1920;
 		uint32_t WindowHeight = 1080;
 	};
@@ -30,6 +25,7 @@ namespace Fusion {
 
 		void Run();
 
+		const Shared<Renderer>& GetRenderer() const { return m_Renderer; }
 		const Unique<Window>& GetWindow() const { return m_Window; }
 
 	public:

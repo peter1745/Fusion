@@ -28,12 +28,15 @@ namespace Fusion {
 
 	void D3D11Renderer::Begin()
 	{
+		s_Storage->Context->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		s_Storage->Context->ClearBackBuffer({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 
 	void D3D11Renderer::DrawIndexed(const Shared<VertexBuffer>& InVertexBuffer, const Shared<IndexBuffer>& InIndexBuffer, const Shared<Shader>& InShader)
 	{
-
+		InVertexBuffer->Bind();
+		InIndexBuffer->Bind();
+		s_Storage->Context->GetDeviceContext()->DrawIndexed(InIndexBuffer->GetCount(), 0, 0);
 	}
 
 	void D3D11Renderer::Clear()

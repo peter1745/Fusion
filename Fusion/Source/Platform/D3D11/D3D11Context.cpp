@@ -1,11 +1,19 @@
 #include "FusionPCH.h"
 #include "D3D11Context.h"
 
+#include "Fusion/Core/Application.h"
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 namespace Fusion {
 
 	D3D11Context::D3D11Context(const Unique<Window>& InWindow)
 	{
 		s_CurrentContext = this;
+
+		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(InWindow->GetWindowHandle());
 
 		uint32_t DeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
@@ -21,13 +29,13 @@ namespace Fusion {
 		SwapChainDesc.BufferDesc.Height = InWindow->GetHeight();
 		SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 		SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-		SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		SwapChainDesc.SampleDesc.Count = 1;
 		SwapChainDesc.SampleDesc.Quality = 0;
 		SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		SwapChainDesc.BufferCount = 3;
-		SwapChainDesc.OutputWindow = static_cast<HWND>(InWindow->GetWindowHandle());
-		SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		SwapChainDesc.BufferCount = 2;
+		SwapChainDesc.OutputWindow = glfwGetWin32Window(NativeWindow);
+		SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		SwapChainDesc.Windowed = true;
 
@@ -59,9 +67,23 @@ namespace Fusion {
 	void D3D11Context::ClearBackBuffer(const glm::vec4& InColor)
 	{
 		// NOTE(Peter): ImGui changes the render targets while rendering, so we have to set it back every frame
-		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, nullptr);
+		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, m_DepthStencilView);
 		m_DeviceContext->ClearRenderTargetView(m_BackBufferView, glm::value_ptr(InColor));
-		//m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		if (m_DepthStencilView)
+			m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		const auto& Window = Application::Get().GetWindow();
+
+		D3D11_VIEWPORT Viewport;
+		ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
+		Viewport.TopLeftX = 0;
+		Viewport.TopLeftY = 0;
+		Viewport.Width = static_cast<float>(Window->GetWidth());
+		Viewport.Height = static_cast<float>(Window->GetHeight());
+		Viewport.MinDepth = 0.0f;
+		Viewport.MaxDepth = 1.0f;
+		m_DeviceContext->RSSetViewports(1, &Viewport);
 	}
 
 	void D3D11Context::Present()
@@ -71,9 +93,14 @@ namespace Fusion {
 
 	void D3D11Context::OnResize(uint32_t InWidth, uint32_t InHeight)
 	{
-		FUSION_RELEASE_COM(m_BackBufferView);
+		ID3D11RenderTargetView* nullViews[] = { nullptr };
+		m_DeviceContext->OMSetRenderTargets(1, nullViews, nullptr);
 
-		m_DXGISwapChain->ResizeBuffers(0, InWidth, InHeight, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+		FUSION_RELEASE_COM(m_BackBufferView);
+		FUSION_RELEASE_COM(m_DepthStencilView);
+		FUSION_RELEASE_COM(m_DepthStencilBuffer);
+
+		m_DXGISwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
 		CreateBackBufferView();
 
@@ -92,6 +119,8 @@ namespace Fusion {
 		DepthStencilDesc.MiscFlags = 0;
 		m_Device->CreateTexture2D(&DepthStencilDesc, NULL, &m_DepthStencilBuffer);
 		m_Device->CreateDepthStencilView(m_DepthStencilBuffer, NULL, &m_DepthStencilView);*/
+
+		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, m_DepthStencilView);
 
 		D3D11_VIEWPORT Viewport;
 		ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
@@ -133,7 +162,6 @@ namespace Fusion {
 		m_DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&BackBufferTexture));
 		m_Device->CreateRenderTargetView(BackBufferTexture, nullptr, &m_BackBufferView);
 		FUSION_RELEASE_COM(BackBufferTexture);
-		m_DeviceContext->OMSetRenderTargets(1, &m_BackBufferView, nullptr);
 	}
 
 }

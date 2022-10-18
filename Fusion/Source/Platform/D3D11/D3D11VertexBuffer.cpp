@@ -6,7 +6,7 @@
 namespace Fusion {
 
 	D3D11VertexBuffer::D3D11VertexBuffer(const VertexBufferInfo& InCreateInfo)
-		: m_Usage(InCreateInfo.Usage), m_Size(InCreateInfo.BufferSize)
+		: m_CreateInfo(InCreateInfo)
 	{
 		Shared<D3D11Context> Context = GraphicsContext::Get<D3D11Context>();
 
@@ -31,18 +31,25 @@ namespace Fusion {
 		FUSION_RELEASE_COM(m_Buffer);
 	}
 
+	void D3D11VertexBuffer::Bind() const
+	{
+		uint32_t Stride = m_CreateInfo.Layout.GetStride();
+		uint32_t Offset = 0;
+		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_Buffer, &Stride, &Offset);
+	}
+
 	void D3D11VertexBuffer::Resize(uint32_t InNewSize)
 	{
-		if (m_Usage == EBufferUsage::Immutable)
+		if (m_CreateInfo.Usage == EBufferUsage::Immutable)
 			return;
 
 		FUSION_RELEASE_COM(m_Buffer);
 
-		m_Size = InNewSize;
+		m_CreateInfo.BufferSize = InNewSize;
 
 		D3D11_BUFFER_DESC BufferDesc;
 		ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
-		BufferDesc.Usage = BufferUsageToD3D11Usage(m_Usage);
+		BufferDesc.Usage = BufferUsageToD3D11Usage(m_CreateInfo.Usage);
 		BufferDesc.ByteWidth = InNewSize;
 		BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -52,9 +59,9 @@ namespace Fusion {
 
 	void D3D11VertexBuffer::SetData(void* InData, uint32_t InSize)
 	{
-		if (InSize > m_Size)
+		if (InSize > m_CreateInfo.BufferSize)
 		{
-			FUSION_CORE_VERIFY(m_Usage != EBufferUsage::Immutable, "Cannot change size of immutable buffer!");
+			FUSION_CORE_VERIFY(m_CreateInfo.Usage != EBufferUsage::Immutable, "Cannot change size of immutable buffer!");
 			Resize(InSize);
 		}
 

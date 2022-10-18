@@ -25,6 +25,9 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)
 	{
+		if (InWidth == 0 || InHeight == 0)
+			return;
+
 		m_Camera.SetViewportSize(InWidth, InHeight);
 	}
 

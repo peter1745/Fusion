@@ -6,11 +6,11 @@ namespace Fusion {
 
 	int Main(int ArgC, char** ArgV)
 	{
-		Fusion::Logging::Initalize();
-		Fusion::Application* app = Fusion::CreateApplication(ArgC, ArgV);
+		Logging::Initalize();
+		Application* app = CreateApplication(ArgC, ArgV);
 		app->Run();
 		delete app;
-		Fusion::Logging::Shutdown();
+		Logging::Shutdown();
 		return 0;
 	}
 
@@ -20,11 +20,15 @@ namespace Fusion {
 	#ifdef _UNICODE
 		int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, PWSTR cmdLine, int cmdShow)
 		{
+			Fusion::Logging::CreateWindowsConsole();
+
 			return Fusion::Main(__argc, __argv);
 		}
 	#else
 		int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, PSTR cmdLine, int cmdShow)
 		{
+			Fusion::Logging::CreateWindowsConsole();
+			
 			return Fusion::Main(__argc, __argv);
 		}
 	#endif

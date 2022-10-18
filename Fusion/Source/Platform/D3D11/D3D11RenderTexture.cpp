@@ -23,6 +23,16 @@ namespace Fusion {
 	{
 		Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
 
+		D3D11_VIEWPORT Viewport;
+		ZeroMemory(&Viewport, sizeof(D3D11_VIEWPORT));
+		Viewport.TopLeftX = 0;
+		Viewport.TopLeftY = 0;
+		Viewport.Width = static_cast<float>(m_CreateInfo.Width);
+		Viewport.Height = static_cast<float>(m_CreateInfo.Height);
+		Viewport.MinDepth = 0.0f;
+		Viewport.MaxDepth = 1.0f;
+		D3DContext->GetDeviceContext()->RSSetViewports(1, &Viewport);
+
 		// TODO(Peter): We shouldn't always use depth stencil view here. In fact the render texture should support creating it's own depth stencil
 		D3DContext->SetRenderTargets(m_RenderTargetView, m_DepthStencilView);
 	}
@@ -30,7 +40,7 @@ namespace Fusion {
 	void D3D11RenderTexture::Unbind()
 	{
 		Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
-		D3DContext->SetRenderTargets(D3DContext->GetBackBufferView(), nullptr);
+		D3DContext->SetRenderTargets(D3DContext->GetBackBufferView(), D3DContext->GetDepthStencilView());
 	}
 
 	void D3D11RenderTexture::Clear(const glm::vec4& InColor)

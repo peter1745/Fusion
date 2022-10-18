@@ -20,6 +20,7 @@ namespace Fusion {
 		virtual void Set(const std::string& InName, const glm::mat4& InValue, bool InTranspose = false) override {}
 		virtual void Set(const std::string& InName, const Shared<Texture2D>& InTexture) override {}
 
+		virtual void Set(uint32_t InSlot, const Shared<UniformBuffer>& InBuffer) override;
 	private:
 		void CompileShader();
 		bool CompileFromFile(EShaderType InType, ID3DBlob** OutByteCode);

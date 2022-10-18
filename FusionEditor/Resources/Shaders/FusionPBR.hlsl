@@ -25,10 +25,15 @@ PixelInput VertexMain(VertexInput InVertexData)
 	
 	InVertexData.Position.w = 1.0f;
 
-	Output.Position = mul(InVertexData.Position, TransformMatrix);
-	Output.Position = mul(Output.Position, ViewMatrix);
-	Output.Position = mul(Output.Position, ProjectionMatrix);
+	float4 WorldPosition = mul(TransformMatrix, InVertexData.Position);
+	float4 ViewPosition = mul(ViewMatrix, WorldPosition);
+	float4 ScreenPosition = mul(ProjectionMatrix, ViewPosition);
+	Output.Position = ScreenPosition;
 	
+	//float4 WorldPosition = mul(InVertexData.Position, TransformMatrix);
+	//float4 ViewPosition = mul(WorldPosition, ViewMatrix);
+	//Output.Position = mul(ViewPosition, ProjectionMatrix);
+	//Output.Position = InVertexData.Position;
 	Output.Normal = InVertexData.Normal;
 	Output.TexCoord = InVertexData.TexCoord;
 	
@@ -38,4 +43,5 @@ PixelInput VertexMain(VertexInput InVertexData)
 float4 PixelMain(PixelInput InPixelData) : SV_Target
 {
 	return float4(InPixelData.Normal, 1.0f);
+	//return InPixelData.Position;
 }

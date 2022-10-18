@@ -1,6 +1,7 @@
 #include "FusionPCH.h"
 #include "D3D11Shader.h"
 #include "D3D11Context.h"
+#include "D3D11UniformBuffer.h"
 
 #include <d3dcompiler.h>
 
@@ -43,6 +44,36 @@ namespace Fusion {
 
 	void D3D11Shader::Unbind()
 	{
+	}
+
+	void D3D11Shader::Set(uint32_t InSlot, const Shared<UniformBuffer>& InBuffer)
+	{
+		if (!InBuffer)
+			return;
+
+		Shared<D3D11UniformBuffer> D3DBuffer = InBuffer.As<D3D11UniformBuffer>();
+
+		if (D3DBuffer->GetBuffer() == nullptr)
+			return;
+
+		ID3D11DeviceContext* Context = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		ID3D11Buffer* BufferPtr = D3DBuffer->GetBuffer();
+
+		switch (D3DBuffer->GetBindPoint())
+		{
+		case EShaderBindPoint::VertexShader:
+			Context->VSSetConstantBuffers(InSlot, 1, &BufferPtr);
+			break;
+		case EShaderBindPoint::PixelShader:
+			Context->PSSetConstantBuffers(InSlot, 1, &BufferPtr);
+			break;
+		case EShaderBindPoint::Both:
+		{
+			Context->VSSetConstantBuffers(InSlot, 1, &BufferPtr);
+			Context->PSSetConstantBuffers(InSlot, 1, &BufferPtr);
+			break;
+		}
+		}
 	}
 
 	void D3D11Shader::CompileShader()

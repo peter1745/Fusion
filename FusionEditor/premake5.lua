@@ -32,6 +32,8 @@ project "FusionEditor"
         "%{IncludeDirs.EnTT}"
     }
 
+    defines { "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL" }
+
     filter "system:windows"
         systemversion "latest"
 

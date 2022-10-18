@@ -16,6 +16,9 @@ namespace Fusion {
 		virtual void Clear(const glm::vec4& InColor) override;
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) override;
 
+		virtual uint32_t GetWidth() const { return m_CreateInfo.Width; }
+		virtual uint32_t GetHeight() const { return m_CreateInfo.Height; }
+
 		virtual void* GetColorTextureID() const override { return static_cast<void*>(m_ShaderResourceView); }
 
 	private:

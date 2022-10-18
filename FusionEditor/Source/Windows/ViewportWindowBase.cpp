@@ -1,12 +1,14 @@
 #include "ViewportWindowBase.h"
 
+#include "Fusion/Core/Application.h"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 namespace FusionEditor {
 
 	ViewportWindowBase::ViewportWindowBase(const std::string& InWindowID, Fusion::World* InWorld)
-		: EditorWindow("GameViewport", 500, 300), m_World(InWorld), m_ViewportWidth(500.0f), m_ViewportHeight(300.0f)
+		: EditorWindow(InWindowID, 300, 300), m_World(InWorld), m_ViewportWidth(300.0f), m_ViewportHeight(300.0f)
 	{
 		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
 
@@ -28,11 +30,23 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::OnUpdate(float InDeltaTime)
 	{
-		if (m_ViewportWidth != GetWindowWidth() || m_ViewportHeight != GetWindowHeight())
+		const Fusion::Unique<Fusion::Window>& Window = Fusion::Application::Get().GetWindow();
+
+#if 1
+		uint32_t NewWidth = GetWindowWidth();
+		uint32_t NewHeight = GetWindowHeight();
+#else
+		uint32_t NewWidth = Window->GetWidth();
+		uint32_t NewHeight = Window->GetHeight();
+#endif
+		if (m_ViewportWidth != NewWidth || m_ViewportHeight != NewHeight)
 		{
-			m_ViewportWidth = GetWindowWidth();
-			m_ViewportHeight = GetWindowHeight();
-			
+			//if (GetWindowWidth() == 0 || GetWindowHeight() == 0)
+			//	return;
+
+			m_ViewportWidth = NewWidth;
+			m_ViewportHeight = NewHeight;
+
 			m_RenderTexture->Resize(m_ViewportWidth, m_ViewportHeight);
 
 			OnResize(m_ViewportWidth, m_ViewportHeight);
@@ -41,7 +55,7 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::RenderContents()
 	{
-		ImGui::Image(m_RenderTexture->GetColorTextureID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(m_RenderTexture->GetColorTextureID(), ImVec2(GetWindowWidth(), GetWindowHeight()));
 	}
 
 

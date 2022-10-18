@@ -2,6 +2,7 @@
 
 #include "Texture.h"
 #include "VertexBufferLayout.h"
+#include "Fusion/Renderer/UniformBuffer.h"
 
 #include <filesystem>
 #include <glm/glm.hpp>
@@ -35,6 +36,8 @@ namespace Fusion {
 		virtual void Set(const std::string& InName, const glm::vec4& InValue) = 0;
 		virtual void Set(const std::string& InName, const glm::mat4& InValue, bool InTranspose = false) = 0;
 		virtual void Set(const std::string& InName, const Shared<Texture2D>& InTexture) = 0;
+
+		virtual void Set(uint32_t InSlot, const Shared<UniformBuffer>& InBuffer) = 0;
 
 	public:
 		static Shared<Shader> Create(const ShaderSpecification& InSpecification);

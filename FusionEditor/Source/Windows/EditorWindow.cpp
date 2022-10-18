@@ -12,12 +12,17 @@ namespace FusionEditor {
 	void EditorWindow::RenderUI(bool& InOpen)
 	{
 		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
-		//ImGui::SetNextWindowSize(ImVec2(float(m_Width), float(m_Height)), ImGuiCond_Once);
 		if (ImGui::Begin(WindowTitle.c_str(), &InOpen))
+		{
+			ImVec2 CursorPos = ImGui::GetCursorPos();
+			ImVec2 ContentRegionSize = ImGui::GetContentRegionAvail();
+
 			RenderContents();
 
-		m_Width = uint32_t(ImGui::GetWindowWidth());
-		m_Height = uint32_t(ImGui::GetWindowHeight());
+			m_Width = uint32_t(ContentRegionSize.x);
+			m_Height = uint32_t(ContentRegionSize.y);
+		}
+
 		ImGui::End();
 	}
 

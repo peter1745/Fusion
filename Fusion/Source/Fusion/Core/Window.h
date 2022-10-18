@@ -5,15 +5,13 @@
 
 #include <string>
 
+struct GLFWwindow;
+
 namespace Fusion {
 
 	struct WindowSpecification
 	{
-#ifdef _UNICODE
-		std::wstring Title;
-#else
 		std::string Title;
-#endif
 		uint32_t Width;
 		uint32_t Height;
 	};
@@ -23,24 +21,33 @@ namespace Fusion {
 	public:
 		using EventCallbackFunc = std::function<void(Event&)>;
 
-		virtual ~Window() = default;
+		Window(const WindowSpecification& InSpecification);
+		~Window();
 
-		virtual uint32_t GetWidth() const = 0;
-		virtual uint32_t GetHeight() const = 0;
+		virtual uint32_t GetWidth() const { return m_WindowData.Specification.Width; }
+		virtual uint32_t GetHeight() const { return m_WindowData.Specification.Height; }
 
-		virtual void SetEventCallback(const EventCallbackFunc& InCallbackFunc) = 0;
+		virtual void SetEventCallback(const EventCallbackFunc& InCallbackFunc)
+		{
+			m_WindowData.EventCallback = InCallbackFunc;
+		}
 
-		virtual void* GetWindowHandle() const = 0;
-		virtual bool ShouldClose() const = 0;
-
-	private:
-		virtual void Init() = 0;
-		virtual void ProcessEvents() = 0;
-
-	private:
-		static Unique<Window> Create(const WindowSpecification& InSpecification);
+		virtual void* GetWindowHandle() const { return static_cast<void*>(m_NativeWindow); }
+		virtual bool ShouldClose() const;
 
 	private:
+		virtual void Init();
+		virtual void ProcessEvents();
+
+	private:
+		struct WindowData
+		{
+			WindowSpecification Specification;
+			EventCallbackFunc EventCallback = nullptr;
+		} m_WindowData;
+
+		GLFWwindow* m_NativeWindow = nullptr;
+
 		friend class Application;
 	};
 

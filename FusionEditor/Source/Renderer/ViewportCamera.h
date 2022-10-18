@@ -18,7 +18,7 @@ namespace FusionEditor {
 
 	private:
 		glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
-		glm::vec3 m_Location = glm::vec3(0.0f);
+		glm::vec3 m_Location = glm::vec3(0.0f, 0.0f, 10.0f);
 		glm::vec3 m_Rotation = glm::vec3(0.0f);
 	};
 

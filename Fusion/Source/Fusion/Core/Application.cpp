@@ -21,7 +21,7 @@ namespace Fusion {
 		WindowSpec.Title = m_Specification.Title;
 		WindowSpec.Width = m_Specification.WindowWidth;
 		WindowSpec.Height = m_Specification.WindowHeight;
-		m_Window = Window::Create(WindowSpec);
+		m_Window = MakeUnique<Window>(WindowSpec);
 		m_Window->Init();
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::OnEvent));
 

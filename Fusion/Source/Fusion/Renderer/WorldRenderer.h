@@ -3,6 +3,7 @@
 #include "Fusion/World/World.h"
 #include "Fusion/Renderer/Camera.h"
 #include "Fusion/Renderer/Shader.h"
+#include "Fusion/Renderer/Renderer.h"
 
 namespace Fusion {
 
@@ -21,6 +22,8 @@ namespace Fusion {
 	private:
 		World* m_World = nullptr;
 		Shared<Shader> m_PBRShader = nullptr;
+		Shared<UniformBuffer> m_CameraDataBuffer = nullptr;
+		Shared<Renderer> m_Renderer = nullptr;
 	};
 
 }

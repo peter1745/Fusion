@@ -5,8 +5,8 @@
 
 namespace Fusion {
 
-	D3D11UniformBuffer::D3D11UniformBuffer(uint32_t InSize, EBufferUsage InUsage)
-		: m_Size(InSize)
+	D3D11UniformBuffer::D3D11UniformBuffer(uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage)
+		: m_Size(InSize), m_BindPoint(InBindPoint)
 	{
 		Shared<D3D11Context> Context = GraphicsContext::Get<D3D11Context>();
 
@@ -20,8 +20,8 @@ namespace Fusion {
 		Context->GetDevice()->CreateBuffer(&BufferDesc, nullptr, &m_Buffer);
 	}
 
-	D3D11UniformBuffer::D3D11UniformBuffer(void* InData, uint32_t InSize, EBufferUsage InUsage)
-		: m_Size(InSize)
+	D3D11UniformBuffer::D3D11UniformBuffer(void* InData, uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage)
+		: m_Size(InSize), m_BindPoint(InBindPoint)
 	{
 		Shared<D3D11Context> Context = GraphicsContext::Get<D3D11Context>();
 

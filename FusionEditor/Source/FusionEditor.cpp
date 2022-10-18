@@ -3,7 +3,7 @@
 #include <Fusion/Memory/Shared.h>
 
 #include <ImGui/imgui.h>
-#include <ImGui/backends/imgui_impl_win32.h>
+#include <ImGui/backends/imgui_impl_glfw.h>
 #include <ImGui/backends/imgui_impl_dx11.h>
 
 #include "Windows/GameViewportWindow.h"
@@ -11,12 +11,11 @@
 #include "Windows/ActorDetailsWindow.h"
 #include <Fusion/Renderer/Mesh.h>
 
+#include <GLFW/glfw3.h>
 
 #ifdef FUSION_PLATFORM_WINDOWS
 	#include <d3d11.h>
 	#include <Platform/D3D11/D3D11Context.h>
-	#include <Platform/Windows/WindowsWindow.h>
-	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
 namespace FusionEditor {
@@ -41,10 +40,6 @@ namespace FusionEditor {
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 		: Application(specification)
 	{
-#ifdef FUSION_PLATFORM_WINDOWS
-		// NOTE(Peter): We have to call the ImGui Win32 Message Proc from Fusions Message Proc, but Fusion has no knowledge of ImGui
-		static_cast<WindowsWindow*>(GetWindow().get())->RegisterMessageProc(ImGui_ImplWin32_WndProcHandler);
-#endif
 	}
 
 	void FusionEditorApp::OnInit()
@@ -94,7 +89,7 @@ namespace FusionEditor {
 
 		IO.ConfigWindowsMoveFromTitleBarOnly = true;
 
-		ImGui_ImplWin32_Init(GetWindow()->GetWindowHandle());
+		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(GetWindow()->GetWindowHandle()), true);
 
 		switch (Renderer::CurrentAPI())
 		{
@@ -144,7 +139,7 @@ namespace FusionEditor {
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
 		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
-		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
+		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
 
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
@@ -163,7 +158,7 @@ namespace FusionEditor {
 			}
 			}
 
-			ImGui_ImplWin32_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
 
 			ImGui::NewFrame();
 		}
@@ -193,8 +188,8 @@ namespace FusionEditor {
 		// End ImGui Rendering
 		{
 			auto& IO = ImGui::GetIO();
-			const auto& Window = GetWindow();
-			IO.DisplaySize = ImVec2((float)Window->GetWidth(), (float)Window->GetHeight());
+			/*const auto& Window = GetWindow();
+			IO.DisplaySize = ImVec2((float)Window->GetWidth(), (float)Window->GetHeight());*/
 
 			ImGui::Render();
 
@@ -209,24 +204,18 @@ namespace FusionEditor {
 
 			if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-			}
-
-			/*if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
 				GLFWwindow* ContextBackup = glfwGetCurrentContext();
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(ContextBackup);
-			}*/
+			}
 		}
 	}
 
 	void FusionEditorApp::ShutdownImGui()
 	{
 		ImGui_ImplDX11_Shutdown();
-		ImGui_ImplWin32_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
@@ -244,12 +233,7 @@ namespace FusionEditor {
 Fusion::Application* Fusion::CreateApplication(int ArgC, char** ArgV)
 {
 	Fusion::ApplicationSpecification specification = {};
-
-#ifdef _UNICODE
-	specification.Title = L"Fusion Editor";
-#else
 	specification.Title = "Fusion Editor";
-#endif
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

@@ -29,7 +29,7 @@ project "Fusion"
         "%{IncludeDirs.TinyGLTF}"
     }
 
-    defines { "GLFW_INCLUDE_NONE" }
+    defines { "GLFW_INCLUDE_NONE", "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL" }
 
     filter "system:windows"
         systemversion "latest"
