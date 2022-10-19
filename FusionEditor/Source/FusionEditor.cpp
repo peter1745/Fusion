@@ -208,6 +208,12 @@ namespace FusionEditor {
 					WorldSerializer::SerializeWorld("Resources/World.fworld", m_World);
 				}
 
+				if (ImGui::MenuItem("Load World"))
+				{
+					m_World->Clear();
+					WorldSerializer::DeserializeWorld("Resources/World.fworld", m_World);
+				}
+
 				ImGui::EndMenu();
 			}
 

@@ -14,8 +14,14 @@ namespace Fusion {
 		World(const std::string& InName = "Empty World");
 
 		const std::string& GetName() const { return m_Name; }
+		void SetName(const std::string& InName) { m_Name = InName; }
 
-		Shared<Actor> CreateActor(const std::string& InName, const Shared<Actor>& InParent = nullptr);
+		Shared<Actor> CreateActorWithID(ActorID InActorID, const std::string& InName, const Shared<Actor>& InParent = nullptr);
+		Shared<Actor> CreateActor(const std::string& InName, const Shared<Actor>& InParent = nullptr)
+		{
+			return CreateActorWithID(ActorID(), InName, InParent);
+		}
+
 		Shared<Actor> FindActorWithID(ActorID InActorID) const;
 
 		template<typename TComponent, typename... TComponentParams>
@@ -28,6 +34,18 @@ namespace Fusion {
 			}
 
 			return &m_Registry.get_or_emplace<TComponent>(m_ActorIDMap.at(InActorID), std::forward<TComponentParams>(InComponentParams)...);
+		}
+
+		template<typename TComponent, typename... TComponentParams>
+		TComponent* AddOrReplaceActorComponent(ActorID InActorID, TComponentParams&&... InComponentParams)
+		{
+			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
+			{
+				FUSION_CORE_WARN("Tried to add component to an invalid actor!");
+				return nullptr;
+			}
+
+			return &m_Registry.emplace_or_replace<TComponent>(m_ActorIDMap.at(InActorID), std::forward<TComponentParams>(InComponentParams)...);
 		}
 
 		template<typename TComponent>
@@ -71,6 +89,8 @@ namespace Fusion {
 		}
 
 		Shared<Actor> GetMainCameraActor() const;
+
+		void Clear();
 
 	private:
 		std::string m_Name = "Empty World";

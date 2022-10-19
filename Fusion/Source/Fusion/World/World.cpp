@@ -8,11 +8,11 @@ namespace Fusion {
 	{
 	}
 
-	Shared<Actor> World::CreateActor(const std::string& InName, const Shared<Actor>& InParent)
+	Shared<Actor> World::CreateActorWithID(ActorID InActorID, const std::string& InName, const Shared<Actor>& InParent /*= nullptr*/)
 	{
-		Shared<Actor> NewActor(new Actor(this));
+		Shared<Actor> NewActor(new Actor(this, InActorID));
 		NewActor->Name = InName;
-		
+
 		m_Actors[NewActor->m_ActorID] = NewActor;
 		m_ActorIDMap[NewActor->m_ActorID] = m_Registry.create();
 
@@ -25,7 +25,7 @@ namespace Fusion {
 			RelationshipComponent* ParentRelationshipComp = FindActorComponent<RelationshipComponent>(InParent->m_ActorID);
 
 			RelationshipComp->ParentID = InParent->m_ActorID;
-			
+
 			if (ParentRelationshipComp->FirstChildID != ActorID::Invalid)
 			{
 				ActorID CurrentChildID = ParentRelationshipComp->FirstChildID;
@@ -77,6 +77,13 @@ namespace Fusion {
 		}
 
 		return nullptr;
+	}
+
+	void World::Clear()
+	{
+		m_ActorIDMap.clear();
+		m_Actors.clear();
+		m_Registry.clear();
 	}
 
 }

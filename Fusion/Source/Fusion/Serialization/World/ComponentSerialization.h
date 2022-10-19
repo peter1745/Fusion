@@ -2,6 +2,7 @@
 
 #include "Fusion/World/Components/AllComponents.h"
 #include "WorldWriter.h"
+#include "WorldReader.h"
 
 #include <string_view>
 
@@ -22,14 +23,12 @@ namespace Fusion {
 			InWriter.Write("Scale", InComponent->Scale);
 		}
 
-		/*static void Deserialize(const WorldReader& InReader, TransformComponent& InComponent)
+		static void Deserialize(const WorldYAMLReader& InReader, TransformComponent& InComponent)
 		{
-			InReader.EnterComponent("Transform");
 			InComponent.Location = InReader.Read<glm::vec3>("Location");
 			InComponent.Rotation = InReader.Read<glm::quat>("Rotation");
 			InComponent.Scale = InReader.Read<glm::vec3>("Scale");
-			InReader.ExitComponent();
-		}*/
+		}
 	};
 
 	template<>
@@ -41,14 +40,9 @@ namespace Fusion {
 		{
 		}
 
-		/*static void Deserialize(const WorldReader& InReader, TransformComponent& InComponent)
+		static void Deserialize(const WorldYAMLReader& InReader, MeshComponent& InComponent)
 		{
-			InReader.EnterComponent("Transform");
-			InComponent.Location = InReader.Read<glm::vec3>("Location");
-			InComponent.Rotation = InReader.Read<glm::quat>("Rotation");
-			InComponent.Scale = InReader.Read<glm::vec3>("Scale");
-			InReader.ExitComponent();
-		}*/
+		}
 	};
 
 	template<>
@@ -60,14 +54,9 @@ namespace Fusion {
 		{
 		}
 
-		/*static void Deserialize(const WorldReader& InReader, TransformComponent& InComponent)
+		static void Deserialize(const WorldYAMLReader& InReader, CameraComponent& InComponent)
 		{
-			InReader.EnterComponent("Transform");
-			InComponent.Location = InReader.Read<glm::vec3>("Location");
-			InComponent.Rotation = InReader.Read<glm::quat>("Rotation");
-			InComponent.Scale = InReader.Read<glm::vec3>("Scale");
-			InReader.ExitComponent();
-		}*/
+		}
 	};
 
 	template<>
@@ -79,14 +68,39 @@ namespace Fusion {
 		{
 		}
 
-		/*static void Deserialize(const WorldReader& InReader, TransformComponent& InComponent)
+		static void Deserialize(const WorldYAMLReader& InReader, SpriteComponent& InComponent)
 		{
-			InReader.EnterComponent("Transform");
-			InComponent.Location = InReader.Read<glm::vec3>("Location");
-			InComponent.Rotation = InReader.Read<glm::quat>("Rotation");
-			InComponent.Scale = InReader.Read<glm::vec3>("Scale");
-			InReader.ExitComponent();
-		}*/
+		}
 	};
 
+
+	namespace ComponentUtils {
+
+		template<typename TFunc, typename... TComponents>
+		inline static void FindByName(const std::string& InName, TFunc InFunc)
+		{
+			([&]()
+			{
+				if (ComponentSerializer<TComponents>::Name == InName)
+				{
+					TComponents NewComponent;
+					InFunc(NewComponent);
+				}
+			}(), ...);
+		}
+
+		template<typename TFunc, typename... TComponents>
+		inline static void FindByName(const std::string& InName, ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
+		{
+			FindByName<TFunc, TComponents...>(InName, InFunc);
+		}
+
+		
+		template<typename TFunc>
+		inline static void AllFindByName(const std::string& InName, TFunc InFunc)
+		{
+			FindByName<TFunc>(InName, AllComponents{}, InFunc);
+		}
+
+	}
 }

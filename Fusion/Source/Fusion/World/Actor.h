@@ -34,6 +34,12 @@ namespace Fusion {
 			return m_World->AddActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
 		}
 
+		template<typename TComponent, typename... TComponentParams>
+		TComponent* AddOrReplaceComponent(TComponentParams&&... InComponentParams)
+		{
+			return m_World->AddOrReplaceActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
+		}
+
 		template<typename TComponent>
 		TComponent* FindComponent() { return m_World->FindActorComponent<TComponent>(m_ActorID); }
 
