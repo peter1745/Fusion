@@ -3,13 +3,17 @@
 #include <Fusion/Memory/Shared.h>
 
 #include <ImGui/imgui.h>
+#include <ImGui/imgui_internal.h>
 #include <ImGui/backends/imgui_impl_glfw.h>
 #include <ImGui/backends/imgui_impl_dx11.h>
 
 #include "Windows/GameViewportWindow.h"
 #include "Windows/WorldOutlinerWindow.h"
 #include "Windows/ActorDetailsWindow.h"
+#include "UI/UILibrary.h"
+
 #include <Fusion/Renderer/Mesh.h>
+#include <Fusion/Serialization/World/WorldSerializer.h>
 
 #include <GLFW/glfw3.h>
 
@@ -19,23 +23,6 @@
 #endif
 
 namespace FusionEditor {
-
-	struct VertexData
-	{
-		glm::vec3 Position;
-		glm::vec2 TextureCoordinate;
-	};
-
-	static VertexData s_TriangleVertices[] = {
-		{ {  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f } }, // Top-Right
-		{ {  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } }, // Bottom-Right
-		{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f } }, // Bottom-Left
-		{ { -0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f } }  // Top-Left
-	};
-
-	static uint32_t s_TriangleIndices[] = { 0, 1, 2, 2, 3, 0 };
-
-	static Shared<EditorViewportWindow> s_ViewportWindow;
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 		: Application(specification)
@@ -138,10 +125,10 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World.get());
-		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World.get());
+		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
+		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 
-		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World.get());
+		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
 	}
 
@@ -179,6 +166,8 @@ namespace FusionEditor {
 		ImGui::Begin("MainDockspaceWindow", nullptr, DockspaceWindowFlags);
 		ImGui::PopStyleVar(3);
 
+		DrawMenuBar();
+
 		ImGui::DockSpace(ImGui::GetID("MainDockspace"));
 
 		m_WindowManager->RenderWindows();
@@ -187,10 +176,6 @@ namespace FusionEditor {
 
 		// End ImGui Rendering
 		{
-			auto& IO = ImGui::GetIO();
-			/*const auto& Window = GetWindow();
-			IO.DisplaySize = ImVec2((float)Window->GetWidth(), (float)Window->GetHeight());*/
-
 			ImGui::Render();
 
 			switch (Renderer::CurrentAPI())
@@ -202,13 +187,31 @@ namespace FusionEditor {
 			}
 			}
 
-			if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
 				GLFWwindow* ContextBackup = glfwGetCurrentContext();
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(ContextBackup);
 			}
+		}
+	}
+
+	void FusionEditorApp::DrawMenuBar()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Save World..."))
+				{
+					WorldSerializer::SerializeWorld("Resources/World.fworld", m_World);
+				}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
 		}
 	}
 
@@ -221,7 +224,7 @@ namespace FusionEditor {
 
 	void FusionEditorApp::DummyWorld()
 	{
-		m_World = MakeUnique<World>();
+		m_World = Shared<World>::Create("Dummy World");
 
 		auto Actor01 = m_World->CreateActor("MeshActor");
 		auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();

@@ -26,10 +26,6 @@ namespace Fusion {
 		inline static const Logger& GetFusionLogger() { return s_FusionLogger; }
 		inline static const Logger& GetClientLogger() { return s_ClientLogger; }
 
-#ifdef FUSION_PLATFORM_WINDOWS
-		static void CreateWindowsConsole();
-#endif
-
 		template<typename... TArgs>
 		static void PrintMessage(bool IsFusionLogger, Level InLevel, TArgs&&... InArgs);
 

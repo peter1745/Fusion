@@ -10,26 +10,30 @@ project "Fusion"
     pchheader "FusionPCH.h"
     pchsource "Source/FusionPCH.cpp"
 
-    files
-    {
+    files {
         "Source/**.cpp",
         "Source/**.h",
 
-        "%{wks.location}/ThirdParty/stb_image/include/stb_image/stb_image.cpp"
+        "%{wks.location}/ThirdParty/stb_image/include/stb_image/stb_image.cpp",
     }
 
-    includedirs
-    {
+    includedirs {
         "Source/",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.EnTT}",
         "%{IncludeDirs.stb_image}",
-        "%{IncludeDirs.TinyGLTF}"
+        "%{IncludeDirs.TinyGLTF}",
+        "%{IncludeDirs.yaml_cpp}"
     }
 
-    defines { "GLFW_INCLUDE_NONE", "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL" }
+    defines {
+        "GLFW_INCLUDE_NONE",
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+        "GLM_ENABLE_EXPERIMENTAL",
+        "YAML_CPP_STATIC_DEFINE"
+    }
 
     filter "system:windows"
         systemversion "latest"

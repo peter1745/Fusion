@@ -10,6 +10,9 @@
 #include <sstream>
 #include <filesystem>
 
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Fusion/Core/Core.h"

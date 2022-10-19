@@ -8,10 +8,12 @@
 
 namespace Fusion {
 
-	class World
+	class World : public SharedObject
 	{
 	public:
-		World();
+		World(const std::string& InName = "Empty World");
+
+		const std::string& GetName() const { return m_Name; }
 
 		Shared<Actor> CreateActor(const std::string& InName, const Shared<Actor>& InParent = nullptr);
 		Shared<Actor> FindActorWithID(ActorID InActorID) const;
@@ -71,6 +73,8 @@ namespace Fusion {
 		Shared<Actor> GetMainCameraActor() const;
 
 	private:
+		std::string m_Name = "Empty World";
+
 		entt::registry m_Registry;
 		std::unordered_map<ActorID, entt::entity> m_ActorIDMap;
 		std::unordered_map<ActorID, Shared<Actor>> m_Actors;

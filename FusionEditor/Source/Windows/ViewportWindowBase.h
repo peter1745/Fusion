@@ -10,7 +10,7 @@ namespace FusionEditor {
 	class ViewportWindowBase : public EditorWindow
 	{
 	public:
-		ViewportWindowBase(const std::string& InWindowID, Fusion::World* InWorld);
+		ViewportWindowBase(const std::string& InWindowID, const Fusion::Shared<Fusion::World>& InWorld);
 
 		virtual void OnRender() override;
 		virtual void OnUpdate(float InDeltaTime) override;
@@ -22,7 +22,7 @@ namespace FusionEditor {
 		virtual void RenderContents() override;
 
 	protected:
-		Fusion::World* m_World = nullptr;
+		Fusion::Shared<Fusion::World> m_World = nullptr;
 		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;
 		Fusion::Shared<Fusion::RenderTexture> m_RenderTexture = nullptr;
 		float m_ViewportWidth = 0.0f, m_ViewportHeight = 0.0f;

@@ -29,6 +29,7 @@ namespace FusionEditor {
 		void InitImGuiStyle();
 		void InitWindows();
 		void DrawUI();
+		void DrawMenuBar();
 		void ShutdownImGui();
 
 		void DummyWorld();
@@ -36,7 +37,7 @@ namespace FusionEditor {
 	private:
 		Shared<Mesh> m_CubeMesh = nullptr;
 
-		Unique<World> m_World = nullptr;
+		Shared<World> m_World = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
 		Shared<EditorViewportWindow> m_ViewportWindow = nullptr;
 	};

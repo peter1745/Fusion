@@ -10,7 +10,7 @@ namespace Fusion {
 	class WorldRenderer
 	{
 	public:
-		WorldRenderer(World* InWorld);
+		WorldRenderer(const Shared<World>& InWorld);
 
 		// TODO(Peter): The view matrix should eventually either be part of Camera or passed somewhere else.
 		//				The reason I haven't put the view matrix in Camera is because in play mode it's just 
@@ -20,9 +20,10 @@ namespace Fusion {
 		void End();
 
 	private:
-		World* m_World = nullptr;
+		Shared<World> m_World = nullptr;
 		Shared<Shader> m_PBRShader = nullptr;
 		Shared<UniformBuffer> m_CameraDataBuffer = nullptr;
+		Shared<UniformBuffer> m_TransformDataBuffer = nullptr;
 		Shared<Renderer> m_Renderer = nullptr;
 	};
 

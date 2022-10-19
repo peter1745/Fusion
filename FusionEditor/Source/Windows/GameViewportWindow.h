@@ -7,7 +7,7 @@ namespace FusionEditor {
 	class GameViewportWindow : public ViewportWindowBase
 	{
 	public:
-		GameViewportWindow(Fusion::World* InWorld);
+		GameViewportWindow(const Fusion::Shared<Fusion::World>& InWorld);
 
 	private:
 		virtual void RenderWorld() override;

@@ -8,7 +8,7 @@
 
 namespace FusionEditor {
 
-	WorldOutlinerWindow::WorldOutlinerWindow(Fusion::World* InWorld)
+	WorldOutlinerWindow::WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld)
 		: EditorWindow("WorldOutlinerWindow"), m_World(InWorld)
 	{
 		SetTitle("World Outliner");

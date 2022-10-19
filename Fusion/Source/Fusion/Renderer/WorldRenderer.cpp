@@ -7,7 +7,7 @@
 
 namespace Fusion {
 
-	WorldRenderer::WorldRenderer(World* InWorld)
+	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
 		: m_World(InWorld)
 	{
 		ShaderSpecification PBRSpec;
@@ -20,22 +20,14 @@ namespace Fusion {
 		m_PBRShader = Shader::Create(PBRSpec);
 
 		m_Renderer = Application::Get().GetRenderer();
-		m_CameraDataBuffer = UniformBuffer::Create(sizeof(glm::mat4) * 3, EShaderBindPoint::VertexShader);
+		m_CameraDataBuffer = UniformBuffer::Create(sizeof(glm::mat4), EShaderBindPoint::VertexShader);
+		m_TransformDataBuffer = UniformBuffer::Create(sizeof(glm::mat4), EShaderBindPoint::VertexShader);
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
 	{
-		struct TransformData
-		{
-			glm::mat4 TransformMatrix;
-			glm::mat4 ViewMatrix;
-			glm::mat4 ProjectionMatrix;
-		} CameraData;
-
-		CameraData.TransformMatrix = glm::mat4(1.0f); // NOTE(Peter): Remove this
-		CameraData.ViewMatrix = InViewMatrix;
-		CameraData.ProjectionMatrix = InCamera.GetProjectionMatrix();
-		m_CameraDataBuffer->SetData(&CameraData);
+		glm::mat4 ViewProjectionMatrix = InCamera.GetProjectionMatrix() * InViewMatrix;
+		m_CameraDataBuffer->SetData(&ViewProjectionMatrix);
 
 		m_PBRShader->Bind();
 		m_PBRShader->Set(0, m_CameraDataBuffer);
@@ -55,14 +47,19 @@ namespace Fusion {
 			const TransformComponent* TransformComp = Actor->FindComponent<TransformComponent>();
 			const Shared<Mesh> ActorMesh = MeshComp->Mesh;
 
+			glm::mat4 Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location)
+				* glm::toMat4(TransformComp->Rotation)
+				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
+			m_TransformDataBuffer->SetData(&Transform);
+			m_PBRShader->Set(1, m_TransformDataBuffer);
+
 			m_Renderer->DrawIndexed(ActorMesh->GetVertexBuffer(), ActorMesh->GetIndexBuffer(), m_PBRShader);
 		}
 	}
 
 	void WorldRenderer::End()
 	{
-		/*Renderer::End();
-		m_Framebuffer->Unbind();*/
+		
 	}
 
 }

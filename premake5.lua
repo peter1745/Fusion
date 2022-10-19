@@ -16,6 +16,7 @@ IntermediatesDir = "%{wks.location}/Build/Intermediates/%{cfg.system}-%{cfg.arch
 group "ThirdParty"
 include "ThirdParty/GLFW"
 include "ThirdParty/ImGui/ImGui"
+include "ThirdParty/yaml-cpp"
 group ""
 
 include "Fusion"

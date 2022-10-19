@@ -1,5 +1,5 @@
 project "FusionEditor"
-    kind "WindowedApp"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
     staticruntime "Off"
@@ -17,7 +17,8 @@ project "FusionEditor"
     {
         "ImGui",
         "Fusion",
-        "GLFW"
+        "GLFW",
+        "yaml-cpp"
     }
 
     includedirs

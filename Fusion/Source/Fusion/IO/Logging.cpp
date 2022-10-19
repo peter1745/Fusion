@@ -50,51 +50,6 @@ namespace Fusion {
 		s_ClientLogger.reset();
 	}
 
-#ifdef FUSION_PLATFORM_WINDOWS
-	void Logging::CreateWindowsConsole()
-	{
-		AllocConsole();
-
-		int ConsoleHandle;
-		intptr_t StdHandle;
-		CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
-		FILE* StreamHandle;
-
-		// allocate a console for this app
-		AllocConsole();
-
-		// set the screen buffer to be big enough to let us scroll text
-		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleInfo);
-		ConsoleInfo.dwSize.Y = 500;
-		SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), ConsoleInfo.dwSize);
-
-		// redirect unbuffered STDOUT to the console
-		StdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_OUTPUT_HANDLE));
-		ConsoleHandle = _open_osfhandle(StdHandle, _O_TEXT);
-		StreamHandle = _fdopen(ConsoleHandle, "w");
-		*stdout = *StreamHandle;
-		setvbuf(stdout, NULL, _IONBF, 0);
-
-		// redirect unbuffered STDIN to the console
-		StdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_INPUT_HANDLE));
-		ConsoleHandle = _open_osfhandle(StdHandle, _O_TEXT);
-		StreamHandle = _fdopen(ConsoleHandle, "r");
-		*stdin = *StreamHandle;
-		setvbuf(stdin, NULL, _IONBF, 0);
-
-		// redirect unbuffered STDERR to the console
-		StdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_ERROR_HANDLE));
-		ConsoleHandle = _open_osfhandle(StdHandle, _O_TEXT);
-		StreamHandle = _fdopen(ConsoleHandle, "w");
-		*stderr = *StreamHandle;
-		setvbuf(stderr, NULL, _IONBF, 0);
-
-		// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
-		// point to console as well
-		std::ios::sync_with_stdio();
-	}
-#endif
-
 	std::shared_ptr<spdlog::logger> Logging::s_FusionLogger;
 	std::shared_ptr<spdlog::logger> Logging::s_ClientLogger;
 

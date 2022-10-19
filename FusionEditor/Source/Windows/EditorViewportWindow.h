@@ -8,7 +8,7 @@ namespace FusionEditor {
 	class EditorViewportWindow : public ViewportWindowBase
 	{
 	public:
-		EditorViewportWindow(Fusion::World* InWorld);
+		EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld);
 
 		virtual void OnUpdate(float InDeltaTime) override;
 

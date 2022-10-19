@@ -3,7 +3,8 @@
 
 namespace Fusion {
 
-	World::World()
+	World::World(const std::string& InName)
+		: m_Name(InName)
 	{
 	}
 

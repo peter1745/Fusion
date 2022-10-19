@@ -2,7 +2,7 @@
 
 namespace FusionEditor {
 
-	EditorViewportWindow::EditorViewportWindow(Fusion::World* InWorld)
+	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld)
 		: ViewportWindowBase("MainViewport", InWorld)
 	{
 		SetTitle("Viewport");
