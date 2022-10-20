@@ -20,7 +20,7 @@ namespace FusionEditor {
 		uint32_t GetWindowWidth() const { return m_Width; }
 		uint32_t GetWindowHeight() const { return m_Height; }
 
-		bool IsFocused() const { return m_IsFocused; }
+		bool IsTabFocused() const { return m_IsTabFocused; }
 
 	protected:
 		EditorWindow(const std::string& InWindowID, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);
@@ -33,7 +33,7 @@ namespace FusionEditor {
 		uint32_t m_Width;
 		uint32_t m_Height;
 
-		bool m_IsFocused = false;
+		bool m_IsTabFocused = false;
 	};
 
 }

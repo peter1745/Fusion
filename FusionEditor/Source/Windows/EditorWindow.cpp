@@ -14,7 +14,7 @@ namespace FusionEditor {
 		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
 		if (ImGui::Begin(WindowTitle.c_str(), &InOpen))
 		{
-			m_IsFocused = ImGui::IsWindowFocused();
+			m_IsTabFocused = true;
 
 			ImVec2 ContentRegionSize = ImGui::GetContentRegionAvail();
 
@@ -22,6 +22,12 @@ namespace FusionEditor {
 
 			m_Width = uint32_t(ContentRegionSize.x);
 			m_Height = uint32_t(ContentRegionSize.y);
+		}
+		else if (InOpen)
+		{
+			// If InOpen is true, but ImGui::Begin returns false it means the window is docked
+			// but not the active tab
+			m_IsTabFocused = false;
 		}
 
 		ImGui::End();

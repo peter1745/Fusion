@@ -13,7 +13,7 @@ namespace FusionEditor {
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
-		m_Camera.SetActive(m_IsMouseInside);
+		m_Camera.SetActive(m_IsMouseInside && IsTabFocused());
 		m_Camera.OnUpdate(InDeltaTime);
 	}
 
