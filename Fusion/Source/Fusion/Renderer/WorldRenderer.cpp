@@ -52,6 +52,7 @@ namespace Fusion {
 				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformDataBuffer->SetData(&Transform);
 			m_PBRShader->Set(1, m_TransformDataBuffer);
+			MeshComp->Texture->Bind(0);
 
 			m_Renderer->DrawIndexed(ActorMesh->GetVertexBuffer(), ActorMesh->GetIndexBuffer(), m_PBRShader);
 		}

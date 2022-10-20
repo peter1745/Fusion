@@ -36,7 +36,10 @@ PixelInput VertexMain(VertexInput InVertexData)
 	return Output;
 }
 
+Texture2D InTexture;
+SamplerState InSampler;
+
 float4 PixelMain(PixelInput InPixelData) : SV_Target
 {
-	return float4(InPixelData.Normal, 1.0f);
+	return InTexture.Sample(InSampler, InPixelData.TexCoord);
 }

@@ -3,7 +3,6 @@
 #include <Fusion/Memory/Shared.h>
 
 #include <ImGui/imgui.h>
-#include <ImGui/imgui_internal.h>
 
 #include "Windows/GameViewportWindow.h"
 #include "Windows/WorldOutlinerWindow.h"
@@ -31,6 +30,7 @@ namespace FusionEditor {
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 
 		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
+		m_Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
 		
 		DummyWorld();
 		
@@ -54,9 +54,8 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_ViewportWindow = m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
+		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
-
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
 	}
@@ -170,6 +169,7 @@ namespace FusionEditor {
 		auto Actor01 = m_World->CreateActor("MeshActor");
 		auto* SpriteComp = Actor01->AddComponent<Fusion::MeshComponent>();
 		SpriteComp->Mesh = m_CubeMesh;
+		SpriteComp->Texture = m_Texture;
 	}
 
 }

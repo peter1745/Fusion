@@ -4,6 +4,7 @@
 #include "Fusion/World/Actor.h"
 #include "Fusion/Renderer/WorldCamera.h"
 #include "Fusion/Renderer/Mesh.h"
+#include "Fusion/Renderer/Texture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -40,6 +41,7 @@ namespace Fusion {
 	struct MeshComponent : public BaseComponent
 	{
 		Shared<Mesh> Mesh = nullptr;
+		Shared<Texture2D> Texture = nullptr;
 	};
 
 }

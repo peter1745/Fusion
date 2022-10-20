@@ -5,6 +5,7 @@
 #include <Fusion/World/World.h>
 #include <Fusion/Renderer/WorldRenderer.h>
 #include <Fusion/Renderer/Mesh.h>
+#include <Fusion/IO/TextureLoader.h>
 
 #include "Windows/WindowManager.h"
 #include "Windows/EditorViewportWindow.h"
@@ -36,10 +37,10 @@ namespace FusionEditor {
 
 	private:
 		Shared<Mesh> m_CubeMesh = nullptr;
+		Shared<Texture2D> m_Texture = nullptr;
 
 		Shared<World> m_World = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
-		Shared<EditorViewportWindow> m_ViewportWindow = nullptr;
 
 		std::unique_ptr<ImGuiPlatformContext> m_ImGuiContext = nullptr;
 	};
