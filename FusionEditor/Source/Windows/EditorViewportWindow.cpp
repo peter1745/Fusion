@@ -13,24 +13,9 @@ namespace FusionEditor {
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
-		m_Camera.SetActive(m_IsMouseInside && IsTabFocused());
+
+		m_Camera.SetActive(IsMouseInside() && IsTabActive());
 		m_Camera.OnUpdate(InDeltaTime);
-	}
-
-	void EditorViewportWindow::RenderContents()
-	{
-		ImVec2 CursorPos = ImGui::GetCursorPos();
-		ImVec2 WindowSize = ImGui::GetWindowSize();
-		ImVec2 WindowPos = ImGui::GetWindowPos();
-
-		WindowPos.x -= CursorPos.x;
-		WindowPos.y -= CursorPos.y;
-
-		ImVec2 MaxBound = { WindowPos.x + WindowSize.x, WindowPos.y + WindowSize.y };
-
-		m_IsMouseInside = UI::IsMouseHoveringRect(WindowPos, MaxBound);
-
-		ViewportWindowBase::RenderContents();
 	}
 
 	void EditorViewportWindow::RenderWorld()
