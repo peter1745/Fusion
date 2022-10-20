@@ -2,6 +2,8 @@
 #include "D3D11Texture.h"
 #include "D3D11Context.h"
 
+#include <stb_image/stb_image.h>
+
 namespace Fusion {
 
 	D3D11Texture2D::D3D11Texture2D(const Texture2DInfo& InCreateInfo)
@@ -27,7 +29,7 @@ namespace Fusion {
 		if (InCreateInfo.Data != nullptr)
 		{
 			InitialData.pSysMem = InCreateInfo.Data;
-			InitialData.SysMemPitch = InCreateInfo.Width * InCreateInfo.BitsPerPixel;
+			InitialData.SysMemPitch = InCreateInfo.Width * InCreateInfo.Channels;
 			InitialData.SysMemSlicePitch = InitialData.SysMemPitch * InCreateInfo.Height;
 		}
 
@@ -56,6 +58,8 @@ namespace Fusion {
 		TextureSamplerDesc.MinLOD = -FLT_MAX;
 		TextureSamplerDesc.MaxLOD = FLT_MAX;
 		D3DContext->GetDevice()->CreateSamplerState(&TextureSamplerDesc, &m_SamplerState);
+
+		stbi_image_free(m_CreateInfo.Data);
 	}
 
 	D3D11Texture2D::~D3D11Texture2D()

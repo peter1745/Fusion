@@ -12,7 +12,7 @@ namespace Fusion {
 		Byte* Data = nullptr;
 		uint32_t Width;
 		uint32_t Height;
-		uint32_t BitsPerPixel;
+		uint32_t Channels;
 	};
 
 	class Texture2D : public SharedObject

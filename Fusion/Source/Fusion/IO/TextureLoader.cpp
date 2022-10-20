@@ -9,10 +9,10 @@ namespace Fusion {
 	{
 		int32_t ImageWidth = 0;
 		int32_t ImageHeight = 0;
-		int32_t BitsPerPixel = 0;
-		stbi_uc* Data = stbi_load(InFilePath.string().c_str(), &ImageWidth, &ImageHeight, &BitsPerPixel, 4);
+		int32_t ImageChannels = 0;
+		stbi_uc* Data = stbi_load(InFilePath.string().c_str(), &ImageWidth, &ImageHeight, &ImageChannels, 4);
 
-		if (Data == nullptr || ImageWidth == 0 || ImageHeight == 0 || BitsPerPixel == 0)
+		if (Data == nullptr || ImageWidth == 0 || ImageHeight == 0 || ImageChannels == 0)
 		{
 			FUSION_CORE_INFO("Failed to load texture '{}'!", InFilePath.string());
 			return nullptr;
@@ -22,12 +22,9 @@ namespace Fusion {
 		CreateInfo.Data = Data;
 		CreateInfo.Width = static_cast<uint32_t>(ImageWidth);
 		CreateInfo.Height = static_cast<uint32_t>(ImageHeight);
-		CreateInfo.BitsPerPixel = static_cast<uint32_t>(BitsPerPixel);
+		CreateInfo.Channels = static_cast<uint32_t>(ImageChannels);
 
-		Shared<Texture2D> Result = Texture2D::Create(CreateInfo);
-		// TODO(Peter): Don't always do it
-		//stbi_image_free(Data);
-		return Result;
+		return Texture2D::Create(CreateInfo);
 	}
 
 }
