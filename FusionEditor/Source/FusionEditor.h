@@ -11,6 +11,8 @@
 
 #include "Renderer/ViewportCamera.h"
 
+#include "Platform/D3D11/ImGuiPlatformContextD3D11.h"
+
 namespace FusionEditor {
 
 	using namespace Fusion;
@@ -25,8 +27,6 @@ namespace FusionEditor {
 		virtual void OnShutdown() override;
 
 	private:
-		void InitImGui();
-		void InitImGuiStyle();
 		void InitWindows();
 		void DrawUI();
 		void DrawMenuBar();
@@ -40,6 +40,8 @@ namespace FusionEditor {
 		Shared<World> m_World = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
 		Shared<EditorViewportWindow> m_ViewportWindow = nullptr;
+
+		std::unique_ptr<ImGuiPlatformContext> m_ImGuiContext = nullptr;
 	};
 
 }
