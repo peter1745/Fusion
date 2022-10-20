@@ -18,7 +18,8 @@ project "FusionEditor"
         "ImGui",
         "Fusion",
         "GLFW",
-        "yaml-cpp"
+        "yaml-cpp",
+        "NFD-Extended"
     }
 
     includedirs
@@ -30,7 +31,8 @@ project "FusionEditor"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.ImGui}",
         "%{IncludeDirs.ImGui}/ImGui", -- Fix for ImGui includes
-        "%{IncludeDirs.EnTT}"
+        "%{IncludeDirs.EnTT}",
+        "%{IncludeDirs.NFD_Extended}"
     }
 
     defines { "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL" }

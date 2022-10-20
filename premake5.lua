@@ -17,6 +17,7 @@ group "ThirdParty"
 include "ThirdParty/GLFW"
 include "ThirdParty/ImGui/ImGui"
 include "ThirdParty/yaml-cpp"
+include "ThirdParty/NFD-Extended"
 group ""
 
 include "Fusion"

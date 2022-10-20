@@ -14,6 +14,7 @@ namespace FusionEditor {
 
 		void SetCurrentActor(const Fusion::Shared<Fusion::Actor>& InActor) { m_CurrentActor = InActor; }
 
+	protected:
 		virtual void RenderContents() override;
 
 	private:

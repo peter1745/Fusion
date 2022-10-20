@@ -1,19 +1,36 @@
 #include "EditorViewportWindow.h"
 
+#include "UI/UILibrary.h"
+
 namespace FusionEditor {
 
 	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld)
-		: ViewportWindowBase("MainViewport", InWorld)
+		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720)
 	{
 		SetTitle("Viewport");
-
-		m_Camera = ViewportCamera(m_ViewportWidth, m_ViewportHeight);
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
+		m_Camera.SetActive(m_IsMouseInside);
 		m_Camera.OnUpdate(InDeltaTime);
+	}
+
+	void EditorViewportWindow::RenderContents()
+	{
+		ImVec2 CursorPos = ImGui::GetCursorPos();
+		ImVec2 WindowSize = ImGui::GetWindowSize();
+		ImVec2 WindowPos = ImGui::GetWindowPos();
+
+		WindowPos.x -= CursorPos.x;
+		WindowPos.y -= CursorPos.y;
+
+		ImVec2 MaxBound = { WindowPos.x + WindowSize.x, WindowPos.y + WindowSize.y };
+
+		m_IsMouseInside = UI::IsMouseHoveringRect(WindowPos, MaxBound);
+
+		ViewportWindowBase::RenderContents();
 	}
 
 	void EditorViewportWindow::RenderWorld()

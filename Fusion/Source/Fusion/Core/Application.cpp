@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Fusion/IO/Keyboard.h"
+#include "Fusion/IO/Mouse.h"
 #include "Fusion/Renderer/Renderer.h"
 #include "Fusion/Events/WindowEvents.h"
 
@@ -26,6 +27,8 @@ namespace Fusion {
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::OnEvent));
 
 		m_Renderer = Renderer::Create(ERendererAPI::D3D11);
+
+		m_Window->Maximize();
 	}
 
 	Application::~Application()
@@ -40,7 +43,8 @@ namespace Fusion {
 		OnInit();
 		while (m_Running)
 		{
-			//Keyboard::Get().TransitionHeldKeys();
+			Keyboard::Get().TransitionHeldKeys();
+			Mouse::Get().TransitionHeldButtons();
 			m_Window->ProcessEvents();
 
 			m_Renderer->Begin();
@@ -53,7 +57,8 @@ namespace Fusion {
 			m_TimeStep = glm::min<float>(m_FrameTime, 0.0333f);
 			m_LastFrameTime = time;
 			
-			//Keyboard::Get().ResetReleasedKeys();
+			Mouse::Get().ResetReleasedButtons();
+			Keyboard::Get().ResetReleasedKeys();
 
 			// TODO(Peter): Handle with event
 			m_Running = !m_Window->ShouldClose();

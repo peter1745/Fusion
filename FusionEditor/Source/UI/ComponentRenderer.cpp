@@ -8,11 +8,11 @@ namespace FusionEditor {
 		if (!UI::BeginHeader("Transform"))
 			return;
 
-		ImGui::DragFloat3("Translation", &InComp->Location.x);
-		ImGui::DragFloat3("Scale", &InComp->Scale.x);
+		ImGui::DragFloat3("Translation", &InComp->Location.x, 0.1f);
+		ImGui::DragFloat3("Scale", &InComp->Scale.x, 0.1f);
 
 		glm::vec3 RotationDegrees = glm::degrees(glm::eulerAngles(InComp->Rotation));
-		if (ImGui::DragFloat3("Rotation", &RotationDegrees.x))
+		if (ImGui::DragFloat3("Rotation", &RotationDegrees.x, 0.1f))
 			InComp->Rotation = glm::quat(glm::radians(RotationDegrees));
 
 		UI::EndHeader();
@@ -31,32 +31,19 @@ namespace FusionEditor {
 		if (!UI::BeginComponentHeader("Camera", InComp->IsActive))
 			return;
 
-		/*UI::Dropdown("Projection Type", &InComp->ProjectionType, { "Perspective", "Orthographic" });
+		float VerticalFOV = InComp->CameraInstance.GetVerticalFOV();
+		if (ImGui::DragFloat("Vertical FOV", &VerticalFOV))
+			InComp->CameraInstance.SetVerticalFOV(VerticalFOV);
 
-		switch (InComp->ProjectionType)
-		{
-		case Fusion::EProjectionType::PerspectiveProjection:
-			RenderPerspectiveParameters(InComp);
-			break;
-		case Fusion::EProjectionType::OrthographicProjection:
-			RenderOrthographicParameters(InComp);
-			break;
-		}
-
-		ImGui::DragFloat("Near Plane", &InComp->NearPlane);
-		ImGui::DragFloat("Far Plane", &InComp->FarPlane);*/
+		float NearPlane = InComp->CameraInstance.GetNearPlane();
+		if (ImGui::DragFloat("Near Plane", &NearPlane))
+			InComp->CameraInstance.SetNearPlane(NearPlane);
+		
+		float FarPlane = InComp->CameraInstance.GetFarPlane();
+		if (ImGui::DragFloat("Far Plane", &FarPlane))
+			InComp->CameraInstance.SetFarPlane(FarPlane);
 
 		UI::EndHeader();
-	}
-
-	void ComponentUI<Fusion::CameraComponent>::RenderPerspectiveParameters(Fusion::CameraComponent* InComp)
-	{
-		//ImGui::DragFloat("Vertical FOV", &InComp->VerticalFOV);
-	}
-
-	void ComponentUI<Fusion::CameraComponent>::RenderOrthographicParameters(Fusion::CameraComponent* InComp)
-	{
-		//ImGui::DragFloat("Orthographic Size", &InComp->OrthographicSize);
 	}
 
 	void ComponentUI<Fusion::MeshComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)

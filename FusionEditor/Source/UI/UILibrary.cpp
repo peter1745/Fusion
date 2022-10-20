@@ -1,5 +1,7 @@
 #include "UILibrary.h"
 
+#include <Fusion/IO/Mouse.h>
+
 namespace FusionEditor::UI {
 
 	void ShiftCursorX(float InAmount) { ImGui::SetCursorPosX(ImGui::GetCursorPosX() + InAmount); }
@@ -155,4 +157,24 @@ namespace FusionEditor::UI {
 		CurrentWindow->DC.NavLayerCurrent = ImGuiNavLayer_Main;
 		CurrentWindow->DC.MenuBarAppending = false;
 	}
+
+	bool IsMouseHoveringRect(const ImVec2& InMin, const ImVec2& InMax, bool InClip /*= true*/)
+	{
+		ImRect ClippedRect(InMin, InMax);
+		if (InClip)
+			ClippedRect.ClipWith(GImGui->CurrentWindow->ClipRect);
+
+		const ImVec2 Min(ClippedRect.Min.x - GImGui->Style.TouchExtraPadding.x, ClippedRect.Min.y - GImGui->Style.TouchExtraPadding.y);
+		const ImVec2 Max(ClippedRect.Max.x + GImGui->Style.TouchExtraPadding.x, ClippedRect.Max.y + GImGui->Style.TouchExtraPadding.y);
+		const ImRect RectForTouch(Min, Max);
+		const glm::vec2& MousePos = Fusion::Mouse::Get().GetPosition();
+		if (!RectForTouch.Contains(ImVec2(MousePos.x, MousePos.y)))
+			return false;
+
+		if (!GImGui->MouseViewport->GetMainRect().Overlaps(ClippedRect))
+			return false;
+
+		return true;
+	}
+
 }

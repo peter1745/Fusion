@@ -1,5 +1,6 @@
 #include "FusionPCH.h"
 #include "Window.h"
+#include "Fusion/IO/Mouse.h"
 #include "Fusion/IO/Keyboard.h"
 #include "Fusion/IO/GLFWKeyMappings.h"
 
@@ -43,13 +44,73 @@ namespace Fusion {
 				Data->EventCallback(ResizeEvent);
 			}
 		});
+
+		glfwSetCursorPosCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, double InPosX, double InPosY)
+		{
+			Mouse::Get().m_Position = { static_cast<float>(InPosX), static_cast<float>(InPosY) };
+		});
+
+		glfwSetMouseButtonCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InButton, int InAction, int InMods)
+		{
+			MouseButtonState& ButtonState = Mouse::Get().m_ButtonStates[InButton];
+			ButtonState.OldState = ButtonState.CurrentState;
+			
+			switch (InAction)
+			{
+			case GLFW_PRESS:
+			{
+				ButtonState.CurrentState = EButtonState::Pressed;
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				ButtonState.CurrentState = EButtonState::Released;
+				break;
+			}
+			}
+		});
+
+		glfwSetKeyCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InKey, int InScanCode, int InAction, int InMods)
+		{
+			KeyData& KeyInfo = Keyboard::Get().GetKeyData(GLFWKeyMappings.at(InKey));
+			KeyInfo.OldState = KeyInfo.CurrentState;
+
+			switch (InAction)
+			{
+			case GLFW_PRESS:
+			{
+				KeyInfo.CurrentState = EButtonState::Pressed;
+				break;
+			}
+			case GLFW_REPEAT:
+			{
+				// NOTE(Peter): This isn't *technically* necessary, since we manually transition pressed keys to the held state
+				KeyInfo.CurrentState = EButtonState::Held;
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				KeyInfo.CurrentState = EButtonState::Released;
+				break;
+			}
+			}
+		});
 	}
 
 	void Window::ProcessEvents()
 	{
+		EMouseVisibility CurrentVisibility = static_cast<EMouseVisibility>(glfwGetInputMode(m_NativeWindow, GLFW_CURSOR) - GLFW_CURSOR_NORMAL);
+		if (CurrentVisibility != Mouse::Get().GetVisibility())
+			glfwSetInputMode(m_NativeWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL + static_cast<int32_t>(Mouse::Get().GetVisibility()));
+
 		glfwPollEvents();
 	}
 
 	bool Window::ShouldClose() const { return glfwWindowShouldClose(m_NativeWindow); }
+
+	void Window::Maximize()
+	{
+		glfwMaximizeWindow(m_NativeWindow);
+	}
 
 }

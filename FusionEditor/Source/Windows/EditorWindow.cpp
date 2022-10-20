@@ -14,6 +14,8 @@ namespace FusionEditor {
 		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
 		if (ImGui::Begin(WindowTitle.c_str(), &InOpen))
 		{
+			m_IsFocused = ImGui::IsWindowFocused();
+
 			ImVec2 ContentRegionSize = ImGui::GetContentRegionAvail();
 
 			RenderContents();

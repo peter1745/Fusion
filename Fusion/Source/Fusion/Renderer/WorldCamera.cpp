@@ -3,9 +3,9 @@
 
 namespace Fusion {
 
-	void WorldCamera::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
+	void WorldCamera::RecalculateProjectionMatrix()
 	{
-		SetProjectionMatrix(glm::perspectiveRH_ZO(glm::radians(m_VerticalFOV), float(InWidth) / float(InHeight), m_NearPlane, m_FarPlane));
+		SetProjectionMatrix(glm::perspectiveRH_ZO(glm::radians(m_VerticalFOV), float(m_Width) / float(m_Height), m_NearPlane, m_FarPlane));
 	}
 
 }

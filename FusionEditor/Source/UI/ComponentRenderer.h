@@ -32,10 +32,6 @@ namespace FusionEditor {
 	{
 	public:
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::CameraComponent* InComp);
-
-	private:
-		static void RenderPerspectiveParameters(Fusion::CameraComponent* InComp);
-		static void RenderOrthographicParameters(Fusion::CameraComponent* InComp);
 	};
 
 	template<>

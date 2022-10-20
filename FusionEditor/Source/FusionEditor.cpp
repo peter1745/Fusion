@@ -14,6 +14,9 @@
 
 #include <Fusion/Renderer/Mesh.h>
 #include <Fusion/Serialization/World/WorldSerializer.h>
+#include <Fusion/IO/Keyboard.h>
+
+#include <NFD-Extended/nfd.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -32,7 +35,9 @@ namespace FusionEditor {
 	void FusionEditorApp::OnInit()
 	{
 		InitImGui();
-				
+	
+		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
+
 		m_CubeMesh = MeshLoader::LoadMeshFromFile("Resources/Meshes/Cube.gltf");
 		
 		DummyWorld();
@@ -50,6 +55,7 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnShutdown()
 	{
+		NFD::Quit();
 		ShutdownImGui();
 	}
 
@@ -205,13 +211,53 @@ namespace FusionEditor {
 			{
 				if (ImGui::MenuItem("Save World..."))
 				{
-					WorldSerializer::SerializeWorld("Resources/World.fworld", m_World);
+					NFD::UniquePath WorldPath;
+					nfdfilteritem_t Filters[] = { { "Fusion World", "fworld" }};
+					nfdresult_t Result = NFD::SaveDialog(WorldPath, Filters, 1);
+
+					switch (Result)
+					{
+					case NFD_OKAY:
+					{
+						WorldSerializer::SerializeWorld(std::filesystem::path(WorldPath.get()), m_World);
+						break;
+					}
+					case NFD_CANCEL:
+					{
+						break;
+					}
+					case NFD_ERROR:
+					{
+						FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+						break;
+					}
+					}
 				}
 
 				if (ImGui::MenuItem("Load World"))
 				{
-					m_World->Clear();
-					WorldSerializer::DeserializeWorld("Resources/World.fworld", m_World);
+					NFD::UniquePath WorldPath;
+					nfdfilteritem_t Filters[] = { { "Fusion World", "fworld" } };
+					nfdresult_t Result = NFD::OpenDialog(WorldPath, Filters, 1);
+
+					switch (Result)
+					{
+					case NFD_OKAY:
+					{
+						m_World->Clear();
+						WorldSerializer::DeserializeWorld(std::filesystem::path(WorldPath.get()), m_World);
+						break;
+					}
+					case NFD_CANCEL:
+					{
+						break;
+					}
+					case NFD_ERROR:
+					{
+						FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+						break;
+					}
+					}
 				}
 
 				ImGui::EndMenu();

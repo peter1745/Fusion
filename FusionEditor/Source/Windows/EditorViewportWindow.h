@@ -12,12 +12,16 @@ namespace FusionEditor {
 
 		virtual void OnUpdate(float InDeltaTime) override;
 
+	protected:
+		virtual void RenderContents() override;
+
 	private:
 		virtual void RenderWorld() override;
 		virtual void OnResize(uint32_t InWidth, uint32_t InHeight) override;
 
 	private:
 		ViewportCamera m_Camera;
+		bool m_IsMouseInside = false;
 
 	};
 

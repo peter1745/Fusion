@@ -1,19 +1,17 @@
 #include "FusionPCH.h"
-#include "Keyboard.h"
-
-#include "Fusion/Core/Application.h"
+#include "Mouse.h"
 
 namespace Fusion {
 
-	Keyboard& Keyboard::Get()
+	Mouse& Mouse::Get()
 	{
-		static Keyboard s_Instance;
+		static Mouse s_Instance;
 		return s_Instance;
 	}
-		
-	void Keyboard::TransitionHeldKeys()
+
+	void Mouse::TransitionHeldButtons()
 	{
-		for (KeyData& Data : m_KeyStates)
+		for (MouseButtonState& Data : m_ButtonStates)
 		{
 			if (Data.CurrentState == EButtonState::Pressed)
 			{
@@ -23,9 +21,9 @@ namespace Fusion {
 		}
 	}
 
-	void Keyboard::ResetReleasedKeys()
+	void Mouse::ResetReleasedButtons()
 	{
-		for (KeyData& Data : m_KeyStates)
+		for (MouseButtonState& Data : m_ButtonStates)
 		{
 			if (Data.CurrentState == EButtonState::Released)
 			{

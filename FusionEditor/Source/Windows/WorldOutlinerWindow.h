@@ -12,6 +12,7 @@ namespace FusionEditor {
 		WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld);
 		~WorldOutlinerWindow();
 
+	protected:
 		virtual void RenderContents() override;
 
 	private:

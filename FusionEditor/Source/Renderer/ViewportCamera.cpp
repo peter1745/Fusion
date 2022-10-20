@@ -1,84 +1,112 @@
 #include "ViewportCamera.h"
 #include "Fusion/Core/Application.h"
-
-//#include <GLFW/glfw3.h>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include "Fusion/IO/Keyboard.h"
+#include "Fusion/IO/Mouse.h"
 
 namespace FusionEditor {
 
 	using namespace Fusion;
-
-	ViewportCamera::ViewportCamera()
-		: Camera(EProjectionType::PerspectiveProjection)
-	{
-	}
+	
+	// NOTE(Peter): Viewport camera shamelessly stolen from Hazel. Thanks Yan and Karim ;)
 
 	ViewportCamera::ViewportCamera(uint32_t InWidth, uint32_t InHeight)
-		: Camera(EProjectionType::PerspectiveProjection)
 	{
-		glm::mat4 mat = glm::perspectiveRH_ZO(glm::radians(70.0f), float(InWidth) / float(InHeight), 0.1f, 100.0f);
-		SetProjectionMatrix(mat);
+		SetViewportSize(InWidth, InHeight);
+
+		constexpr glm::vec3 InitialPosition = { 5, 5, 5 };
+		m_Distance = glm::distance(InitialPosition, m_FocalPoint);
+
+		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
+		m_Pitch = glm::pi<float>() / 4.0f;
+
+		m_Location = m_FocalPoint - GetForwardDirection() * m_Distance + m_LocationDelta;
+		const glm::quat Orientation = GetOrientation();
+		m_Direction = glm::eulerAngles(Orientation) * (180.0f / glm::pi<float>());
+		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Location) * glm::toMat4(Orientation);
+		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
 	void ViewportCamera::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
 	{
-		glm::mat4 mat = glm::perspectiveRH_ZO(glm::radians(70.0f), float(InWidth) / float(InHeight), 0.1f, 100.0f);
-		SetProjectionMatrix(mat);
+		SetProjectionMatrix(glm::perspectiveFov(glm::radians(m_VerticalFOV), float(InWidth), float(InHeight), m_NearPlane, m_FarPlane));
 	}
-
-	/*
-	
-	struct KeyState
-	{
-		bool IsHeld;
-		bool PressedThisFrame;
-		uint32_t RepeatCount;
-	};
-
-	*/
 
 	void ViewportCamera::OnUpdate(float InDeltaTime)
 	{
-		/*GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(Fusion::Application::Get().GetWindow()->GetNativeWindow());
+		if (!m_IsActive)
+		{
+			Mouse::Get().SetVisibility(EMouseVisibility::Visible);
+			return;
+		}
 
-		int32_t keyState = glfwGetKey(NativeWindow, GLFW_KEY_W);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(0.0f, 0.0f, -1.0f) * InDeltaTime;
+		const glm::vec2& MousePosition = Mouse::Get().GetPosition();
+		const glm::vec2 MouseDelta = (MousePosition - m_InitialMousePosition) * 0.002f;
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_A);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(-1.0f, 0.0f, 0.0f) * InDeltaTime;
+		if (Mouse::Get().IsButtonHeld(EMouseButton::Right))
+		{
+			Mouse::Get().SetVisibility(EMouseVisibility::Locked);
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_S);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(0.0f, 0.0f, 1.0f) * InDeltaTime;
+			const float YawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
+			const float CameraSpeed = 1.5f;
+			const float RotationSpeed = 0.7f;
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_D);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(1.0f, 0.0f, 0.0f) * InDeltaTime;
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::Q))
+				m_LocationDelta -= InDeltaTime * CameraSpeed * glm::vec3{ 0.f, YawSign, 0.f };
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::E))
+				m_LocationDelta += InDeltaTime * CameraSpeed * glm::vec3{ 0.f, YawSign, 0.f };
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::S))
+				m_LocationDelta -= InDeltaTime * CameraSpeed * m_Direction;
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::W))
+				m_LocationDelta += InDeltaTime * CameraSpeed * m_Direction;
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::A))
+				m_LocationDelta -= InDeltaTime * CameraSpeed * m_RightDirection;
+			if (Keyboard::Get().IsKeyHeld(EKeyCode::D))
+				m_LocationDelta += InDeltaTime * CameraSpeed * m_RightDirection;
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_SPACE);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(0.0f, 1.0f, 0.0f) * InDeltaTime;
+			constexpr float MaxRate = 0.12f;
+			m_YawDelta += glm::clamp(YawSign * MouseDelta.x * RotationSpeed, -MaxRate, MaxRate);
+			m_PitchDelta += glm::clamp(MouseDelta.y * RotationSpeed, -MaxRate, MaxRate);
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_LEFT_SHIFT);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Location += glm::vec3(0.0f, -1.0f, 0.0f) * InDeltaTime;
+			m_RightDirection = glm::cross(m_Direction, glm::vec3{ 0.f, YawSign, 0.f });
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_Q);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Rotation -= glm::vec3(0.0f, 90.0f, 0.0f) * InDeltaTime;
+			m_Direction = glm::rotate(glm::normalize(glm::cross(glm::angleAxis(-m_PitchDelta, m_RightDirection),
+				glm::angleAxis(-m_YawDelta, glm::vec3{ 0.f, YawSign, 0.f }))), m_Direction);
 
-		keyState = glfwGetKey(NativeWindow, GLFW_KEY_E);
-		if (keyState == GLFW_PRESS || keyState == GLFW_REPEAT)
-			m_Rotation += glm::vec3(0.0f, 90.0f, 0.0f) * InDeltaTime;
+			const float distance = glm::distance(m_FocalPoint, m_Location);
+			m_FocalPoint = m_Location + GetForwardDirection() * distance;
+			m_Distance = distance;
+		}
+		else
+		{
+			Mouse::Get().SetVisibility(EMouseVisibility::Visible);
+		}
 
-		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Location) * glm::toMat4(glm::quat(glm::radians(m_Rotation)));
-		m_ViewMatrix = glm::inverse(m_ViewMatrix);*/
+		m_InitialMousePosition = MousePosition;
+		m_Location += m_LocationDelta;
+		m_Yaw += m_YawDelta;
+		m_Pitch += m_PitchDelta;
 
-		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Location);// *glm::toMat4(glm::quat(glm::radians(m_Rotation)));
-		m_ViewMatrix = glm::inverse(m_ViewMatrix);
+		UpdateCameraView();
+	}
+
+	void ViewportCamera::UpdateCameraView()
+	{
+		const float YawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
+
+		// Extra step to handle the problem when the camera direction is the same as the up vector
+		const float CosAngle = glm::dot(GetForwardDirection(), GetUpDirection());
+		if (CosAngle * YawSign > 0.99f)
+			m_PitchDelta = 0.f;
+
+		const glm::vec3 LookDirection = m_Location + GetForwardDirection();
+		m_Direction = glm::normalize(LookDirection - m_Location);
+		m_Distance = glm::distance(m_Location, m_FocalPoint);
+		m_ViewMatrix = glm::lookAt(m_Location, LookDirection, glm::vec3{ 0.f, YawSign, 0.f });
+
+		// Damping
+		m_YawDelta *= 0.6f;
+		m_PitchDelta *= 0.6f;
+		m_LocationDelta *= 0.8f;
 	}
 
 }

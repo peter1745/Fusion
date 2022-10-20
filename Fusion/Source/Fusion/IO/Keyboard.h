@@ -1,29 +1,26 @@
 #pragma once
 
 #include "KeyCodes.h"
+#include "EButtonState.h"
 
 #include <array>
 
 namespace Fusion {
 
-	enum class EKeyState
-	{
-		None = -1,
-		Pressed,
-		Held,
-		Released
-	};
-
 	struct KeyData
 	{
-		EKeyState CurrentState = EKeyState::None;
-		EKeyState OldState = EKeyState::None;
+		EButtonState CurrentState = EButtonState::None;
+		EButtonState OldState = EButtonState::None;
 	};
 
 	class Keyboard
 	{
 	public:
 		const KeyData& GetKeyData(EKeyCode InKeyCode) const { return m_KeyStates[(size_t)InKeyCode]; }
+		
+		bool IsKeyPressed(EKeyCode InKeyCode) const { return m_KeyStates[(size_t)InKeyCode].CurrentState == EButtonState::Pressed; }
+		bool IsKeyHeld(EKeyCode InKeyCode) const { return m_KeyStates[(size_t)InKeyCode].CurrentState == EButtonState::Held; }
+		bool IsKeyReleased(EKeyCode InKeyCode) const { return m_KeyStates[(size_t)InKeyCode].CurrentState == EButtonState::Released; }
 
 		static Keyboard& Get();
 
