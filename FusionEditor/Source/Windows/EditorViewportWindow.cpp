@@ -71,7 +71,7 @@ namespace FusionEditor {
 		const glm::mat4& ProjectionMatrix = m_Camera.GetProjectionMatrix();
 		glm::mat4 ActorTransformMatrix =
 			  glm::translate(glm::mat4(1.0f), ActorTransformComp->Location)
-			* glm::toMat4(ActorTransformComp->Rotation)
+			* glm::toMat4(ActorTransformComp->GetRotation())
 			* glm::scale(glm::mat4(1.0f), ActorTransformComp->Scale);
 
 		bool TransformChanged = ImGuizmo::Manipulate(
@@ -83,9 +83,11 @@ namespace FusionEditor {
 
 		if (TransformChanged)
 		{
+			glm::quat Rotation;
 			glm::vec3 Skew;
 			glm::vec4 Perspective;
-			glm::decompose(ActorTransformMatrix, ActorTransformComp->Scale, ActorTransformComp->Rotation, ActorTransformComp->Location, Skew, Perspective);
+			glm::decompose(ActorTransformMatrix, ActorTransformComp->Scale, Rotation, ActorTransformComp->Location, Skew, Perspective);
+			ActorTransformComp->SetRotation(Rotation);
 		}
 	}
 

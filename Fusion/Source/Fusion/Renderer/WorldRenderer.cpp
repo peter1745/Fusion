@@ -48,7 +48,7 @@ namespace Fusion {
 			const Shared<Mesh> ActorMesh = MeshComp->Mesh;
 
 			glm::mat4 Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location)
-				* glm::toMat4(TransformComp->Rotation)
+				* glm::toMat4(TransformComp->GetRotation())
 				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformDataBuffer->SetData(&Transform);
 			m_PBRShader->Set(1, m_TransformDataBuffer);

@@ -19,14 +19,14 @@ namespace Fusion {
 		static void Serialize(WorldYAMLWriter& InWriter, const TransformComponent* InComponent)
 		{
 			InWriter.Write("Location", InComponent->Location);
-			InWriter.Write("Rotation", InComponent->Rotation);
+			InWriter.Write("Rotation", InComponent->GetRotationEuler());
 			InWriter.Write("Scale", InComponent->Scale);
 		}
 
 		static void Deserialize(const WorldYAMLReader& InReader, TransformComponent& InComponent)
 		{
 			InComponent.Location = InReader.Read<glm::vec3>("Location");
-			InComponent.Rotation = InReader.Read<glm::quat>("Rotation");
+			InComponent.SetRotationEuler(InReader.Read<glm::vec3>("Rotation"));
 			InComponent.Scale = InReader.Read<glm::vec3>("Scale");
 		}
 	};

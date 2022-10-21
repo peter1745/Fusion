@@ -11,9 +11,9 @@ namespace FusionEditor {
 		ImGui::DragFloat3("Translation", &InComp->Location.x, 0.1f);
 		ImGui::DragFloat3("Scale", &InComp->Scale.x, 0.1f);
 
-		glm::vec3 RotationDegrees = glm::degrees(glm::eulerAngles(InComp->Rotation));
+		glm::vec3 RotationDegrees = glm::degrees(InComp->GetRotationEuler());
 		if (ImGui::DragFloat3("Rotation", &RotationDegrees.x, 0.1f))
-			InComp->Rotation = glm::quat(glm::radians(RotationDegrees));
+			InComp->SetRotationEuler(glm::radians(RotationDegrees));
 
 		UI::EndHeader();
 	}

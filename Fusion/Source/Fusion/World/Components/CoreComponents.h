@@ -20,8 +20,26 @@ namespace Fusion {
 	struct TransformComponent
 	{
 		glm::vec3 Location = glm::vec3(0.0f);
-		glm::quat Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		glm::vec3 Scale = glm::vec3(1.0f);
+
+		void SetRotation(const glm::quat& InRotation)
+		{
+			m_Rotation = InRotation;
+			m_RotationEuler = glm::eulerAngles(InRotation);
+		}
+
+		void SetRotationEuler(const glm::vec3& InRotation)
+		{
+			m_Rotation = glm::quat(InRotation);
+			m_RotationEuler = InRotation;
+		}
+
+		const glm::quat& GetRotation() const { return m_Rotation; }
+		const glm::vec3& GetRotationEuler() const { return m_RotationEuler; }
+
+	private:
+		glm::quat m_Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		glm::vec3 m_RotationEuler = { 0.0f, 0.0f, 0.0f };
 	};
 
 	struct RelationshipComponent
