@@ -25,13 +25,18 @@ namespace FusionEditor {
 		virtual void RenderWorld() override;
 		virtual void OnResize(uint32_t InWidth, uint32_t InHeight) override;
 
+		void MainpulateGizmos();
+
 		bool OnKeyPressed(Fusion::KeyPressedEvent& InEvent);
+
+		void OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor);
 
 	private:
 		ViewportCamera m_Camera;
 		EGizmoType m_ActiveGizmoType = EGizmoType::None;
 		EGizmoSpace m_GizmoSpace = EGizmoSpace::World;
 
+		Fusion::Shared<Fusion::Actor> m_SelectedActor = nullptr;
 	};
 
 }

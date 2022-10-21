@@ -1,6 +1,9 @@
 #include "ActorDetailsWindow.h"
 #include "UI/ComponentRenderer.h"
 
+#include "WindowManager.h"
+#include "WorldOutlinerWindow.h"
+
 #include "Fusion/World/World.h"
 #include "Fusion/World/Components/AllComponents.h"
 
@@ -12,6 +15,9 @@ namespace FusionEditor {
 		: EditorWindow("ActorDetailsWindowID")
 	{
 		SetTitle("Actor Details");
+
+		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
+		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(ActorDetailsWindow::OnSelectionChanged));
 	}
 
 	ActorDetailsWindow::~ActorDetailsWindow()
@@ -41,6 +47,11 @@ namespace FusionEditor {
 		RenderComponentMenuItem<CameraComponent>("Camera");
 
 		ImGui::EndPopup();
+	}
+
+	void ActorDetailsWindow::OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor)
+	{
+		m_CurrentActor = InActor;
 	}
 
 }

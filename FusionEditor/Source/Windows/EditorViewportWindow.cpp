@@ -2,9 +2,12 @@
 
 #include "UI/UILibrary.h"
 #include "UI/ImGuizmo.h"
+#include "WindowManager.h"
+#include "WorldOutlinerWindow.h"
 
 #include <Fusion/IO/Mouse.h>
 
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace FusionEditor {
@@ -13,6 +16,9 @@ namespace FusionEditor {
 		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720)
 	{
 		SetTitle("Viewport");
+
+		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
+		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(EditorViewportWindow::OnSelectionChanged));
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
@@ -32,13 +38,11 @@ namespace FusionEditor {
 		});
 	}
 
-	static glm::mat4 s_Transform = glm::mat4(1.0f);
-
 	void EditorViewportWindow::RenderContents()
 	{
 		ViewportWindowBase::RenderContents();
 
-		if (m_ActiveGizmoType == EGizmoType::None)
+		if (m_ActiveGizmoType == EGizmoType::None || m_SelectedActor == nullptr)
 			return;
 
 		ImGuizmo::OPERATION CurrentOperation = (ImGuizmo::OPERATION)-1;
@@ -61,15 +65,28 @@ namespace FusionEditor {
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
+		Fusion::TransformComponent* ActorTransformComp = m_SelectedActor->FindComponent<Fusion::TransformComponent>();
+
 		const glm::mat4& ViewMatrix = m_Camera.GetViewMatrix();
 		const glm::mat4& ProjectionMatrix = m_Camera.GetProjectionMatrix();
+		glm::mat4 ActorTransformMatrix =
+			  glm::translate(glm::mat4(1.0f), ActorTransformComp->Location)
+			* glm::toMat4(ActorTransformComp->Rotation)
+			* glm::scale(glm::mat4(1.0f), ActorTransformComp->Scale);
 
-		ImGuizmo::Manipulate(
+		bool TransformChanged = ImGuizmo::Manipulate(
 			glm::value_ptr(ViewMatrix),
 			glm::value_ptr(ProjectionMatrix),
 			CurrentOperation,
 			CurrentMode,
-			glm::value_ptr(s_Transform));
+			glm::value_ptr(ActorTransformMatrix));
+
+		if (TransformChanged)
+		{
+			glm::vec3 Skew;
+			glm::vec4 Perspective;
+			glm::decompose(ActorTransformMatrix, ActorTransformComp->Scale, ActorTransformComp->Rotation, ActorTransformComp->Location, Skew, Perspective);
+		}
 	}
 
 	void EditorViewportWindow::RenderWorld()
@@ -119,10 +136,21 @@ namespace FusionEditor {
 				ConsumeKeyPress = true;
 				break;
 			}
+			case Fusion::EKeyCode::L:
+			{
+				m_GizmoSpace = (m_GizmoSpace == EGizmoSpace::Local) ? EGizmoSpace::World : EGizmoSpace::Local;
+				ConsumeKeyPress = true;
+				break;
+			}
 			}
 		}
 
 		return ConsumeKeyPress;
+	}
+
+	void EditorViewportWindow::OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor)
+	{
+		m_SelectedActor = InActor;
 	}
 
 }

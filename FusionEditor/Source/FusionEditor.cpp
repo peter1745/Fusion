@@ -59,10 +59,10 @@ namespace FusionEditor {
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
-		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
-		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
+		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
+		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 	}
 
 	void FusionEditorApp::DrawUI()

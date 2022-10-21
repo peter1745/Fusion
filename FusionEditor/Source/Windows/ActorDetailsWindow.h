@@ -12,8 +12,6 @@ namespace FusionEditor {
 		ActorDetailsWindow();
 		~ActorDetailsWindow();
 
-		void SetCurrentActor(const Fusion::Shared<Fusion::Actor>& InActor) { m_CurrentActor = InActor; }
-
 	protected:
 		virtual void RenderContents() override;
 
@@ -42,6 +40,8 @@ namespace FusionEditor {
 				InFunc(Comp);
 			}
 		}
+
+		void OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor);
 
 	private:
 		Fusion::Shared<Fusion::Actor> m_CurrentActor = nullptr;

@@ -1,6 +1,5 @@
 #include "WorldOutlinerWindow.h"
 #include "WindowManager.h"
-#include "ActorDetailsWindow.h"
 
 #include "Fusion/World/Components/AllComponents.h"
 
@@ -48,7 +47,7 @@ namespace FusionEditor {
 		const bool IsOpen = ImGui::TreeNode(InActor->Name.c_str());
 
 		if (IsOpen != WasOpen)
-			WindowManager::Get()->GetWindowOfType<ActorDetailsWindow>()->SetCurrentActor(InActor);
+			m_SelectionCallbacks.Invoke(InActor);
 
 		if (!IsOpen)
 			return;
