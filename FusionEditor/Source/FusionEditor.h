@@ -26,6 +26,7 @@ namespace FusionEditor {
 		virtual void OnInit() override;
 		virtual void OnUpdate(float DeltaTime) override;
 		virtual void OnShutdown() override;
+		virtual void OnEvent(Event& InEvent) override;
 
 	private:
 		void InitWindows();

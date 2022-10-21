@@ -51,6 +51,11 @@ namespace FusionEditor {
 		ShutdownImGui();
 	}
 
+	void FusionEditorApp::OnEvent(Event& InEvent)
+	{
+		m_WindowManager->OnEvent(InEvent);
+	}
+
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();

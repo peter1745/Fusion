@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Fusion/Memory/Shared.h"
+#include "Fusion/Events/Event.h"
 
 #include <string>
 
@@ -16,6 +17,7 @@ namespace FusionEditor {
 
 		virtual void OnRender() {}
 		virtual void OnUpdate(float InDeltaTime) {}
+		virtual void OnEvent(Fusion::Event& InEvent) {}
 
 		uint32_t GetWindowWidth() const { return m_Width; }
 		uint32_t GetWindowHeight() const { return m_Height; }

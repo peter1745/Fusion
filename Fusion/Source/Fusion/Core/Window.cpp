@@ -5,6 +5,7 @@
 #include "Fusion/IO/GLFWKeyMappings.h"
 
 #include "Fusion/Events/WindowEvents.h"
+#include "Fusion/Events/KeyboardEvents.h"
 
 #include <GLFW/glfw3.h>
 
@@ -72,6 +73,8 @@ namespace Fusion {
 
 		glfwSetKeyCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InKey, int InScanCode, int InAction, int InMods)
 		{
+			WindowData* Data = static_cast<WindowData*>(glfwGetWindowUserPointer(InNativeWindow));
+
 			KeyData& KeyInfo = Keyboard::Get().GetKeyData(GLFWKeyMappings.at(InKey));
 			KeyInfo.OldState = KeyInfo.CurrentState;
 
@@ -80,6 +83,9 @@ namespace Fusion {
 			case GLFW_PRESS:
 			{
 				KeyInfo.CurrentState = EButtonState::Pressed;
+
+				KeyPressedEvent KeyEvent(GLFWKeyMappings.at(InKey));
+				Data->EventCallback(KeyEvent);
 				break;
 			}
 			case GLFW_REPEAT:
@@ -91,6 +97,9 @@ namespace Fusion {
 			case GLFW_RELEASE:
 			{
 				KeyInfo.CurrentState = EButtonState::Released;
+
+				KeyReleasedEvent KeyEvent(GLFWKeyMappings.at(InKey));
+				Data->EventCallback(KeyEvent);
 				break;
 			}
 			}

@@ -36,7 +36,8 @@ namespace Fusion {
 		virtual void OnUpdate(float DeltaTime) {}
 		virtual void OnShutdown() {}
 
-		void OnEvent(Event& InEvent);
+		void EventCallback(Event& InEvent);
+		virtual void OnEvent(Event& InEvent) {}
 
 	private:
 		ApplicationSpecification m_Specification;

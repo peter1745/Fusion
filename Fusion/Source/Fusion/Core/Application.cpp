@@ -24,7 +24,7 @@ namespace Fusion {
 		WindowSpec.Height = m_Specification.WindowHeight;
 		m_Window = MakeUnique<Window>(WindowSpec);
 		m_Window->Init();
-		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::OnEvent));
+		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::EventCallback));
 
 		m_Renderer = Renderer::Create(ERendererAPI::D3D11);
 
@@ -68,7 +68,7 @@ namespace Fusion {
 
 	Application& Application::Get() { return *s_Application; }
 
-	void Application::OnEvent(Event& InEvent)
+	void Application::EventCallback(Event& InEvent)
 	{
 		EventDispatcher Dispatcher(InEvent);
 		Dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& InCloseEvent)
@@ -82,6 +82,8 @@ namespace Fusion {
 			m_Renderer->OnResize(InResizeEvent.GetWidth(), InResizeEvent.GetHeight());
 			return false;
 		});
+
+		OnEvent(InEvent);
 	}
 
 }

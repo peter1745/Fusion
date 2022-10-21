@@ -64,6 +64,8 @@ namespace FusionEditor {
 			return m_Windows.at(WindowID).Window;
 		}
 
+		void OnEvent(Fusion::Event& InEvent);
+
 	public:
 		inline static WindowManager* Get() { return s_Instance; }
 

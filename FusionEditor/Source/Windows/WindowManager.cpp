@@ -2,6 +2,17 @@
 
 namespace FusionEditor {
 
+	void WindowManager::OnEvent(Fusion::Event& InEvent)
+	{
+		for (auto& [WindowID, Data] : m_Windows)
+		{
+			if (!Data.IsOpen || !Data.Window->IsTabActive())
+				continue;
+			
+			Data.Window->OnEvent(InEvent);
+		}
+	}
+
 	void WindowManager::RenderWindows()
 	{
 		for (auto& [WindowID, Data] : m_Windows)

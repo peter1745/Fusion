@@ -22,7 +22,6 @@ namespace FusionEditor {
 		virtual void OnResize(uint32_t InWidth, uint32_t InHeight) {}
 		virtual void RenderWorld() = 0;
 
-
 	protected:
 		Fusion::Shared<Fusion::World> m_World = nullptr;
 		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;

@@ -8,6 +8,8 @@
 
 #include <ImGui/imgui.h>
 
+#include "ImGuizmo.h"
+
 namespace FusionEditor {
 
 	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
@@ -32,6 +34,7 @@ namespace FusionEditor {
 	{
 		BeginFramePlatform();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiPlatformContext::EndFrame()
@@ -93,6 +96,31 @@ namespace FusionEditor {
 			UIStyle.WindowRounding = 0.0f;
 			UIStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+		
+		// ImGuizmo Style
+		auto& GizmoStyle = ImGuizmo::GetStyle();
+		GizmoStyle.TranslationLineThickness = 8.0f;
+		GizmoStyle.TranslationLineArrowSize = 10.0f;
+		GizmoStyle.RotationLineThickness = 8.0f;
+		GizmoStyle.RotationOuterLineThickness = 8.0f;
+		GizmoStyle.ScaleLineThickness = 8.0f;
+		GizmoStyle.ScaleLineCircleSize = 10.0f;
+		GizmoStyle.HatchedAxisLineThickness = 0.0f;
+
+		GizmoStyle.Colors[ImGuizmo::DIRECTION_X] = ImVec4(0.666f, 0.000f, 0.000f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::DIRECTION_Y] = ImVec4(0.000f, 0.666f, 0.000f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::DIRECTION_Z] = ImVec4(0.000f, 0.000f, 0.666f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::PLANE_X] = ImVec4(0.666f, 0.000f, 0.000f, 0.75f);
+		GizmoStyle.Colors[ImGuizmo::PLANE_Y] = ImVec4(0.000f, 0.666f, 0.000f, 0.75f);
+		GizmoStyle.Colors[ImGuizmo::PLANE_Z] = ImVec4(0.000f, 0.000f, 0.666f, 0.75f);
+		GizmoStyle.Colors[ImGuizmo::SELECTION] = ImVec4(1.000f, 0.7500f, 0.062f, 0.741f);
+		GizmoStyle.Colors[ImGuizmo::INACTIVE] = ImVec4(0.600f, 0.600f, 0.600f, 0.600f);
+		GizmoStyle.Colors[ImGuizmo::TRANSLATION_LINE] = ImVec4(0.666f, 0.666f, 0.666f, 0.666f);
+		GizmoStyle.Colors[ImGuizmo::SCALE_LINE] = ImVec4(0.250f, 0.250f, 0.250f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::ROTATION_USING_BORDER] = ImVec4(1.000f, 0.500f, 0.062f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::ROTATION_USING_FILL] = ImVec4(1.000f, 0.500f, 0.062f, 0.500f);
+		GizmoStyle.Colors[ImGuizmo::TEXT] = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
+		GizmoStyle.Colors[ImGuizmo::TEXT_SHADOW] = ImVec4(0.000f, 0.000f, 0.000f, 1.000f);
 	}
 
 }

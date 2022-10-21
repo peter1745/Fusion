@@ -60,6 +60,7 @@ namespace Fusion {
 		D3DContext->GetDevice()->CreateSamplerState(&TextureSamplerDesc, &m_SamplerState);
 
 		stbi_image_free(m_CreateInfo.Data);
+		m_CreateInfo.Data = nullptr;
 	}
 
 	D3D11Texture2D::~D3D11Texture2D()
