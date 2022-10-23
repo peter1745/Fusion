@@ -32,10 +32,12 @@ project "FusionEditor"
         "%{IncludeDirs.ImGui}",
         "%{IncludeDirs.ImGui}/ImGui", -- Fix for ImGui includes
         "%{IncludeDirs.EnTT}",
+        "%{IncludeDirs.stb_image}",
+        "%{IncludeDirs.yaml_cpp}",
         "%{IncludeDirs.NFD_Extended}"
     }
 
-    defines { "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL" }
+    defines { "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL", "YAML_CPP_STATIC_DEFINE" }
 
     filter "system:windows"
         systemversion "latest"

@@ -2,26 +2,13 @@
 
 #include "Fusion/Core/Core.h"
 #include "Fusion/Memory/Shared.h"
+#include "Fusion/Core/UUID.h"
 
 namespace Fusion {
 
-	class ActorID
-	{
-	public:
-		static const uint64_t Invalid = 0;
-
-	public:
-		ActorID();
-		ActorID(uint64_t InActorID);
-		ActorID(const ActorID& InOther);
-
-		operator uint64_t() { return m_ActorID; }
-		operator const uint64_t() const { return m_ActorID; }
-	private:
-		uint64_t m_ActorID;
-	};
-
 	class World;
+
+	using ActorID = UUID;
 
 	class Actor : public SharedObject
 	{
@@ -57,19 +44,6 @@ namespace Fusion {
 		World* m_World = nullptr;
 
 		friend class World;
-	};
-
-}
-
-namespace std {
-
-	template<>
-	struct hash<Fusion::ActorID>
-	{
-		size_t operator()(const Fusion::ActorID& InActorID) const noexcept
-		{
-			return (uint64_t)InActorID;
-		}
 	};
 
 }

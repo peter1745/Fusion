@@ -1,0 +1,41 @@
+#include "ProjectSerializer.h"
+
+#include "Fusion/IO/Logging.h"
+#include "Fusion/Core/Assert.h"
+
+#include <fstream>
+#include <sstream>
+
+#include <yaml-cpp/yaml.h>
+
+namespace FusionEditor {
+
+	void ProjectSerializer::Serialize(const std::shared_ptr<Project>& InProject)
+	{
+		YAML::Emitter Emitter;
+		Emitter << YAML::BeginMap;
+		Emitter << YAML::Key << "Project" << YAML::Value << InProject->Name;
+		Emitter << YAML::EndMap;
+
+		std::ofstream StreamOut(InProject->BaseDirectory / (InProject->Name + ".fproj"));
+		StreamOut << Emitter.c_str();
+		StreamOut.close();
+	}
+
+	std::shared_ptr<Project> ProjectSerializer::Deserialize(const std::filesystem::path& InFilePath)
+	{
+		std::ifstream StreamIn(InFilePath);
+		FUSION_CLIENT_VERIFY(StreamIn);
+		std::stringstream StringBuffer;
+		StringBuffer << StreamIn.rdbuf();
+
+		YAML::Node RootNode = YAML::Load(StringBuffer);
+		FUSION_CLIENT_VERIFY(RootNode);
+
+		std::shared_ptr<Project> NewProject = std::make_shared<Project>();
+		NewProject->Name = RootNode["Project"].as<std::string>();
+		NewProject->BaseDirectory = InFilePath.parent_path();
+		return NewProject;
+	}
+
+}

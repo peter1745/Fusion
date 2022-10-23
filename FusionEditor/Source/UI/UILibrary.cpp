@@ -177,4 +177,16 @@ namespace FusionEditor::UI {
 		return true;
 	}
 
+	void BeginDisabled(bool InDisabled)
+	{
+		if (InDisabled)
+			ImGui::BeginDisabled(true);
+	}
+
+	void EndDisabled()
+	{
+		if (GImGui->DisabledStackSize > 0)
+			ImGui::EndDisabled();
+	}
+
 }

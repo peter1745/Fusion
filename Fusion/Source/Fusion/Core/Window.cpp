@@ -22,6 +22,12 @@ namespace Fusion {
 		glfwTerminate();
 	}
 	
+	void Window::SetTitle(const std::string& InTitle)
+	{
+		glfwSetWindowTitle(m_NativeWindow, InTitle.c_str());
+		m_WindowData.Specification.Title = InTitle;
+	}
+
 	void Window::Init()
 	{
 		FUSION_CORE_VERIFY(glfwInit(), "Failed to initialize GLFW!");

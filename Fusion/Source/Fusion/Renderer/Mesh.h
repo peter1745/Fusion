@@ -39,10 +39,4 @@ namespace Fusion {
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 	};
 
-	class MeshLoader
-	{
-	public:
-		static Shared<Mesh> LoadMeshFromFile(const std::filesystem::path& InFilePath);
-	};
-
 }

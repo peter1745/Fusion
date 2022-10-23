@@ -27,6 +27,9 @@ namespace FusionEditor::UI {
 	// Uses Fusion's own mouse position, since ImGui's mouse position becomes invalid if the cursor is hidden or locked
 	bool IsMouseHoveringRect(const ImVec2& InMin, const ImVec2& InMax, bool InClip = true);
 
+	void BeginDisabled(bool InDisabled = true);
+	void EndDisabled();
+
 	template<typename TEnum>
 	static bool Dropdown(std::string_view InLabel, TEnum* InSelectedValue, const Fusion::InitializerList<std::string_view>& InOptionLabels)
 	{

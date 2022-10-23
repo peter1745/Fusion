@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Fusion/World/World.h"
-#include "YAMLCustomConverters.h"
+#include "Fusion/Serialization/YAMLCustomConverters.h"
 
 #include <yaml-cpp/yaml.h>
 #include <filesystem>

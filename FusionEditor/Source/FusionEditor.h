@@ -12,7 +12,8 @@
 
 #include "Renderer/ViewportCamera.h"
 
-#include "Platform/D3D11/ImGuiPlatformContextD3D11.h"
+#include "UI/ImGuiPlatformContext.h"
+#include "Project/Project.h"
 
 namespace FusionEditor {
 
@@ -28,13 +29,19 @@ namespace FusionEditor {
 		virtual void OnShutdown() override;
 		virtual void OnEvent(Event& InEvent) override;
 
+		void ShowImportWindowForFile(const std::filesystem::path& InFilePath);
+
 	private:
 		void InitWindows();
 		void DrawUI();
 		void DrawMenuBar();
 		void ShutdownImGui();
 
-		void DummyWorld();
+		void CreateProject(const std::string& InName, const std::filesystem::path& InDirectory);
+		void LoadProject(const std::filesystem::path& InProjectPath);
+
+	private:
+		void DrawNewProjectPopup();
 
 	private:
 		Shared<Mesh> m_CubeMesh = nullptr;
@@ -44,6 +51,10 @@ namespace FusionEditor {
 		Unique<WindowManager> m_WindowManager = nullptr;
 
 		std::unique_ptr<ImGuiPlatformContext> m_ImGuiContext = nullptr;
+
+		std::shared_ptr<Project> m_CurrentProject;
+
+		std::string m_PopupToOpen = "";
 	};
 
 }

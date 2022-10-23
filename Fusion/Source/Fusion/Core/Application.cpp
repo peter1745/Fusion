@@ -12,7 +12,7 @@ namespace Fusion {
 
 	static Application* s_Application = nullptr;
 
-	Application::Application(const ApplicationSpecification& InSpecification)
+	Application::Application(const ApplicationSpecification& InSpecification, void* InUserData)
 		: m_Specification(InSpecification)
 	{
 		FUSION_CORE_VERIFY(s_Application == nullptr);
@@ -22,6 +22,7 @@ namespace Fusion {
 		WindowSpec.Title = m_Specification.Title;
 		WindowSpec.Width = m_Specification.WindowWidth;
 		WindowSpec.Height = m_Specification.WindowHeight;
+		WindowSpec.UserData = InUserData;
 		m_Window = MakeUnique<Window>(WindowSpec);
 		m_Window->Init();
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::EventCallback));
@@ -46,6 +47,8 @@ namespace Fusion {
 			Keyboard::Get().TransitionHeldKeys();
 			Mouse::Get().TransitionHeldButtons();
 			m_Window->ProcessEvents();
+
+			ExecuteMainThreadQueue();
 
 			m_Renderer->Begin();
 			OnUpdate(m_TimeStep);
@@ -84,6 +87,16 @@ namespace Fusion {
 		});
 
 		OnEvent(InEvent);
+	}
+
+	void Application::ExecuteMainThreadQueue()
+	{
+		std::scoped_lock<std::mutex> Lock(m_MainThreadQueueMutex);
+
+		for (auto& Func : m_MainThreadQueue)
+			Func();
+
+		m_MainThreadQueue.clear();
 	}
 
 }

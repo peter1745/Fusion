@@ -14,15 +14,23 @@ namespace Fusion {
 		std::string Title;
 		uint32_t Width;
 		uint32_t Height;
+		void* UserData;
+	};
+
+	using EventCallbackFunc = std::function<void(Event&)>;
+	struct WindowData
+	{
+		WindowSpecification Specification;
+		EventCallbackFunc EventCallback = nullptr;
 	};
 
 	class Window
 	{
 	public:
-		using EventCallbackFunc = std::function<void(Event&)>;
-
 		Window(const WindowSpecification& InSpecification);
 		~Window();
+
+		void SetTitle(const std::string& InTitle);
 
 		uint32_t GetWidth() const { return m_WindowData.Specification.Width; }
 		uint32_t GetHeight() const { return m_WindowData.Specification.Height; }
@@ -42,12 +50,7 @@ namespace Fusion {
 		void ProcessEvents();
 
 	private:
-		struct WindowData
-		{
-			WindowSpecification Specification;
-			EventCallbackFunc EventCallback = nullptr;
-		} m_WindowData;
-
+		WindowData m_WindowData;
 		GLFWwindow* m_NativeWindow = nullptr;
 
 		friend class Application;

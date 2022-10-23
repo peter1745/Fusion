@@ -2,7 +2,7 @@
 #include "WorldWriter.h"
 #include "ComponentSerialization.h"
 
-#include "YAMLCustomConverters.h"
+#include "Fusion/Serialization/YAMLCustomConverters.h"
 
 namespace Fusion {
 
@@ -22,7 +22,7 @@ namespace Fusion {
 				m_Emitter << YAML::Key << "Actor" << YAML::Value << Actor->GetActorID();
 				m_Emitter << YAML::Key << "Name" << YAML::Value << Actor->Name;
 
-				ComponentUtils::AllConst(Actor, [this, CurrentActor = Actor]<typename TComponent>(const TComponent * InComponent)
+				ComponentUtils::AllConst(Actor, [this, CurrentActor = Actor]<typename TComponent>(const TComponent* InComponent)
 				{
 					m_Emitter << YAML::Key << ComponentSerializer<TComponent>::Name;
 					m_Emitter << YAML::BeginMap;
