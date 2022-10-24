@@ -25,57 +25,57 @@ namespace FusionEditor {
 
 	void MeshImporterWindow::Import()
 	{
-		if (HasExtension(m_SourceAssetPath, "gltf") || HasExtension(m_SourceAssetPath, "glb"))
+		if (!HasExtension(m_SourceAssetPath, "gltf") && !HasExtension(m_SourceAssetPath, "glb"))
+			return;
+
+		Fusion::GLTFData Data;
+		if (!Fusion::GLTFLoader::LoadGLTFMesh(m_SourceAssetPath, Data))
+			return;
+
+		YAML::Emitter Emitter;
+		Emitter << YAML::BeginMap;
+		Emitter << YAML::Key << "Mesh" << YAML::Value << YAML::BeginMap;
+		Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle();
+		Emitter << YAML::Key << "Name" << YAML::Value << Data.Name;
+
+		// Vertices
 		{
-			Fusion::GLTFData Data;
-			if (!Fusion::GLTFLoader::LoadGLTFMesh(m_SourceAssetPath, Data))
-				return;
+			Emitter << YAML::Key << "Vertices" << YAML::Value << YAML::BeginMap;
 
-			YAML::Emitter Emitter;
-			Emitter << YAML::BeginMap;
-			Emitter << YAML::Key << "Mesh" << YAML::Value << YAML::BeginMap;
-			Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle();
-			Emitter << YAML::Key << "Name" << YAML::Value << Data.Name;
-
-			// Vertices
+			for (const auto& VertexData : Data.Vertices)
 			{
-				Emitter << YAML::Key << "Vertices" << YAML::Value << YAML::BeginMap;
-
-				for (const auto& VertexData : Data.Vertices)
-				{
-					Emitter << YAML::Key << "Vertex" << YAML::BeginMap;
-					Emitter << YAML::Key << "Position" << YAML::Value << VertexData.Position;
-					Emitter << YAML::Key << "Normal" << YAML::Value << VertexData.Normal;
-					Emitter << YAML::Key << "UV" << YAML::Value << VertexData.TextureCoordinate;
-					Emitter << YAML::EndMap;
-				}
-
-				Emitter << YAML::EndMap;
-			}
-
-			// Indices
-			{
-				Emitter << YAML::Key << "Indices" << YAML::Value << YAML::BeginMap;
-
-				for (const auto& IndicesData : Data.Indices)
-				{
-					Emitter << YAML::Key << "Index" << YAML::BeginMap;
-					Emitter << YAML::Key << "V0" << YAML::Value << IndicesData.Vertex0;
-					Emitter << YAML::Key << "V1" << YAML::Value << IndicesData.Vertex1;
-					Emitter << YAML::Key << "V2" << YAML::Value << IndicesData.Vertex2;
-					Emitter << YAML::EndMap;
-				}
-
+				Emitter << YAML::Key << "Vertex" << YAML::BeginMap;
+				Emitter << YAML::Key << "Position" << YAML::Value << VertexData.Position;
+				Emitter << YAML::Key << "Normal" << YAML::Value << VertexData.Normal;
+				Emitter << YAML::Key << "UV" << YAML::Value << VertexData.TextureCoordinate;
 				Emitter << YAML::EndMap;
 			}
 
 			Emitter << YAML::EndMap;
-			Emitter << YAML::EndMap;
-
-			std::ofstream StreamOut(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
-			StreamOut << Emitter.c_str();
-			StreamOut.close();
 		}
+
+		// Indices
+		{
+			Emitter << YAML::Key << "Indices" << YAML::Value << YAML::BeginMap;
+
+			for (const auto& IndicesData : Data.Indices)
+			{
+				Emitter << YAML::Key << "Index" << YAML::BeginMap;
+				Emitter << YAML::Key << "V0" << YAML::Value << IndicesData.Vertex0;
+				Emitter << YAML::Key << "V1" << YAML::Value << IndicesData.Vertex1;
+				Emitter << YAML::Key << "V2" << YAML::Value << IndicesData.Vertex2;
+				Emitter << YAML::EndMap;
+			}
+
+			Emitter << YAML::EndMap;
+		}
+
+		Emitter << YAML::EndMap;
+		Emitter << YAML::EndMap;
+
+		std::ofstream StreamOut(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
+		StreamOut << Emitter.c_str();
+		StreamOut.close();
 	}
 
 	void MeshImporterWindow::RenderContents()
