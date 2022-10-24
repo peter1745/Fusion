@@ -106,7 +106,7 @@ namespace Fusion {
 			}
 
 			// NOTE(Peter): We should be creating submeshes here, but for now we'll only process the first submesh
-			return false;
+			return true;
 		}
 	}
 

@@ -15,7 +15,6 @@
 #include "Project/ProjectSerializer.h"
 
 #include "AssetSystem/AssetUtils.h"
-#include "AssetSystem/Factories/MeshAssetFactory.h"
 
 #include <Fusion/Renderer/Mesh.h>
 #include <Fusion/Serialization/World/WorldSerializer.h>
@@ -73,6 +72,9 @@ namespace FusionEditor {
 
 	void FusionEditorApp::ShowImportWindowForFile(const std::filesystem::path& InFilePath)
 	{
+		if (!m_CurrentProject)
+			return;
+
 		Shared<ContentBrowserWindow> ContentBrowser = m_WindowManager->GetWindowOfType<ContentBrowserWindow>();
 
 		if (!ContentBrowser->IsMouseInside())
@@ -89,16 +91,22 @@ namespace FusionEditor {
 			FUSION_CLIENT_WARN("Unable to import asset {}, couldn't determine asset type", InFilePath);
 			return;
 		}
+
+		const auto& OutputPath = m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->GetCurrentFolderPath();
+		m_WindowManager->OpenWindowByID(m_AssetImporterWindows[Type]->GetID());
+		m_AssetImporterWindows[Type]->SetImportPaths(InFilePath, OutputPath);
 	}
 
 	void FusionEditorApp::InitWindows()
 	{
 		m_WindowManager = MakeUnique<WindowManager>();
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
-		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
+		m_WindowManager->RegisterWindow<ActorDetailsWindow>(false);
 		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
+
+		m_AssetImporterWindows[EAssetType::Mesh] = m_WindowManager->RegisterWindow<MeshImporterWindow>(false);
 	}
 
 	void FusionEditorApp::DrawUI()

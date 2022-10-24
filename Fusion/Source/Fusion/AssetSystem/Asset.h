@@ -7,6 +7,8 @@
 
 namespace Fusion {
 
+	using AssetHandle = UUID;
+
 	enum class EAssetType
 	{
 		None = -1, Mesh
@@ -20,7 +22,7 @@ namespace Fusion {
 		virtual EAssetType GetType() const { return EAssetType::None; }
 
 	public:
-		UUID Handle;
+		AssetHandle Handle;
 	};
 
 	class MeshAsset : public Asset

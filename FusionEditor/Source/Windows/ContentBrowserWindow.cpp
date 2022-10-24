@@ -27,14 +27,20 @@ namespace FusionEditor {
 			return;
 		}
 
-		m_FileWatcher = std::make_unique<filewatch::FileWatch<std::string>>(
-			(InProject->BaseDirectory / "Content").string(),
-			FUSION_BIND_FUNC(ContentBrowserWindow::OnFileSystemChanged));
+		m_CurrentFolderPath = InProject->BaseDirectory / "Content";
+		m_FileWatcher = std::make_unique<filewatch::FileWatch<std::string>>(m_CurrentFolderPath.string(), FUSION_BIND_FUNC(ContentBrowserWindow::OnFileSystemChanged));
+
+		for (auto Entry : std::filesystem::directory_iterator(m_CurrentFolderPath))
+			AddFileSystemEntry(Entry.path());
 	}
 
-	void ContentBrowserWindow::ImportAssetFile(const std::filesystem::path& InFilePath)
+	void ContentBrowserWindow::NavigateToFolder(size_t InFolderIndex)
 	{
+		m_CurrentFolderPath = m_ContentEntries[InFolderIndex].FilePath;
+		m_ContentEntries.clear();
 
+		for (auto Entry : std::filesystem::directory_iterator(m_CurrentFolderPath))
+			AddFileSystemEntry(Entry.path());
 	}
 
 	void ContentBrowserWindow::RenderContents()
@@ -42,35 +48,61 @@ namespace FusionEditor {
 		if (m_CurrentProject == nullptr)
 			return;
 
-		for (const auto& Entry : m_ContentEntries)
-			ImGui::Text("%s (%s)", Entry.FilePath.string().c_str(), Entry.IsDirectory ? "Directory" : "File");
+		const float CellSize = 196.0f;
+		const float ScrollBarOffset = 20.0f + ImGui::GetStyle().ScrollbarSize;
+		const float PanelWidth = ImGui::GetContentRegionAvail().x - ScrollBarOffset;
+		int32_t ColumnCount = glm::max(int32_t(PanelWidth / CellSize), 1);
+		ImGui::Columns(ColumnCount, 0, false);
+
+		int32_t ClickedEntryIndex = -1;
+
+		for (size_t Idx = 0; Idx < m_ContentEntries.size(); Idx++)
+		{
+			float ColumnWidth = ImGui::GetColumnWidth();
+			std::string Name = m_ContentEntries[Idx].FilePath.filename().string();
+			if (ImGui::Button(Name.c_str(), ImVec2(ColumnWidth, ColumnWidth)))
+				ClickedEntryIndex = Idx;
+			ImGui::NextColumn();
+		}
+
+		if (ClickedEntryIndex != -1 && m_ContentEntries[ClickedEntryIndex].IsFolder)
+		{
+			NavigateToFolder(size_t(ClickedEntryIndex));
+		}
+	}
+
+	void ContentBrowserWindow::AddFileSystemEntry(const std::filesystem::path& InFilePath)
+	{
+		if (!std::filesystem::equivalent(m_CurrentFolderPath, InFilePath.parent_path()))
+			return;
+
+		if (std::filesystem::is_directory(InFilePath))
+		{
+			m_ContentEntries.push_back({ InFilePath, true });
+		}
+		else
+		{
+			m_ContentEntries.push_back({ InFilePath, false });
+		}
 	}
 
 	void ContentBrowserWindow::OnFileSystemChanged(const std::string& InFile, const filewatch::Event InEventType)
 	{
 		Fusion::Application::Get().SubmitToMainThread([this, FilePath = InFile, EventType = InEventType]()
 		{
-			bool IsDirectory = std::filesystem::is_directory(m_CurrentProject->BaseDirectory / "Content" / FilePath);
+			std::filesystem::path FullPath = m_CurrentProject->BaseDirectory / "Content" / FilePath;
 
 			switch (EventType)
 			{
 			case filewatch::Event::added:
-				m_ContentEntries.push_back({ FilePath, IsDirectory });
+				AddFileSystemEntry(FullPath);
 				break;
 			case filewatch::Event::removed:
 			{
-				auto It = std::remove_if(m_ContentEntries.begin(), m_ContentEntries.end(), [&FilePath](const ContentEntry& InEntry)
-				{
-					return InEntry.FilePath == FilePath;
-				});
-
-				if (It != m_ContentEntries.end())
-					m_ContentEntries.erase(It);
 				break;
 			}
 			case filewatch::Event::modified:
 			{
-				FUSION_CORE_INFO("Modified!");
 				break;
 			}
 			case filewatch::Event::renamed_old:

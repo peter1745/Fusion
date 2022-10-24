@@ -6,9 +6,11 @@
 #include <Fusion/Renderer/WorldRenderer.h>
 #include <Fusion/Renderer/Mesh.h>
 #include <Fusion/IO/TextureLoader.h>
+#include <Fusion/AssetSystem/Asset.h>
 
 #include "Windows/WindowManager.h"
 #include "Windows/EditorViewportWindow.h"
+#include "Windows/AssetSystem/MeshImporterWindow.h"
 
 #include "Renderer/ViewportCamera.h"
 
@@ -49,6 +51,8 @@ namespace FusionEditor {
 
 		Shared<World> m_World = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
+
+		std::unordered_map<EAssetType, Shared<AssetImporterWindow>> m_AssetImporterWindows;
 
 		std::unique_ptr<ImGuiPlatformContext> m_ImGuiContext = nullptr;
 

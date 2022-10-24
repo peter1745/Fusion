@@ -10,7 +10,7 @@ namespace FusionEditor {
 	class ViewportWindowBase : public EditorWindow
 	{
 	public:
-		ViewportWindowBase(const std::string& InWindowID, const Fusion::Shared<Fusion::World>& InWorld);
+		ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld);
 
 		virtual void OnRender() override;
 		virtual void OnUpdate(float InDeltaTime) override;

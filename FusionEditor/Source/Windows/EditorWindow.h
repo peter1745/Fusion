@@ -25,8 +25,10 @@ namespace FusionEditor {
 		bool IsTabActive() const { return m_IsTabActive; }
 		bool IsMouseInside() const { return m_IsMouseInside; }
 
+		uint32_t GetID() const { return m_WindowID; }
+
 	protected:
-		EditorWindow(const std::string& InWindowID, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);
+		EditorWindow(const std::string& InTitle, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);
 
 		virtual void RenderContents() = 0;
 
@@ -34,13 +36,15 @@ namespace FusionEditor {
 		void CheckMouseIsInside();
 
 	private:
-		std::string m_WindowID;
+		uint32_t m_WindowID;
 		std::string m_Title = "Editor Window";
 		uint32_t m_Width;
 		uint32_t m_Height;
 
 		bool m_IsTabActive = false;
 		bool m_IsMouseInside = false;
+
+		friend class WindowManager;
 	};
 
 }

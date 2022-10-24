@@ -3,8 +3,8 @@
 
 namespace FusionEditor {
 
-	EditorWindow::EditorWindow(const std::string& InWindowID, uint32_t InInitialWidth /*= 0*/, uint32_t InInitialHeight /*= 0*/)
-		: m_WindowID(InWindowID), m_Width(InInitialWidth), m_Height(InInitialHeight)
+	EditorWindow::EditorWindow(const std::string& InTitle, uint32_t InInitialWidth /*= 0*/, uint32_t InInitialHeight /*= 0*/)
+		: m_Title(InTitle), m_Width(InInitialWidth), m_Height(InInitialHeight)
 	{
 	}
 
@@ -51,5 +51,4 @@ namespace FusionEditor {
 
 		ImGui::End();
 	}
-
 }

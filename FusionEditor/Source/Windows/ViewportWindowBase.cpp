@@ -7,8 +7,8 @@
 
 namespace FusionEditor {
 
-	ViewportWindowBase::ViewportWindowBase(const std::string& InWindowID, const Fusion::Shared<Fusion::World>& InWorld)
-		: EditorWindow(InWindowID, 300, 300), m_World(InWorld), m_ViewportWidth(300.0f), m_ViewportHeight(300.0f)
+	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld)
+		: EditorWindow(InTitle, 300, 300), m_World(InWorld), m_ViewportWidth(300.0f), m_ViewportHeight(300.0f)
 	{
 		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
 

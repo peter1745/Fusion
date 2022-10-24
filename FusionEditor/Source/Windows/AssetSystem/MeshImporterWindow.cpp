@@ -1,7 +1,10 @@
-#include "MeshAssetFactory.h"
+#include "MeshImporterWindow.h"
+
+#include "Windows/WindowManager.h"
 
 #include <Fusion/IO/GLTFLoader.h>
 #include <Fusion/Renderer/Mesh.h>
+#include <Fusion/AssetSystem/Asset.h>
 
 #include <Fusion/Serialization/YAMLCustomConverters.h>
 #include <yaml-cpp/yaml.h>
@@ -14,23 +17,24 @@ namespace FusionEditor {
 	{
 		return InFilePath.extension().string().find(InExtension) != std::string::npos;
 	}
-		
-	Fusion::Shared<Fusion::MeshAsset> MeshAssetFactory::ImportFromFile(const std::filesystem::path& InOutputPath, const std::filesystem::path& InFilePath)
-	{
-		Fusion::Shared<Fusion::MeshAsset> Result = nullptr;
 
-		if (HasExtension(InFilePath, "gltf") || HasExtension(InFilePath, "glb"))
+	MeshImporterWindow::MeshImporterWindow()
+		: AssetImporterWindow("Import Mesh")
+	{
+	}
+
+	void MeshImporterWindow::Import()
+	{
+		if (HasExtension(m_SourceAssetPath, "gltf") || HasExtension(m_SourceAssetPath, "glb"))
 		{
 			Fusion::GLTFData Data;
-			if (!Fusion::GLTFLoader::LoadGLTFMesh(InFilePath, Data))
-				return nullptr;
-
-			Result = Fusion::Shared<Fusion::MeshAsset>::Create(Data.Vertices, Data.Indices);
+			if (!Fusion::GLTFLoader::LoadGLTFMesh(m_SourceAssetPath, Data))
+				return;
 
 			YAML::Emitter Emitter;
 			Emitter << YAML::BeginMap;
 			Emitter << YAML::Key << "Mesh" << YAML::Value << YAML::BeginMap;
-			Emitter << YAML::Key << "Handle" << YAML::Value << Result->Handle;
+			Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle();
 			Emitter << YAML::Key << "Name" << YAML::Value << Data.Name;
 
 			// Vertices
@@ -68,12 +72,24 @@ namespace FusionEditor {
 			Emitter << YAML::EndMap;
 			Emitter << YAML::EndMap;
 
-			std::ofstream StreamOut(InOutputPath);
+			std::ofstream StreamOut(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
 			StreamOut << Emitter.c_str();
 			StreamOut.close();
 		}
+	}
 
-		return Result;
+	void MeshImporterWindow::RenderContents()
+	{
+		if (ImGui::Button("Import"))
+		{
+			Import();
+			WindowManager::Get()->CloseWindowByID(GetID());
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+			WindowManager::Get()->CloseWindowByID(GetID());
 	}
 
 }

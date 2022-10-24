@@ -3,6 +3,7 @@
 #include "EditorWindow.h"
 
 #include "Fusion/Core/TypeInfo.h"
+#include "Fusion/IO/Logging.h"
 #include "Fusion/Memory/Shared.h"
 
 #include <unordered_map>
@@ -24,6 +25,28 @@ namespace FusionEditor {
 			s_Instance = this;
 		}
 
+		void OpenWindowByID(uint32_t InWindowID)
+		{
+			if (m_Windows.find(InWindowID) == m_Windows.end())
+			{
+				FUSION_CLIENT_WARN("Tried to open a window using an invalid ID!");
+				return;
+			}
+
+			m_Windows.at(InWindowID).IsOpen = true;
+		}
+
+		void CloseWindowByID(uint32_t InWindowID)
+		{
+			if (m_Windows.find(InWindowID) == m_Windows.end())
+			{
+				FUSION_CLIENT_WARN("Tried to open a window using an invalid ID!");
+				return;
+			}
+
+			m_Windows.at(InWindowID).IsOpen = false;
+		}
+
 		template<typename TWindow, typename... TWindowParams>
 		requires std::derived_from<TWindow, EditorWindow>&& std::constructible_from<TWindow, TWindowParams...>
 		Fusion::Shared<TWindow> RegisterWindow(bool InOpenByDefault, TWindowParams&&... InParams)
@@ -38,6 +61,7 @@ namespace FusionEditor {
 
 			WindowData& Data = m_Windows[WindowID];
 			Data.Window = Fusion::Shared<TWindow>::Create(std::forward<TWindowParams>(InParams)...);
+			Data.Window->m_WindowID = WindowID;
 			Data.IsOpen = InOpenByDefault;
 			return Data.Window;
 		}
