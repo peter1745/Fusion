@@ -1,6 +1,6 @@
-#include "ViewportWindowBase.h"
+#include "ViewportWindowBase.hpp"
 
-#include "Fusion/Core/Application.h"
+#include "Fusion/Core/Application.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>

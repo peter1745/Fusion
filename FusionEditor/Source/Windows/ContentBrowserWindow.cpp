@@ -1,5 +1,5 @@
-#include "ContentBrowserWindow.h"
-#include "Fusion/Core/Application.h"
+#include "ContentBrowserWindow.hpp"
+#include "Fusion/Core/Application.hpp"
 
 #include <filesystem>
 

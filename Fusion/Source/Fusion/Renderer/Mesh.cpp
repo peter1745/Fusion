@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "Mesh.h"
+#include "FusionPCH.hpp"
+#include "Mesh.hpp"
 
 namespace Fusion {
 

@@ -1,11 +1,11 @@
-#include "EditorViewportWindow.h"
+#include "EditorViewportWindow.hpp"
 
-#include "UI/UILibrary.h"
+#include "UI/UILibrary.hpp"
 #include "UI/ImGuizmo.h"
-#include "WindowManager.h"
-#include "WorldOutlinerWindow.h"
+#include "WindowManager.hpp"
+#include "WorldOutlinerWindow.hpp"
 
-#include <Fusion/IO/Mouse.h>
+#include <Fusion/IO/Mouse.hpp>
 
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/type_ptr.hpp>

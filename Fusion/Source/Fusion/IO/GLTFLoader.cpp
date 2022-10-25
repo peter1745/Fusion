@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "GLTFLoader.h"
+#include "FusionPCH.hpp"
+#include "GLTFLoader.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NOEXCEPTION

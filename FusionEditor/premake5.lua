@@ -10,6 +10,7 @@ project "FusionEditor"
     files
     {
         "Source/**.cpp",
+        "Source/**.hpp",
         "Source/**.h"
     }
 

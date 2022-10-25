@@ -1,10 +1,10 @@
-#include "FusionPCH.h"
-#include "Application.h"
+#include "FusionPCH.hpp"
+#include "Application.hpp"
 
-#include "Fusion/IO/Keyboard.h"
-#include "Fusion/IO/Mouse.h"
-#include "Fusion/Renderer/Renderer.h"
-#include "Fusion/Events/WindowEvents.h"
+#include "Fusion/IO/Keyboard.hpp"
+#include "Fusion/IO/Mouse.hpp"
+#include "Fusion/Renderer/Renderer.hpp"
+#include "Fusion/Events/WindowEvents.hpp"
 
 #include <glm/glm.hpp>
 

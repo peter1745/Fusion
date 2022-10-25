@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "ByteBuffer.h"
+#include "FusionPCH.hpp"
+#include "ByteBuffer.hpp"
 
 namespace Fusion {
 

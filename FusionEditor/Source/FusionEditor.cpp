@@ -1,24 +1,24 @@
-#include "FusionEditor.h"
-#include <Fusion/EntryPoint.h>
-#include <Fusion/Memory/Shared.h>
+#include "FusionEditor.hpp"
+#include <Fusion/EntryPoint.hpp>
+#include <Fusion/Memory/Shared.hpp>
 
 #include <ImGui/imgui.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
 
-#include "Windows/GameViewportWindow.h"
-#include "Windows/WorldOutlinerWindow.h"
-#include "Windows/ActorDetailsWindow.h"
-#include "Windows/ContentBrowserWindow.h"
+#include "Windows/GameViewportWindow.hpp"
+#include "Windows/WorldOutlinerWindow.hpp"
+#include "Windows/ActorDetailsWindow.hpp"
+#include "Windows/ContentBrowserWindow.hpp"
 
-#include "UI/UILibrary.h"
+#include "UI/UILibrary.hpp"
 
-#include "Project/ProjectSerializer.h"
+#include "Project/ProjectSerializer.hpp"
 
-#include "AssetSystem/AssetUtils.h"
+#include "AssetSystem/AssetUtils.hpp"
 
-#include <Fusion/Renderer/Mesh.h>
-#include <Fusion/Serialization/World/WorldSerializer.h>
-#include <Fusion/IO/Keyboard.h>
+#include <Fusion/Renderer/Mesh.hpp>
+#include <Fusion/Serialization/World/WorldSerializer.hpp>
+#include <Fusion/IO/Keyboard.hpp>
 
 #include <NFD-Extended/nfd.hpp>
 

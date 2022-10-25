@@ -1,8 +1,8 @@
-#include "FusionPCH.h"
-#include "Renderer.h"
+#include "FusionPCH.hpp"
+#include "Renderer.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/D3D11Renderer.h"	
+	#include "Platform/D3D11/D3D11Renderer.hpp"
 #endif
 
 // #include "Platform/OpenGL/OpenGLRenderer.h"

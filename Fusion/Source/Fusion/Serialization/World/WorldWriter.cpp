@@ -1,8 +1,8 @@
-#include "FusionPCH.h"
-#include "WorldWriter.h"
-#include "ComponentSerialization.h"
+#include "FusionPCH.hpp"
+#include "WorldWriter.hpp"
+#include "ComponentSerialization.hpp"
 
-#include "Fusion/Serialization/YAMLCustomConverters.h"
+#include "Fusion/Serialization/YAMLCustomConverters.hpp"
 
 namespace Fusion {
 

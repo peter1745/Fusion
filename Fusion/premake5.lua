@@ -7,11 +7,12 @@ project "Fusion"
     targetdir (BuildDir .. "/%{prj.name}")
     objdir (IntermediatesDir .. "/%{prj.name}")
 
-    pchheader "FusionPCH.h"
+    pchheader "FusionPCH.hpp"
     pchsource "Source/FusionPCH.cpp"
 
     files {
         "Source/**.cpp",
+        "Source/**.hpp",
         "Source/**.h",
 
         "%{wks.location}/ThirdParty/stb_image/include/stb_image/stb_image.cpp",

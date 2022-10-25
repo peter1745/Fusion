@@ -1,6 +1,6 @@
-#include "FusionPCH.h"
-#include "WorldReader.h"
-#include "ComponentSerialization.h"
+#include "FusionPCH.hpp"
+#include "WorldReader.hpp"
+#include "ComponentSerialization.hpp"
 
 namespace Fusion {
 

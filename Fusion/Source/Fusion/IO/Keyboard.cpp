@@ -1,7 +1,7 @@
-#include "FusionPCH.h"
-#include "Keyboard.h"
+#include "FusionPCH.hpp"
+#include "Keyboard.hpp"
 
-#include "Fusion/Core/Application.h"
+#include "Fusion/Core/Application.hpp"
 
 namespace Fusion {
 

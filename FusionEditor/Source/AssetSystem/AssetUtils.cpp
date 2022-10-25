@@ -1,4 +1,4 @@
-#include "AssetUtils.h"
+#include "AssetUtils.hpp"
 
 #include <unordered_map>
 

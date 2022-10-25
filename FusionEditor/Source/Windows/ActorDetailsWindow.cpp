@@ -1,11 +1,11 @@
-#include "ActorDetailsWindow.h"
-#include "UI/ComponentRenderer.h"
+#include "ActorDetailsWindow.hpp"
+#include "UI/ComponentRenderer.hpp"
 
-#include "WindowManager.h"
-#include "WorldOutlinerWindow.h"
+#include "WindowManager.hpp"
+#include "WorldOutlinerWindow.hpp"
 
-#include "Fusion/World/World.h"
-#include "Fusion/World/Components/AllComponents.h"
+#include "Fusion/World/World.hpp"
+#include "Fusion/World/Components/AllComponents.hpp"
 
 namespace FusionEditor {
 

@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "Mouse.h"
+#include "FusionPCH.hpp"
+#include "Mouse.hpp"
 
 namespace Fusion {
 

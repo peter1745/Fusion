@@ -1,9 +1,9 @@
-#include "ImGuiPlatformContext.h"
+#include "ImGuiPlatformContext.hpp"
 
-#include <Fusion/Renderer/Renderer.h>
+#include <Fusion/Renderer/Renderer.hpp>
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/ImGuiPlatformContextD3D11.h"
+	#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
 #endif
 
 #include <ImGui/imgui.h>

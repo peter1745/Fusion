@@ -1,7 +1,7 @@
-#include "ViewportCamera.h"
-#include "Fusion/Core/Application.h"
-#include "Fusion/IO/Keyboard.h"
-#include "Fusion/IO/Mouse.h"
+#include "ViewportCamera.hpp"
+#include "Fusion/Core/Application.hpp"
+#include "Fusion/IO/Keyboard.hpp"
+#include "Fusion/IO/Mouse.hpp"
 
 namespace FusionEditor {
 

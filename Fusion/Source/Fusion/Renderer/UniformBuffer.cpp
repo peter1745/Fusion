@@ -1,8 +1,8 @@
-#include "FusionPCH.h"
-#include "UniformBuffer.h"
-#include "Renderer.h"
+#include "FusionPCH.hpp"
+#include "UniformBuffer.hpp"
+#include "Renderer.hpp"
 
-#include "Platform/D3D11/D3D11UniformBuffer.h"
+#include "Platform/D3D11/D3D11UniformBuffer.hpp"
 
 namespace Fusion {
 

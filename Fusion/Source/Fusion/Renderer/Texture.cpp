@@ -1,9 +1,9 @@
-#include "FusionPCH.h"
-#include "Texture.h"
-#include "Renderer.h"
+#include "FusionPCH.hpp"
+#include "Texture.hpp"
+#include "Renderer.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/D3D11Texture.h"
+	#include "Platform/D3D11/D3D11Texture.hpp"
 #endif
 
 namespace Fusion {

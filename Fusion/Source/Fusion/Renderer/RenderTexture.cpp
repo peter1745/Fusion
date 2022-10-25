@@ -1,8 +1,8 @@
-#include "FusionPCH.h"
-#include "RenderTexture.h"
-#include "Renderer.h"
+#include "FusionPCH.hpp"
+#include "RenderTexture.hpp"
+#include "Renderer.hpp"
 
-#include "Platform/D3D11/D3D11RenderTexture.h"
+#include "Platform/D3D11/D3D11RenderTexture.hpp"
 
 namespace Fusion {
 

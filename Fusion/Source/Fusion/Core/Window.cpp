@@ -1,11 +1,11 @@
-#include "FusionPCH.h"
-#include "Window.h"
-#include "Fusion/IO/Mouse.h"
-#include "Fusion/IO/Keyboard.h"
-#include "Fusion/IO/GLFWKeyMappings.h"
+#include "FusionPCH.hpp"
+#include "Window.hpp"
+#include "Fusion/IO/Mouse.hpp"
+#include "Fusion/IO/Keyboard.hpp"
+#include "Fusion/IO/GLFWKeyMappings.hpp"
 
-#include "Fusion/Events/WindowEvents.h"
-#include "Fusion/Events/KeyboardEvents.h"
+#include "Fusion/Events/WindowEvents.hpp"
+#include "Fusion/Events/KeyboardEvents.hpp"
 
 #include <GLFW/glfw3.h>
 

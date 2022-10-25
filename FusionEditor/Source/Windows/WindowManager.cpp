@@ -1,4 +1,4 @@
-#include "WindowManager.h"
+#include "WindowManager.hpp"
 
 namespace FusionEditor {
 

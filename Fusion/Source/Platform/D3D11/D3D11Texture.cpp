@@ -1,6 +1,6 @@
-#include "FusionPCH.h"
-#include "D3D11Texture.h"
-#include "D3D11Context.h"
+#include "FusionPCH.hpp"
+#include "D3D11Texture.hpp"
+#include "D3D11Context.hpp"
 
 #include <stb_image/stb_image.h>
 

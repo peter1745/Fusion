@@ -1,7 +1,7 @@
-#include "FusionPCH.h"
-#include "Shader.h"
+#include "FusionPCH.hpp"
+#include "Shader.hpp"
 
-#include "Platform/D3D11/D3D11Shader.h"
+#include "Platform/D3D11/D3D11Shader.hpp"
 
 namespace Fusion {
 

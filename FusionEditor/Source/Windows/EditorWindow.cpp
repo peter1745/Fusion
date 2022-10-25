@@ -1,5 +1,5 @@
-#include "EditorWindow.h"
-#include "UI/UILibrary.h"
+#include "EditorWindow.hpp"
+#include "UI/UILibrary.hpp"
 
 namespace FusionEditor {
 

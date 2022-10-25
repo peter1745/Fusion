@@ -1,6 +1,6 @@
-#include "UILibrary.h"
+#include "UILibrary.hpp"
 
-#include <Fusion/IO/Mouse.h>
+#include <Fusion/IO/Mouse.hpp>
 
 namespace FusionEditor::UI {
 

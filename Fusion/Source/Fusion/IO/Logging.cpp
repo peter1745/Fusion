@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "Logging.h"
+#include "FusionPCH.hpp"
+#include "Logging.hpp"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>

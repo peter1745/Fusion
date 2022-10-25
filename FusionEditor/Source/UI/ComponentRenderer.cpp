@@ -1,5 +1,5 @@
-#include "ComponentRenderer.h"
-#include "UILibrary.h"
+#include "ComponentRenderer.hpp"
+#include "UILibrary.hpp"
 
 namespace FusionEditor {
 

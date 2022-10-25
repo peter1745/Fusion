@@ -1,11 +1,11 @@
-#include "ImGuiPlatformContextD3D11.h"
+#include "ImGuiPlatformContextD3D11.hpp"
 
-#include <Fusion/Core/Application.h>
+#include <Fusion/Core/Application.hpp>
 
 #include <GLFW/glfw3.h>
 #include <d3d11.h>
 
-#include <Platform/D3D11/D3D11Context.h>
+#include <Platform/D3D11/D3D11Context.hpp>
 
 #include <ImGui/imgui.h>
 #include <ImGui/backends/imgui_impl_glfw.h>

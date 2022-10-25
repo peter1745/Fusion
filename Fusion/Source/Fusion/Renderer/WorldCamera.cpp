@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "WorldCamera.h"
+#include "FusionPCH.hpp"
+#include "WorldCamera.hpp"
 
 namespace Fusion {
 

@@ -1,6 +1,6 @@
-#include "FusionPCH.h"
-#include "D3D11IndexBuffer.h"
-#include "D3D11Context.h"
+#include "FusionPCH.hpp"
+#include "D3D11IndexBuffer.hpp"
+#include "D3D11Context.hpp"
 
 namespace Fusion {
 

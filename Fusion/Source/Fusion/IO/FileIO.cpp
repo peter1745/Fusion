@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "FileIO.h"
+#include "FusionPCH.hpp"
+#include "FileIO.hpp"
 
 namespace Fusion {
 

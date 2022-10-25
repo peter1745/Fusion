@@ -1,5 +1,5 @@
-#include "FusionPCH.h"
-#include "TextureLoader.h"
+#include "FusionPCH.hpp"
+#include "TextureLoader.hpp"
 
 #include <stb_image/stb_image.h>
 

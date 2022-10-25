@@ -1,7 +1,7 @@
-#include "FusionPCH.h"
-#include "D3D11Context.h"
+#include "FusionPCH.hpp"
+#include "D3D11Context.hpp"
 
-#include "Fusion/Core/Application.h"
+#include "Fusion/Core/Application.hpp"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>

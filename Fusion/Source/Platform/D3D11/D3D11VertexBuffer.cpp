@@ -1,7 +1,7 @@
-#include "FusionPCH.h"
-#include "D3D11VertexBuffer.h"
-#include "D3D11Context.h"
-#include "D3D11Common.h"
+#include "FusionPCH.hpp"
+#include "D3D11VertexBuffer.hpp"
+#include "D3D11Context.hpp"
+#include "D3D11Common.hpp"
 
 namespace Fusion {
 

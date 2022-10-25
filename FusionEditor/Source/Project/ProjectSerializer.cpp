@@ -1,7 +1,7 @@
-#include "ProjectSerializer.h"
+#include "ProjectSerializer.hpp"
 
-#include "Fusion/IO/Logging.h"
-#include "Fusion/Core/Assert.h"
+#include "Fusion/IO/Logging.hpp"
+#include "Fusion/Core/Assert.hpp"
 
 #include <fstream>
 #include <sstream>

@@ -1,9 +1,9 @@
-#include "FusionPCH.h"
-#include "D3D11Renderer.h"
+#include "FusionPCH.hpp"
+#include "D3D11Renderer.hpp"
 
-#include "D3D11Context.h"
+#include "D3D11Context.hpp"
 
-#include "Fusion/Core/Application.h"
+#include "Fusion/Core/Application.hpp"
 
 namespace Fusion {
 

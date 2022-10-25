@@ -1,9 +1,9 @@
-#include "FusionPCH.h"
-#include "WorldRenderer.h"
-#include "Renderer.h"
-#include "Fusion/Core/Application.h"
+#include "FusionPCH.hpp"
+#include "WorldRenderer.hpp"
+#include "Renderer.hpp"
+#include "Fusion/Core/Application.hpp"
 
-#include "Fusion/World/Components/AllComponents.h"
+#include "Fusion/World/Components/AllComponents.hpp"
 
 namespace Fusion {
 

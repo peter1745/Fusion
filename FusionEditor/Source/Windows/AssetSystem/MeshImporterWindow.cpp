@@ -1,12 +1,12 @@
-#include "MeshImporterWindow.h"
+#include "MeshImporterWindow.hpp"
 
-#include "Windows/WindowManager.h"
+#include "Windows/WindowManager.hpp"
 
-#include <Fusion/IO/GLTFLoader.h>
-#include <Fusion/Renderer/Mesh.h>
-#include <Fusion/AssetSystem/Asset.h>
+#include <Fusion/IO/GLTFLoader.hpp>
+#include <Fusion/Renderer/Mesh.hpp>
+#include <Fusion/AssetSystem/Asset.hpp>
 
-#include <Fusion/Serialization/YAMLCustomConverters.h>
+#include <Fusion/Serialization/YAMLCustomConverters.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include <fstream>

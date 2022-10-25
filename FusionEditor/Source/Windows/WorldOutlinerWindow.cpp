@@ -1,7 +1,7 @@
-#include "WorldOutlinerWindow.h"
-#include "WindowManager.h"
+#include "WorldOutlinerWindow.hpp"
+#include "WindowManager.hpp"
 
-#include "Fusion/World/Components/AllComponents.h"
+#include "Fusion/World/Components/AllComponents.hpp"
 
 #include <ImGui/imgui_internal.h>
 

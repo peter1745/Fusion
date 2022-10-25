@@ -1,7 +1,7 @@
-#include "FusionPCH.h"
-#include "D3D11Shader.h"
-#include "D3D11Context.h"
-#include "D3D11UniformBuffer.h"
+#include "FusionPCH.hpp"
+#include "D3D11Shader.hpp"
+#include "D3D11Context.hpp"
+#include "D3D11UniformBuffer.hpp"
 
 #include <d3dcompiler.h>
 
