@@ -1,11 +1,48 @@
 #pragma once
 
+#include "Fusion/Core/UUID.hpp"
+#include "Fusion/AssetSystem/Asset.hpp"
+
 #include <yaml-cpp/yaml.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 namespace YAML {
+
+	template<>
+	struct convert<Fusion::UUID>
+	{
+		static Node encode(const Fusion::UUID& rhs)
+		{
+			Node node;
+			node.push_back(uint64_t(rhs));
+			return node;
+		}
+
+		static bool decode(const Node& node, Fusion::UUID& rhs)
+		{
+			rhs = Fusion::UUID(node.as<uint64_t>());
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Fusion::AssetHandle>
+	{
+		static Node encode(const Fusion::AssetHandle& rhs)
+		{
+			Node node;
+			node.push_back(uint64_t(rhs));
+			return node;
+		}
+
+		static bool decode(const Node& node, Fusion::AssetHandle& rhs)
+		{
+			rhs = Fusion::AssetHandle(node.as<uint64_t>());
+			return true;
+		}
+	};
 
 	template<>
 	struct convert<glm::vec2>

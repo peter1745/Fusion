@@ -84,14 +84,6 @@ namespace FusionEditor {
 		}
 
 		EAssetType Type = AssetUtils::GetTypeFromExtension(InFilePath);
-
-		if (Type == EAssetType::None)
-		{
-			// NOTE(Peter): Maybe open a popup to make this very obvious
-			FUSION_CLIENT_WARN("Unable to import asset {}, couldn't determine asset type", InFilePath);
-			return;
-		}
-
 		const auto& OutputPath = m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->GetCurrentFolderPath();
 		m_WindowManager->OpenWindowByID(m_AssetImporterWindows[Type]->GetID());
 		m_AssetImporterWindows[Type]->SetImportPaths(InFilePath, OutputPath);

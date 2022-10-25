@@ -5,6 +5,7 @@
 #include <Fusion/IO/GLTFLoader.hpp>
 #include <Fusion/Renderer/Mesh.hpp>
 #include <Fusion/AssetSystem/Asset.hpp>
+#include <Fusion/AssetSystem/AssetLoader.hpp>
 
 #include <Fusion/Serialization/YAMLCustomConverters.hpp>
 #include <yaml-cpp/yaml.h>
@@ -35,7 +36,7 @@ namespace FusionEditor {
 		YAML::Emitter Emitter;
 		Emitter << YAML::BeginMap;
 		Emitter << YAML::Key << "Mesh" << YAML::Value << YAML::BeginMap;
-		Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle();
+		Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle(Fusion::EAssetType::Mesh);
 		Emitter << YAML::Key << "Name" << YAML::Value << Data.Name;
 
 		// Vertices
@@ -76,6 +77,8 @@ namespace FusionEditor {
 		std::ofstream StreamOut(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
 		StreamOut << Emitter.c_str();
 		StreamOut.close();
+
+		Fusion::AssetLoader::LoadFromFile<Fusion::MeshAsset>(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
 	}
 
 	void MeshImporterWindow::RenderContents()

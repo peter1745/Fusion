@@ -14,11 +14,11 @@ namespace Fusion {
 
 		mutable std::atomic<uint32_t> m_RefCount = 0;
 
-		template<typename T>
+		template<typename T, typename TBaseType>
 		friend class Shared;
 	};
 
-	template<typename T>
+	template<typename T, typename TBaseType = SharedObject>
 	class Shared
 	{
 	public:
@@ -33,34 +33,34 @@ namespace Fusion {
 		}
 
 		Shared(T* InPtr)
-			: m_Ptr(InPtr)
+			: m_Ptr(static_cast<TBaseType*>(InPtr))
 		{
 			IncreaseReferenceCount();
 		}
 
-		Shared(const Shared<T>& InOther)
-			: m_Ptr(InOther.m_Ptr)
+		Shared(const Shared<T, TBaseType>& InOther)
+			: m_Ptr(static_cast<TBaseType*>(InOther.m_Ptr))
 		{
 			IncreaseReferenceCount();
 		}
 
-		Shared(Shared<T>&& InOther) noexcept
+		Shared(Shared<T, TBaseType>&& InOther) noexcept
 		{
 			m_Ptr = InOther.m_Ptr;
 			InOther.m_Ptr = nullptr;
 		}
 
-		template<typename TOther>
-		Shared(const Shared<TOther>& InOther)
+		template<typename TOther, typename TOtherBase>
+		Shared(const Shared<TOther, TOtherBase>& InOther)
 		{
-			m_Ptr = static_cast<T*>(InOther.m_Ptr);
+			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
 			IncreaseReferenceCount();
 		}
 
-		template<typename TOther>
-		Shared(Shared<TOther>&& InOther) noexcept
+		template<typename TOther, typename TOtherBase>
+		Shared(Shared<TOther, TOtherBase>&& InOther) noexcept
 		{
-			m_Ptr = static_cast<T*>(InOther.m_Ptr);
+			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
 			InOther.m_Ptr = nullptr;
 		}
 
@@ -76,7 +76,7 @@ namespace Fusion {
 			return *this;
 		}
 
-		Shared& operator=(const Shared<T>& InOther)
+		Shared& operator=(const Shared<T, TBaseType>& InOther)
 		{
 			DecreaseReferenceCount();
 			m_Ptr = InOther.m_Ptr;
@@ -84,7 +84,7 @@ namespace Fusion {
 			return *this;
 		}
 
-		Shared& operator=(Shared<T>&& InOther) noexcept
+		Shared& operator=(Shared<T, TBaseType>&& InOther) noexcept
 		{
 			DecreaseReferenceCount();
 			m_Ptr = InOther.m_Ptr;
@@ -92,17 +92,17 @@ namespace Fusion {
 			return *this;
 		}
 
-		template<typename TOther>
-		Shared& operator=(const Shared<TOther>& InOther)
+		template<typename TOther, typename TOtherBase>
+		Shared& operator=(const Shared<TOther, TOtherBase>& InOther)
 		{
 			DecreaseReferenceCount();
-			m_Ptr = static_cast<T*>(InOther.m_Ptr);
+			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
 			IncreaseReferenceCount();
 			return *this;
 		}
 
-		template<typename TOther>
-		Shared& operator=(Shared<TOther>&& InOther) noexcept
+		template<typename TOther, typename TOtherBase>
+		Shared& operator=(Shared<TOther, TOtherBase>&& InOther) noexcept
 		{
 			DecreaseReferenceCount();
 			m_Ptr = static_cast<T*>(InOther.m_Ptr);
@@ -113,14 +113,14 @@ namespace Fusion {
 		operator bool() { return m_Ptr != nullptr; }
 		operator bool() const { return m_Ptr != nullptr; }
 
-		T* operator->() { return m_Ptr; }
-		const T* operator->() const { return m_Ptr; }
+		T* operator->() { return static_cast<T*>(m_Ptr); }
+		const T* operator->() const { return static_cast<const T*>(m_Ptr); }
 
-		T& operator*() { return *m_Ptr; }
-		const T& operator*() const { return *m_Ptr; }
+		T& operator*() { return *static_cast<T*>(m_Ptr); }
+		const T& operator*() const { return *static_cast<const T*>(m_Ptr); }
 
-		T* Get() { return m_Ptr; }
-		const T* Get() const { return m_Ptr; }
+		T* Get() { return static_cast<T*>(m_Ptr); }
+		const T* Get() const { return static_cast<T*>(m_Ptr); }
 
 		void Reset(T* InPtr = nullptr)
 		{
@@ -130,15 +130,14 @@ namespace Fusion {
 		}
 
 		template<typename TOther>
-		Shared<TOther> As() const { return Shared<TOther>(*this); }
+		Shared<TOther, TBaseType> As() const { return Shared<TOther, TBaseType>(*this); }
 
 		bool operator==(const Shared<T>& InOther) const { return m_Ptr == InOther.m_Ptr; }
 		bool operator!=(const Shared<T>& InOther) const { return !(*this == InOther); }
 
 	public:
 		template<typename... TArgs>
-			requires std::constructible_from<T, TArgs...>
-		static Shared<T> Create(TArgs&&... InArgs)
+		static Shared<T> Create(TArgs&&... InArgs) requires std::constructible_from<T, TArgs...>
 		{
 			return Shared<T>(new T(std::forward<TArgs>(InArgs)...));
 		}
@@ -166,10 +165,10 @@ namespace Fusion {
 		}
 
 	private:
-		template<class TOther>
+		template<class TOther, class TBaseType>
 		friend class Shared;
 
-		mutable T* m_Ptr;
+		mutable TBaseType* m_Ptr;
 	};
 
 }

@@ -73,7 +73,6 @@ namespace Fusion {
 		}
 	};
 
-
 	namespace ComponentUtils {
 
 		template<typename TFunc, typename... TComponents>
