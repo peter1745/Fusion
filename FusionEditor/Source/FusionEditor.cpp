@@ -18,6 +18,7 @@
 
 #include <Fusion/Renderer/Mesh.hpp>
 #include <Fusion/Serialization/World/WorldSerializer.hpp>
+#include <Fusion/IO/FileIO.hpp>
 #include <Fusion/IO/Keyboard.hpp>
 
 #include <NFD-Extended/nfd.hpp>
@@ -271,9 +272,27 @@ namespace FusionEditor {
 
 		m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->SetCurrentProject(m_CurrentProject);
 
-		for (auto It : std::filesystem::recursive_directory_iterator(m_CurrentProject->BaseDirectory / "Content"))
+		for (const auto& It : std::filesystem::recursive_directory_iterator(m_CurrentProject->BaseDirectory / "Content"))
 		{
-			
+			std::filesystem::path FilePath = It.path();
+
+			if (std::filesystem::is_directory(FilePath))
+				continue;
+
+			if (FilePath.extension().string().find("fasset") == std::string::npos)
+				continue;
+
+			Fusion::ImmutableBuffer Buffer;
+			if (!Fusion::FileIO::ReadFile(FilePath, Buffer))
+			{
+				FUSION_CORE_ERROR("Failed to load asset file {}", FilePath);
+				continue;
+			}
+
+			Fusion::AssetHandle Handle = Buffer.Read<Fusion::AssetHandle>();
+			Buffer.Release();
+
+			GetAssetStorage()->AddDatabank(Handle, { FilePath });
 		}
 	}
 
