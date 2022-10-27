@@ -41,20 +41,20 @@ namespace Fusion {
 		{
 			const MeshComponent* MeshComp = Actor->FindComponent<MeshComponent>();
 
-			if (!MeshComp->IsActive || !MeshComp->Mesh)
+			if (!MeshComp->IsActive || !MeshComp->MeshHandle.IsValid())
 				continue;
 
 			const TransformComponent* TransformComp = Actor->FindComponent<TransformComponent>();
-			const Shared<Mesh> ActorMesh = MeshComp->Mesh;
+			const AssetContainer<MeshAsset> ActorMesh = Application::Get().GetAssetStorage()->GetAsset<MeshAsset>(MeshComp->MeshHandle);
 
 			glm::mat4 Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location)
 				* glm::toMat4(TransformComp->GetRotation())
 				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformDataBuffer->SetData(&Transform);
 			m_PBRShader->Set(1, m_TransformDataBuffer);
-			MeshComp->Texture->Bind(0);
+			//MeshComp->Texture->Bind(0);
 
-			m_Renderer->DrawIndexed(ActorMesh->GetVertexBuffer(), ActorMesh->GetIndexBuffer(), m_PBRShader);
+			m_Renderer->DrawIndexed(ActorMesh->GetMesh()->GetVertexBuffer(), ActorMesh->GetMesh()->GetIndexBuffer(), m_PBRShader);
 		}
 	}
 

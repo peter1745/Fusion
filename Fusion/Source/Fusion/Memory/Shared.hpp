@@ -33,13 +33,13 @@ namespace Fusion {
 		}
 
 		Shared(T* InPtr)
-			: m_Ptr(static_cast<TBaseType*>(InPtr))
+			: m_Ptr(InPtr)
 		{
 			IncreaseReferenceCount();
 		}
 
 		Shared(const Shared<T, TBaseType>& InOther)
-			: m_Ptr(static_cast<TBaseType*>(InOther.m_Ptr))
+			: m_Ptr(InOther.m_Ptr)
 		{
 			IncreaseReferenceCount();
 		}
@@ -53,14 +53,14 @@ namespace Fusion {
 		template<typename TOther, typename TOtherBase>
 		Shared(const Shared<TOther, TOtherBase>& InOther)
 		{
-			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
+			m_Ptr = static_cast<T*>(InOther.m_Ptr);
 			IncreaseReferenceCount();
 		}
 
 		template<typename TOther, typename TOtherBase>
 		Shared(Shared<TOther, TOtherBase>&& InOther) noexcept
 		{
-			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
+			m_Ptr = static_cast<T*>(InOther.m_Ptr);
 			InOther.m_Ptr = nullptr;
 		}
 
@@ -96,7 +96,7 @@ namespace Fusion {
 		Shared& operator=(const Shared<TOther, TOtherBase>& InOther)
 		{
 			DecreaseReferenceCount();
-			m_Ptr = static_cast<TBaseType*>(InOther.m_Ptr);
+			m_Ptr = static_cast<T*>(InOther.m_Ptr);
 			IncreaseReferenceCount();
 			return *this;
 		}
@@ -132,14 +132,14 @@ namespace Fusion {
 		template<typename TOther>
 		Shared<TOther, TBaseType> As() const { return Shared<TOther, TBaseType>(*this); }
 
-		bool operator==(const Shared<T>& InOther) const { return m_Ptr == InOther.m_Ptr; }
-		bool operator!=(const Shared<T>& InOther) const { return !(*this == InOther); }
+		bool operator==(const Shared<T, TBaseType>& InOther) const { return m_Ptr == InOther.m_Ptr; }
+		bool operator!=(const Shared<T, TBaseType>& InOther) const { return !(*this == InOther); }
 
 	public:
 		template<typename... TArgs>
-		static Shared<T> Create(TArgs&&... InArgs) requires std::constructible_from<T, TArgs...>
+		static Shared<T, TBaseType> Create(TArgs&&... InArgs) requires std::constructible_from<T, TArgs...>
 		{
-			return Shared<T>(new T(std::forward<TArgs>(InArgs)...));
+			return Shared<T, TBaseType>(new T(std::forward<TArgs>(InArgs)...));
 		}
 
 	private:
@@ -168,7 +168,7 @@ namespace Fusion {
 		template<class TOther, class TBaseType>
 		friend class Shared;
 
-		mutable TBaseType* m_Ptr;
+		mutable T* m_Ptr;
 	};
 
 }

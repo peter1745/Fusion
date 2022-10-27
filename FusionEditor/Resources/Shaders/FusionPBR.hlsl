@@ -41,5 +41,6 @@ SamplerState InSampler;
 
 float4 PixelMain(PixelInput InPixelData) : SV_Target
 {
-	return InTexture.Sample(InSampler, InPixelData.TexCoord);
+	//return InTexture.Sample(InSampler, InPixelData.TexCoord);
+	return float4(InPixelData.Normal, 1.0f);
 }

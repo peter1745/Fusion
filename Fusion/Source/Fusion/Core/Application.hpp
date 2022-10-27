@@ -3,6 +3,8 @@
 #include "Window.hpp"
 #include "Fusion/Renderer/Renderer.hpp"
 
+#include "Fusion/AssetSystem/AssetStorage.hpp"
+
 #include <chrono>
 #include <mutex>
 
@@ -41,6 +43,9 @@ namespace Fusion {
 		const Shared<Renderer>& GetRenderer() const { return m_Renderer; }
 		const Unique<Window>& GetWindow() const { return m_Window; }
 
+		Shared<AssetStorage> GetAssetStorage() { return m_AssetStorage; }
+		const Shared<AssetStorage>& GetAssetStorage() const { return m_AssetStorage; }
+
 	public:
 		static Application& Get();
 
@@ -65,6 +70,8 @@ namespace Fusion {
 
 		std::mutex m_MainThreadQueueMutex;
 		std::vector<std::function<void()>> m_MainThreadQueue;
+
+		Shared<AssetStorage> m_AssetStorage;
 
 	protected:
 		Shared<Renderer> m_Renderer = nullptr;

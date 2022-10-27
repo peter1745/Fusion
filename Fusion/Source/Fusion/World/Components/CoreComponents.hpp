@@ -3,7 +3,7 @@
 #include "BaseComponent.hpp"
 #include "Fusion/World/Actor.hpp"
 #include "Fusion/Renderer/WorldCamera.hpp"
-#include "Fusion/Renderer/Mesh.hpp"
+#include "Fusion/AssetSystem/Asset.hpp"
 #include "Fusion/Renderer/Texture.hpp"
 
 #include <glm/glm.hpp>
@@ -58,7 +58,7 @@ namespace Fusion {
 
 	struct MeshComponent : public BaseComponent
 	{
-		Shared<Mesh> Mesh = nullptr;
+		AssetHandle MeshHandle;
 		Shared<Texture2D> Texture = nullptr;
 	};
 

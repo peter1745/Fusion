@@ -2,6 +2,10 @@
 
 #include "Windows/WindowManager.hpp"
 
+#include <Fusion/Core/Application.hpp>
+
+#include <Fusion/IO/ImmutableBuffer.hpp>
+#include <Fusion/IO/FileIO.hpp>
 #include <Fusion/IO/GLTFLoader.hpp>
 #include <Fusion/Renderer/Mesh.hpp>
 #include <Fusion/AssetSystem/Asset.hpp>
@@ -33,52 +37,32 @@ namespace FusionEditor {
 		if (!Fusion::GLTFLoader::LoadGLTFMesh(m_SourceAssetPath, Data))
 			return;
 
-		YAML::Emitter Emitter;
-		Emitter << YAML::BeginMap;
-		Emitter << YAML::Key << "Mesh" << YAML::Value << YAML::BeginMap;
-		Emitter << YAML::Key << "Handle" << YAML::Value << Fusion::AssetHandle(Fusion::EAssetType::Mesh);
-		Emitter << YAML::Key << "Name" << YAML::Value << Data.Name;
+		Fusion::AssetHandle Handle(Fusion::EAssetType::Mesh);
+
+		size_t VertexSize = Data.Vertices.size() * sizeof(Fusion::Vertex);
+		size_t IndexSize = Data.Indices.size() * sizeof(Fusion::Index);
+		Fusion::WritableBuffer Buffer(sizeof(Fusion::AssetHandle) + VertexSize + IndexSize + sizeof(size_t) + sizeof(size_t));
+
+		Buffer.Write<uint64_t>(Handle);
 
 		// Vertices
-		{
-			Emitter << YAML::Key << "Vertices" << YAML::Value << YAML::BeginMap;
-
-			for (const auto& VertexData : Data.Vertices)
-			{
-				Emitter << YAML::Key << "Vertex" << YAML::BeginMap;
-				Emitter << YAML::Key << "Position" << YAML::Value << VertexData.Position;
-				Emitter << YAML::Key << "Normal" << YAML::Value << VertexData.Normal;
-				Emitter << YAML::Key << "UV" << YAML::Value << VertexData.TextureCoordinate;
-				Emitter << YAML::EndMap;
-			}
-
-			Emitter << YAML::EndMap;
-		}
+		Buffer.Write(Data.Vertices.size());
+		for (const auto& VertexData : Data.Vertices)
+			Buffer.Write(VertexData);
 
 		// Indices
-		{
-			Emitter << YAML::Key << "Indices" << YAML::Value << YAML::BeginMap;
+		Buffer.Write(Data.Indices.size());
+		for (const auto& IndicesData : Data.Indices)
+			Buffer.Write(IndicesData);
 
-			for (const auto& IndicesData : Data.Indices)
-			{
-				Emitter << YAML::Key << "Index" << YAML::BeginMap;
-				Emitter << YAML::Key << "V0" << YAML::Value << IndicesData.Vertex0;
-				Emitter << YAML::Key << "V1" << YAML::Value << IndicesData.Vertex1;
-				Emitter << YAML::Key << "V2" << YAML::Value << IndicesData.Vertex2;
-				Emitter << YAML::EndMap;
-			}
-
-			Emitter << YAML::EndMap;
-		}
-
-		Emitter << YAML::EndMap;
-		Emitter << YAML::EndMap;
-
-		std::ofstream StreamOut(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
-		StreamOut << Emitter.c_str();
+		std::filesystem::path OutputPath = m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fasset");
+		std::ofstream StreamOut(OutputPath, std::ios::binary | std::ios::trunc);
+		StreamOut.write(reinterpret_cast<const char*>(Buffer.GetData()), Buffer.GetSize());
 		StreamOut.close();
+		Buffer.Release();
 
-		Fusion::AssetLoader::LoadFromFile<Fusion::MeshAsset>(m_AssetOutputPath / m_SourceAssetPath.filename().replace_extension("fmesh"));
+		// Create AssetDatabank
+		Fusion::Application::Get().GetAssetStorage()->AddDatabank(Handle, { OutputPath });
 	}
 
 	void MeshImporterWindow::RenderContents()

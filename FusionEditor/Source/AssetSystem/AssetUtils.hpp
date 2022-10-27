@@ -8,6 +8,8 @@ namespace FusionEditor {
 	{
 	public:
 		static Fusion::EAssetType GetTypeFromExtension(const std::filesystem::path& InFilePath);
+		static Fusion::AssetHandle GetHandleFromFilePath(const std::filesystem::path& InFilePath);
+
 	};
 
 }

@@ -1,6 +1,8 @@
 #include "ComponentRenderer.hpp"
 #include "UILibrary.hpp"
 
+#include <Fusion/Core/Application.hpp>
+
 namespace FusionEditor {
 
 	void ComponentUI<Fusion::TransformComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp)
@@ -50,6 +52,26 @@ namespace FusionEditor {
 	{
 		if (!UI::BeginComponentHeader("Mesh", InComp->IsActive))
 			return;
+
+		if (!InComp->MeshHandle.IsValid())
+		{
+			ImGui::Button("Null");
+		}
+		else
+		{
+			const auto& Databank = Fusion::Application::Get().GetAssetStorage()->GetDatabank(InComp->MeshHandle);
+			std::string Name = Databank.FilePath.filename().string();
+			ImGui::Button(Name.c_str());
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload("AssetPayload");
+			if (Payload)
+				InComp->MeshHandle = *static_cast<Fusion::AssetHandle*>(Payload->Data);
+
+			ImGui::EndDragDropTarget();
+		}
 
 		UI::EndHeader();
 	}

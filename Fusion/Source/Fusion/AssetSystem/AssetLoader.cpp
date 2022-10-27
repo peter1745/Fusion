@@ -3,32 +3,32 @@
 
 #include "Fusion/Serialization/YAMLCustomConverters.hpp"
 
+#include "Fusion/IO/FileIO.hpp"
+
+#include "Loaders/MeshAssetLoader.hpp"
+
 #include <yaml-cpp/yaml.h>
 
 namespace Fusion {
 
+	void AssetLoader::RegisterDefaultLoaders()
+	{
+		s_RegisteredLoaders[EAssetType::Mesh] = MakeUnique<MeshAssetLoader>();
+	}
+
 	AssetContainer<Asset> AssetLoader::LoadFromFile_Internal(const std::filesystem::path& InFilePath)
 	{
-		std::ifstream StreamIn(InFilePath);
-		if (!StreamIn)
+		Fusion::ImmutableBuffer Buffer;
+		if (!Fusion::FileIO::ReadFile(InFilePath, Buffer))
 			return nullptr;
 
-		YAML::Node RootNode = YAML::Load(StreamIn);
-
-		if (!RootNode)
-		{
-			FUSION_CORE_ERROR("Tried loading invalid asset from {}", InFilePath.string());
-			return nullptr;
-		}
-
-		RootNode = RootNode.begin()->second;
-
-		AssetHandle Handle = RootNode["Handle"].as<AssetHandle>(AssetHandle(0));
+		Fusion::AssetHandle Handle = Buffer.Read<Fusion::AssetHandle>();
 		EAssetType Type = Handle.GetType();
+		FUSION_CORE_VERIFY(s_RegisteredLoaders.find(Type) != s_RegisteredLoaders.end());
 
-
-
-		return nullptr;
+		AssetContainer<Asset> Result = s_RegisteredLoaders.at(Type)->LoadAsset(Buffer);
+		Result->Handle = Handle;
+		return Result;
 	}
 
 }

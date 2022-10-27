@@ -1,5 +1,6 @@
 #include "ContentBrowserWindow.hpp"
 #include "Fusion/Core/Application.hpp"
+#include "AssetSystem/AssetUtils.hpp"
 
 #include <filesystem>
 
@@ -58,10 +59,27 @@ namespace FusionEditor {
 
 		for (size_t Idx = 0; Idx < m_ContentEntries.size(); Idx++)
 		{
+			const auto& Entry = m_ContentEntries[Idx];
+
 			float ColumnWidth = ImGui::GetColumnWidth();
-			std::string Name = m_ContentEntries[Idx].FilePath.filename().string();
-			if (ImGui::Button(Name.c_str(), ImVec2(ColumnWidth, ColumnWidth)))
+			std::string Name = Entry.FilePath.filename().string();
+			const bool Clicked = ImGui::Button(Name.c_str(), ImVec2(ColumnWidth, ColumnWidth));
+
+			if (Clicked && Entry.IsFolder)
 				ClickedEntryIndex = Idx;
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				if (!Entry.IsFolder)
+				{
+					Fusion::AssetHandle Handle = AssetUtils::GetHandleFromFilePath(Entry.FilePath);
+					ImGui::SetDragDropPayload("AssetPayload", &Handle, sizeof(Fusion::AssetHandle), ImGuiCond_Once);
+				}
+
+				ImGui::Text(Name.c_str());
+				ImGui::EndDragDropSource();
+			}
+
 			ImGui::NextColumn();
 		}
 

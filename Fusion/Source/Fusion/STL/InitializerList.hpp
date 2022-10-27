@@ -15,10 +15,7 @@ namespace Fusion {
 
 		size_t Size() const { return m_List.size(); }
 
-		T operator[](size_t InIndex) const
-		{
-			return *(m_List.begin() + InIndex);
-		}
+		T operator[](size_t InIndex) const { return *(m_List.begin() + InIndex); }
 
 	private:
 		std::initializer_list<T> m_List;

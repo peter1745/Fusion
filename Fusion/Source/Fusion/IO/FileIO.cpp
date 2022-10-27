@@ -3,7 +3,7 @@
 
 namespace Fusion {
 
-	bool FileIO::ReadFile(const std::filesystem::path& InPath, ByteBuffer& OutBuffer)
+	bool FileIO::ReadFile(const std::filesystem::path& InPath, ImmutableBuffer& OutBuffer)
 	{
 		std::ifstream Stream(InPath, std::ios::ate | std::ios::binary);
 		if (!Stream.is_open())
@@ -11,13 +11,14 @@ namespace Fusion {
 
 		uint32_t StreamSize = uint32_t(Stream.tellg());
 
+		Stream.seekg(std::ios::beg);
+
 		if (StreamSize == 0)
 			return false;
 
-		OutBuffer.Allocate(StreamSize);
-
-		Stream.seekg(0, std::ios::beg);
-		Stream.read(reinterpret_cast<char*>(OutBuffer.Data), StreamSize);
+		Byte* TempBuffer = new Byte[StreamSize];
+		Stream.read(reinterpret_cast<char*>(TempBuffer), StreamSize);
+		OutBuffer = ImmutableBuffer(TempBuffer, StreamSize);
 		Stream.close();
 		return true;
 	}

@@ -45,6 +45,7 @@ namespace FusionEditor {
 
 		RenderComponentMenuItem<SpriteComponent>("Sprite");
 		RenderComponentMenuItem<CameraComponent>("Camera");
+		RenderComponentMenuItem<MeshComponent>("Mesh");
 
 		ImGui::EndPopup();
 	}

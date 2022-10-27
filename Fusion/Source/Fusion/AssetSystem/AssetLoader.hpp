@@ -1,21 +1,29 @@
 #pragma once
 
 #include "Asset.hpp"
-
-#include <yaml-cpp/yaml.h>
+#include "Fusion/IO/ImmutableBuffer.hpp"
 
 namespace Fusion {
 
 	class AssetLoaderImpl
 	{
 	public:
-		virtual bool LoadAssetFromYAML(const YAML::Node& InNode) = 0;
+		virtual AssetContainer<Asset> LoadAsset(ImmutableBuffer& InBuffer) = 0;
 	};
 
 	class AssetLoader
 	{
 	public:
-		template<typename T>
+		static void RegisterDefaultLoaders();
+
+		/*template<typename TLoader>
+		static void RegisterLoader(EAssetType InType)
+		{
+			FUSION_CORE_VERIFY(s_RegisteredLoaders.find(InType) != s_RegisteredLoaders.end());
+			s_RegisteredLoaders[InType] = MakeUnique<TLoader>();
+		}*/
+
+		template<AssetType T>
 		static AssetContainer<T> LoadFromFile(const std::filesystem::path& InFilePath)
 		{
 			return LoadFromFile_Internal(InFilePath).As<T>();

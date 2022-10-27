@@ -30,7 +30,7 @@ namespace Fusion {
 
 	void AssetHandle::SetValue(EAssetType InType, uint64_t InID)
 	{
-		m_Value = static_cast<uint64_t>(static_cast<uint16_t>(InType)) << 48 | (InID & 0xFFFF'FFFF'FFFFULL);
+		m_Value = static_cast<uint64_t>(static_cast<uint16_t>(InType)) << TypeMask | (InID & IDMask);
 	}
 
 }

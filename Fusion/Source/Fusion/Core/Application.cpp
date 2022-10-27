@@ -6,6 +6,8 @@
 #include "Fusion/Renderer/Renderer.hpp"
 #include "Fusion/Events/WindowEvents.hpp"
 
+#include "Fusion/AssetSystem/AssetLoader.hpp"
+
 #include <glm/glm.hpp>
 
 namespace Fusion {
@@ -30,6 +32,10 @@ namespace Fusion {
 		m_Renderer = Renderer::Create(ERendererAPI::D3D11);
 
 		m_Window->Maximize();
+
+		AssetLoader::RegisterDefaultLoaders();
+
+		m_AssetStorage = Shared<AssetStorage>::Create();
 	}
 
 	Application::~Application()
@@ -60,6 +66,8 @@ namespace Fusion {
 			m_TimeStep = glm::min<float>(m_FrameTime, 0.0333f);
 			m_LastFrameTime = time;
 			
+			m_AssetStorage->ProcessDestructionQueue();
+
 			Mouse::Get().ResetReleasedButtons();
 			Keyboard::Get().ResetReleasedKeys();
 
