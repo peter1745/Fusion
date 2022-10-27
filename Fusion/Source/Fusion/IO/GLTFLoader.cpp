@@ -47,8 +47,9 @@ namespace Fusion {
 			return false;
 		}
 
-		for (tinygltf::Mesh& MeshData : ModelData.meshes)
+		//for (tinygltf::Mesh& MeshData : ModelData.meshes)
 		{
+			tinygltf::Mesh& MeshData = ModelData.meshes[0];
 			OutData.Name = MeshData.name;
 
 			for (tinygltf::Primitive& Primitive : MeshData.primitives)
@@ -104,12 +105,9 @@ namespace Fusion {
 					IndexData.Vertex2 = IndicesData[i * 3 + 2];
 				}
 			}
-
-			// NOTE(Peter): We should be creating submeshes here, but for now we'll only process the first submesh
-			return true;
 		}
 
-		return false;
+		return Loaded;
 	}
 
 }

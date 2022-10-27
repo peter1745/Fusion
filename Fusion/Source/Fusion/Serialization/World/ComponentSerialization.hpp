@@ -36,11 +36,11 @@ namespace Fusion {
 	{
 		inline static const std::string Name = "MeshComponent";
 
-		static void Serialize(WorldYAMLWriter& InWriter, const MeshComponent* InComponent)
+		static void Serialize([[maybe_unused]] WorldYAMLWriter& InWriter, [[maybe_unused]] const MeshComponent* InComponent)
 		{
 		}
 
-		static void Deserialize(const WorldYAMLReader& InReader, MeshComponent& InComponent)
+		static void Deserialize([[maybe_unused]] const WorldYAMLReader& InReader, [[maybe_unused]] MeshComponent& InComponent)
 		{
 		}
 	};
@@ -50,11 +50,11 @@ namespace Fusion {
 	{
 		inline static const std::string Name = "CameraComponent";
 
-		static void Serialize(WorldYAMLWriter& InWriter, const CameraComponent* InComponent)
+		static void Serialize([[maybe_unused]] WorldYAMLWriter& InWriter, [[maybe_unused]] const CameraComponent* InComponent)
 		{
 		}
 
-		static void Deserialize(const WorldYAMLReader& InReader, CameraComponent& InComponent)
+		static void Deserialize([[maybe_unused]] const WorldYAMLReader& InReader, [[maybe_unused]] CameraComponent& InComponent)
 		{
 		}
 	};
@@ -64,11 +64,11 @@ namespace Fusion {
 	{
 		inline static const std::string Name = "SpriteComponent";
 
-		static void Serialize(WorldYAMLWriter& InWriter, const SpriteComponent* InComponent)
+		static void Serialize([[maybe_unused]] WorldYAMLWriter& InWriter, [[maybe_unused]] const SpriteComponent* InComponent)
 		{
 		}
 
-		static void Deserialize(const WorldYAMLReader& InReader, SpriteComponent& InComponent)
+		static void Deserialize([[maybe_unused]] const WorldYAMLReader& InReader, [[maybe_unused]] SpriteComponent& InComponent)
 		{
 		}
 	};
@@ -89,7 +89,7 @@ namespace Fusion {
 		}
 
 		template<typename TFunc, typename... TComponents>
-		inline static void FindByName(const std::string& InName, ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
+		inline static void FindByName(const std::string& InName, [[maybe_unused]] ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
 		{
 			FindByName<TFunc, TComponents...>(InName, InFunc);
 		}

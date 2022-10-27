@@ -13,12 +13,12 @@ namespace Fusion {
 		virtual void Bind() override;
 		virtual void Unbind() override;
 
-		virtual void Set(const std::string& InName, float InValue) override {}
-		virtual void Set(const std::string& InName, const glm::vec2& InValue) override {}
-		virtual void Set(const std::string& InName, const glm::vec3& InValue) override {}
-		virtual void Set(const std::string& InName, const glm::vec4& InValue) override {}
-		virtual void Set(const std::string& InName, const glm::mat4& InValue, bool InTranspose = false) override {}
-		virtual void Set(const std::string& InName, const Shared<Texture2D>& InTexture) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] float InValue) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] const glm::vec2& InValue) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] const glm::vec3& InValue) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] const glm::vec4& InValue) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] const glm::mat4& InValue, [[maybe_unused]] bool InTranspose = false) override {}
+		virtual void Set([[maybe_unused]] const std::string& InName, [[maybe_unused]] const Shared<Texture2D>& InTexture) override {}
 
 		virtual void Set(uint32_t InSlot, const Shared<UniformBuffer>& InBuffer) override;
 	private:

@@ -12,6 +12,7 @@ namespace Fusion {
 	{
 		switch (Renderer::CurrentAPI())
 		{
+		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return Shared<D3D11Texture2D>::Create(InCreateInfo);
 		}
 

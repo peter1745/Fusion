@@ -76,7 +76,7 @@ namespace FusionEditor {
 					ImGui::SetDragDropPayload("AssetPayload", &Handle, sizeof(Fusion::AssetHandle), ImGuiCond_Once);
 				}
 
-				ImGui::Text(Name.c_str());
+				ImGui::Text("%s", Name.c_str());
 				ImGui::EndDragDropSource();
 			}
 

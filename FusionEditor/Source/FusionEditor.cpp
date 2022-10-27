@@ -361,7 +361,7 @@ namespace FusionEditor {
 
 }
 
-Fusion::Application* Fusion::CreateApplication(int ArgC, char** ArgV)
+Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[maybe_unused]] char** ArgV)
 {
 	Fusion::ApplicationSpecification specification = {};
 	specification.Title = "Fusion Editor";

@@ -48,9 +48,6 @@ namespace Fusion {
 		// Perspective Parameters
 		float m_VerticalFOV = 70.0f;
 
-		// Orthographic Parameters
-		float m_OrthographicSize = 10.0f;
-
 	};
 
 }

@@ -32,7 +32,7 @@ namespace Fusion {
 		s_Storage->Context->ClearBackBuffer({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 
-	void D3D11Renderer::DrawIndexed(const Shared<VertexBuffer>& InVertexBuffer, const Shared<IndexBuffer>& InIndexBuffer, const Shared<Shader>& InShader)
+	void D3D11Renderer::DrawIndexed(const Shared<VertexBuffer>& InVertexBuffer, const Shared<IndexBuffer>& InIndexBuffer, [[maybe_unused]] const Shared<Shader>& InShader)
 	{
 		InVertexBuffer->Bind();
 		InIndexBuffer->Bind();

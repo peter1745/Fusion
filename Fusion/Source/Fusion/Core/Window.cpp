@@ -52,12 +52,12 @@ namespace Fusion {
 			}
 		});
 
-		glfwSetCursorPosCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, double InPosX, double InPosY)
+		glfwSetCursorPosCallback(m_NativeWindow, []([[maybe_unused]] GLFWwindow* InNativeWindow, double InPosX, double InPosY)
 		{
 			Mouse::Get().m_Position = { static_cast<float>(InPosX), static_cast<float>(InPosY) };
 		});
 
-		glfwSetMouseButtonCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InButton, int InAction, int InMods)
+		glfwSetMouseButtonCallback(m_NativeWindow, []([[maybe_unused]] GLFWwindow* InNativeWindow, int InButton, int InAction, [[maybe_unused]] int InMods)
 		{
 			MouseButtonState& ButtonState = Mouse::Get().m_ButtonStates[InButton];
 			ButtonState.OldState = ButtonState.CurrentState;
@@ -77,7 +77,7 @@ namespace Fusion {
 			}
 		});
 
-		glfwSetKeyCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InKey, int InScanCode, int InAction, int InMods)
+		glfwSetKeyCallback(m_NativeWindow, [](GLFWwindow* InNativeWindow, int InKey, [[maybe_unused]] int InScanCode, int InAction, [[maybe_unused]] int InMods)
 		{
 			WindowData* Data = static_cast<WindowData*>(glfwGetWindowUserPointer(InNativeWindow));
 

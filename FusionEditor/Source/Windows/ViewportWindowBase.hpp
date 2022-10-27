@@ -19,7 +19,7 @@ namespace FusionEditor {
 		virtual void RenderContents() override;
 
 	private:
-		virtual void OnResize(uint32_t InWidth, uint32_t InHeight) {}
+		virtual void OnResize([[maybe_unused]] uint32_t InWidth, [[maybe_unused]] uint32_t InHeight) {}
 		virtual void RenderWorld() = 0;
 
 	protected:

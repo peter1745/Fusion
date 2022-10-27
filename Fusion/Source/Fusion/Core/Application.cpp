@@ -82,7 +82,7 @@ namespace Fusion {
 	void Application::EventCallback(Event& InEvent)
 	{
 		EventDispatcher Dispatcher(InEvent);
-		Dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& InCloseEvent)
+		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent)
 		{
 			m_Running = false;
 			return true;

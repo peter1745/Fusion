@@ -18,8 +18,8 @@ namespace FusionEditor {
 		void RenderUI(bool& InOpen);
 
 		virtual void OnRender() {}
-		virtual void OnUpdate(float InDeltaTime) {}
-		virtual void OnEvent(Fusion::Event& InEvent) {}
+		virtual void OnUpdate([[maybe_unused]] float InDeltaTime) {}
+		virtual void OnEvent([[maybe_unused]] Fusion::Event& InEvent) {}
 
 		uint32_t GetWindowWidth() const { return m_Width; }
 		uint32_t GetWindowHeight() const { return m_Height; }

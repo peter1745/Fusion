@@ -51,11 +51,11 @@ namespace Fusion {
 
 	private:
 		virtual void OnInit() {}
-		virtual void OnUpdate(float DeltaTime) {}
+		virtual void OnUpdate([[maybe_unused]] float DeltaTime) {}
 		virtual void OnShutdown() {}
 
 		void EventCallback(Event& InEvent);
-		virtual void OnEvent(Event& InEvent) {}
+		virtual void OnEvent([[maybe_unused]] Event& InEvent) {}
 
 		void ExecuteMainThreadQueue();
 

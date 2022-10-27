@@ -11,10 +11,10 @@ namespace Fusion {
 
 	struct WindowSpecification
 	{
-		std::string Title;
-		uint32_t Width;
-		uint32_t Height;
-		void* UserData;
+		std::string Title = "";
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		void* UserData = nullptr;
 	};
 
 	using EventCallbackFunc = std::function<void(Event&)>;

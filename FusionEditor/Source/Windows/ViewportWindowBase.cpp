@@ -28,7 +28,7 @@ namespace FusionEditor {
 		m_RenderTexture->Unbind();
 	}
 
-	void ViewportWindowBase::OnUpdate(float InDeltaTime)
+	void ViewportWindowBase::OnUpdate([[maybe_unused]] float InDeltaTime)
 	{
 		uint32_t NewWidth = GetWindowWidth();
 		uint32_t NewHeight = GetWindowHeight();

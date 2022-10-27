@@ -9,6 +9,7 @@ workspace "Fusion"
     flags { "MultiProcessorCompile" }
 
     toolset "clang"
+    warnings "High"
 
 BuildDir = "%{wks.location}/Build/%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 IntermediatesDir = "%{wks.location}/Build/Intermediates/%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"

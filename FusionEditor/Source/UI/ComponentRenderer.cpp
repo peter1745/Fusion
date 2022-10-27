@@ -5,7 +5,7 @@
 
 namespace FusionEditor {
 
-	void ComponentUI<Fusion::TransformComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp)
+	void ComponentUI<Fusion::TransformComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp)
 	{
 		if (!UI::BeginHeader("Transform"))
 			return;
@@ -20,7 +20,7 @@ namespace FusionEditor {
 		UI::EndHeader();
 	}
 
-	void ComponentUI<Fusion::SpriteComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::SpriteComponent* InComp)
+	void ComponentUI<Fusion::SpriteComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::SpriteComponent* InComp)
 	{
 		if (!UI::BeginComponentHeader("Sprite", InComp->IsActive))
 			return;
@@ -28,7 +28,7 @@ namespace FusionEditor {
 		UI::EndHeader();
 	}
 	
-	void ComponentUI<Fusion::CameraComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::CameraComponent* InComp)
+	void ComponentUI<Fusion::CameraComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::CameraComponent* InComp)
 	{
 		if (!UI::BeginComponentHeader("Camera", InComp->IsActive))
 			return;
@@ -48,7 +48,7 @@ namespace FusionEditor {
 		UI::EndHeader();
 	}
 
-	void ComponentUI<Fusion::MeshComponent>::Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)
+	void ComponentUI<Fusion::MeshComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)
 	{
 		if (!UI::BeginComponentHeader("Mesh", InComp->IsActive))
 			return;

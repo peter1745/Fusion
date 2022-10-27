@@ -15,10 +15,12 @@ namespace Fusion {
 		case ShaderDataType::Float2: return DXGI_FORMAT_R32G32_FLOAT;
 		case ShaderDataType::Float3: return DXGI_FORMAT_R32G32B32_FLOAT;
 		case ShaderDataType::Float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case ShaderDataType::Mat3x3: return DXGI_FORMAT_UNKNOWN;
+		case ShaderDataType::Mat4x4: return DXGI_FORMAT_UNKNOWN;
 		}
 
 		FUSION_CORE_VERIFY(false, "Unsupported data type!");
-		return DXGI_FORMAT_R32_FLOAT;
+		return DXGI_FORMAT_UNKNOWN;
 	}
 
 	D3D11Shader::D3D11Shader(const ShaderSpecification& InSpecification)

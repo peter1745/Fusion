@@ -35,13 +35,13 @@ namespace Fusion {
 		}
 
 		template<typename TFunc, typename... TComponents>
-		inline static void Each(Shared<Actor> InActor, ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
+		inline static void Each(Shared<Actor> InActor, [[maybe_unused]] ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
 		{
 			Each<TFunc, TComponents...>(InActor, InFunc);
 		}
 
 		template<typename TFunc, typename... TComponents>
-		inline static void EachConst(const Shared<Actor>& InActor, ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
+		inline static void EachConst(const Shared<Actor>& InActor, [[maybe_unused]] ComponentGroup<TComponents...> InCompGroup, TFunc InFunc)
 		{
 			EachConst<TFunc, TComponents...>(InActor, InFunc);
 		}
