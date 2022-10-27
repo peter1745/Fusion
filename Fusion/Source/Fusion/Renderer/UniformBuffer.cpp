@@ -10,6 +10,7 @@ namespace Fusion {
 	{
 		switch (Renderer::CurrentAPI())
 		{
+		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return Shared<D3D11UniformBuffer>::Create(InSize, InBindPoint, InUsage);
 		}
 
@@ -21,6 +22,7 @@ namespace Fusion {
 	{
 		switch (Renderer::CurrentAPI())
 		{
+		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return Shared<D3D11UniformBuffer>::Create(InData, InSize, InBindPoint, InUsage);
 		}
 

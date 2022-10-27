@@ -66,7 +66,7 @@ namespace FusionEditor {
 			const bool Clicked = ImGui::Button(Name.c_str(), ImVec2(ColumnWidth, ColumnWidth));
 
 			if (Clicked && Entry.IsFolder)
-				ClickedEntryIndex = Idx;
+				ClickedEntryIndex = int32_t(Idx);
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{

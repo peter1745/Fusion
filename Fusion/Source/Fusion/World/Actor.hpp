@@ -16,22 +16,16 @@ namespace Fusion {
 		const ActorID& GetActorID() const { return m_ActorID; }
 
 		template<typename TComponent, typename... TComponentParams>
-		TComponent* AddComponent(TComponentParams&&... InComponentParams)
-		{
-			return m_World->AddActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
-		}
+		TComponent* AddComponent(TComponentParams&&... InComponentParams);
 
 		template<typename TComponent, typename... TComponentParams>
-		TComponent* AddOrReplaceComponent(TComponentParams&&... InComponentParams)
-		{
-			return m_World->AddOrReplaceActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
-		}
+		TComponent* AddOrReplaceComponent(TComponentParams&&... InComponentParams);
 
 		template<typename TComponent>
-		TComponent* FindComponent() { return m_World->FindActorComponent<TComponent>(m_ActorID); }
+		TComponent* FindComponent();
 
 		template<typename TComponent>
-		const TComponent* FindComponent() const { return m_World->FindActorComponent<TComponent>(m_ActorID); }
+		const TComponent* FindComponent() const;
 
 	private:
 		Actor(World* InWorld, ActorID InActorID = ActorID());

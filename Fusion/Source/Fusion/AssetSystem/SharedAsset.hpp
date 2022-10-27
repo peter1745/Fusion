@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <atomic>
 
 namespace Fusion {
 
@@ -32,7 +33,7 @@ namespace Fusion {
 
 		void SetRefCountChangedCallback(const AssetRefCountCallback& InCallback) { m_RefCountCallback = InCallback; }
 
-		mutable std::atomic<uint32_t> m_RefCount = 0;
+		mutable std::atomic<uint32_t> m_RefCount;
 
 		AssetRefCountCallback m_RefCountCallback;
 

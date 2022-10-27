@@ -12,7 +12,7 @@ namespace Fusion {
 		void DecreaseReferenceCount() { --m_RefCount; }
 		uint32_t GetReferenceCount() const { return m_RefCount.load(); }
 
-		mutable std::atomic<uint32_t> m_RefCount = 0;
+		mutable std::atomic<uint32_t> m_RefCount;
 
 		template<typename T, typename TBaseType>
 		friend class Shared;
@@ -165,7 +165,7 @@ namespace Fusion {
 		}
 
 	private:
-		template<class TOther, class TBaseType>
+		template<class TOther, class TOtherBase>
 		friend class Shared;
 
 		mutable T* m_Ptr;

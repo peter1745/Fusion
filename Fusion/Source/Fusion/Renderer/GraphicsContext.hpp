@@ -8,6 +8,8 @@ namespace Fusion {
 	class GraphicsContext : public SharedObject
 	{
 	public:
+		virtual ~GraphicsContext() = default;
+
 		virtual void ClearBackBuffer(const glm::vec4& InColor) = 0;
 		virtual void Present() = 0;
 

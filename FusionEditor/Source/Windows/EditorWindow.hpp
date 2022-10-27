@@ -12,6 +12,8 @@ namespace FusionEditor {
 	class EditorWindow : public Fusion::SharedObject
 	{
 	public:
+		virtual ~EditorWindow() = default;
+
 		void SetTitle(const std::string& InTitle) { m_Title = InTitle; }
 		void RenderUI(bool& InOpen);
 

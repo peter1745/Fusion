@@ -7,11 +7,7 @@
 namespace FusionEditor {
 
 	template<typename TComponent>
-	class ComponentUI
-	{
-	public:
-		static void Render(Fusion::Shared<Fusion::Actor> InActor, TComponent* InComp) { static_assert(false); }
-	};
+	class ComponentUI {};
 
 	template<>
 	class ComponentUI<Fusion::TransformComponent>

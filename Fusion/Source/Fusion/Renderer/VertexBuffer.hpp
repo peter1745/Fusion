@@ -8,8 +8,8 @@ namespace Fusion {
 
 	struct VertexBufferInfo
 	{
-		uint32_t BufferSize;
-		void* Data;
+		uint32_t BufferSize = 0;
+		void* Data = nullptr;
 		VertexBufferLayout Layout;
 		EBufferUsage Usage = EBufferUsage::Static;
 	};
@@ -17,6 +17,8 @@ namespace Fusion {
 	class VertexBuffer : public SharedObject
 	{
 	public:
+		virtual ~VertexBuffer() = default;
+
 		virtual void Bind() const = 0;
 		virtual void Resize(uint32_t InNewSize) = 0;
 		virtual void SetData(void* InData, uint32_t InSize) = 0;

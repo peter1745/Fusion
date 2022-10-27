@@ -104,7 +104,6 @@ namespace FusionEditor {
 
 	void FusionEditorApp::DrawUI()
 	{
-		// Begin ImGui Rendering
 		m_ImGuiContext->BeginFrame();
 
 		ImGuiViewport* MainViewport = ImGui::GetMainViewport();
@@ -139,7 +138,6 @@ namespace FusionEditor {
 
 		ImGui::End();
 
-		// End ImGui Rendering
 		m_ImGuiContext->EndFrame();
 	}
 

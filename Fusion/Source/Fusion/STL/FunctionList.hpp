@@ -42,7 +42,7 @@ namespace Fusion {
 
 		void RemoveFunction(const FuncType& InFunc)
 		{
-			auto It = std::remove_if(m_Storage.begin(), m_Storage.end(), [](const FuncType& OtherFunc)
+			auto It = std::remove_if(m_Storage.begin(), m_Storage.end(), [&InFunc](const FuncType& OtherFunc)
 			{
 				return OtherFunc.target() == InFunc.target();
 			});

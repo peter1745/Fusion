@@ -39,8 +39,8 @@ namespace FusionEditor {
 
 		Fusion::AssetHandle Handle(Fusion::EAssetType::Mesh);
 
-		size_t VertexSize = Data.Vertices.size() * sizeof(Fusion::Vertex);
-		size_t IndexSize = Data.Indices.size() * sizeof(Fusion::Index);
+		uint32_t VertexSize = uint32_t(Data.Vertices.size()) * sizeof(Fusion::Vertex);
+		uint32_t IndexSize = uint32_t(Data.Indices.size()) * sizeof(Fusion::Index);
 		Fusion::WritableBuffer Buffer(sizeof(Fusion::AssetHandle) + VertexSize + IndexSize + sizeof(size_t) + sizeof(size_t));
 
 		Buffer.Write<uint64_t>(Handle);

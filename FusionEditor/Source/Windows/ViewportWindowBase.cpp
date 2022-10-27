@@ -8,7 +8,7 @@
 namespace FusionEditor {
 
 	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld)
-		: EditorWindow(InTitle, 300, 300), m_World(InWorld), m_ViewportWidth(300.0f), m_ViewportHeight(300.0f)
+		: EditorWindow(InTitle, 300, 300), m_World(InWorld), m_ViewportWidth(300), m_ViewportHeight(300)
 	{
 		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
 
@@ -49,7 +49,7 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::RenderContents()
 	{
-		ImGui::Image(m_RenderTexture->GetColorTextureID(), ImVec2(m_ViewportWidth, m_ViewportHeight));
+		ImGui::Image(m_RenderTexture->GetColorTextureID(), ImVec2(float(m_ViewportWidth), float(m_ViewportHeight)));
 	}
 
 

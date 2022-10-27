@@ -48,6 +48,8 @@ namespace FusionEditor {
 		ImGuizmo::OPERATION CurrentOperation = (ImGuizmo::OPERATION)-1;
 		switch (m_ActiveGizmoType)
 		{
+		case EGizmoType::None:
+			return;
 		case EGizmoType::Translate:
 			CurrentOperation = ImGuizmo::TRANSLATE;
 			break;
@@ -142,6 +144,11 @@ namespace FusionEditor {
 			{
 				m_GizmoSpace = (m_GizmoSpace == EGizmoSpace::Local) ? EGizmoSpace::World : EGizmoSpace::Local;
 				ConsumeKeyPress = true;
+				break;
+			}
+			default:
+			{
+				ConsumeKeyPress = false;
 				break;
 			}
 			}

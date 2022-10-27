@@ -160,7 +160,7 @@ namespace Fusion {
 
 		ID3D11Device* Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
 		Device->CreateInputLayout(
-			InputElements.data(), InputElements.size(),
+			InputElements.data(), UINT(InputElements.size()),
 			InVertexByteCode->GetBufferPointer(), InVertexByteCode->GetBufferSize(),
 			&m_InputLayout);
 	}

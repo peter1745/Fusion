@@ -13,7 +13,7 @@ namespace FusionEditor {
 		using SelectionCallbackList = Fusion::FunctionList<void(Fusion::Shared<Fusion::Actor>)>;
 	public:
 		WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld);
-		~WorldOutlinerWindow();
+		virtual ~WorldOutlinerWindow();
 
 		SelectionCallbackList& GetSelectionCallbackList() { return m_SelectionCallbacks; }
 

@@ -100,4 +100,22 @@ namespace Fusion {
 		std::unordered_map<ActorID, Shared<Actor>> m_Actors;
 	};
 
+	template<typename TComponent, typename... TComponentParams>
+	TComponent* Actor::AddComponent(TComponentParams&&... InComponentParams)
+	{
+		return m_World->AddActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
+	}
+
+	template<typename TComponent, typename... TComponentParams>
+	TComponent* Actor::AddOrReplaceComponent(TComponentParams&&... InComponentParams)
+	{
+		return m_World->AddOrReplaceActorComponent<TComponent>(m_ActorID, std::forward<TComponentParams>(InComponentParams)...);
+	}
+
+	template<typename TComponent>
+	TComponent* Actor::FindComponent() { return m_World->FindActorComponent<TComponent>(m_ActorID); }
+
+	template<typename TComponent>
+	const TComponent* Actor::FindComponent() const { return m_World->FindActorComponent<TComponent>(m_ActorID); }
+
 }

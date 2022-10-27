@@ -8,6 +8,7 @@ namespace Fusion {
 	class AssetLoaderImpl
 	{
 	public:
+		virtual ~AssetLoaderImpl() = default;
 		virtual AssetContainer<Asset> LoadAsset(ImmutableBuffer& InBuffer) = 0;
 	};
 
