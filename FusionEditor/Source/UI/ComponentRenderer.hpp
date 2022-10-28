@@ -13,6 +13,8 @@ namespace FusionEditor {
 	class ComponentUI<Fusion::TransformComponent>
 	{
 	public:
+		static constexpr std::string_view DisplayName = "Transform";
+
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp);
 	};
 
@@ -20,6 +22,8 @@ namespace FusionEditor {
 	class ComponentUI<Fusion::SpriteComponent>
 	{
 	public:
+		static constexpr std::string_view DisplayName = "Sprite";
+
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::SpriteComponent* InComp);
 	};
 
@@ -27,6 +31,8 @@ namespace FusionEditor {
 	class ComponentUI<Fusion::CameraComponent>
 	{
 	public:
+		static constexpr std::string_view DisplayName = "Camera";
+
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::CameraComponent* InComp);
 	};
 
@@ -34,6 +40,8 @@ namespace FusionEditor {
 	class ComponentUI<Fusion::MeshComponent>
 	{
 	public:
+		static constexpr std::string_view DisplayName = "Mesh";
+
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp);
 	};
 

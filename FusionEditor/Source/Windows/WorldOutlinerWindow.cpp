@@ -37,7 +37,16 @@ namespace FusionEditor {
 			if (RelationshipComp->ParentID != Fusion::ActorID::Invalid)
 				continue;
 
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 8.0f));
 			RenderActorNode(Actor);
+			ImGui::PopStyleVar();
+		}
+
+		if (m_DeletedActor)
+		{
+			m_SelectionCallbacks.Invoke(nullptr);
+			m_World->DestroyActor(m_DeletedActor->GetActorID());
+			m_DeletedActor = nullptr;
 		}
 	}
 
@@ -45,6 +54,16 @@ namespace FusionEditor {
 	{
 		const bool WasOpen = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(InActor->Name.c_str()));
 		const bool IsOpen = ImGui::TreeNode(InActor->Name.c_str());
+
+		if (ImGui::BeginPopupContextWindow("ActorContextMenu"))
+		{
+			if (ImGui::MenuItem("Delete"))
+			{
+				m_DeletedActor = InActor;
+			}
+
+			ImGui::EndPopup();
+		}
 
 		if (IsOpen != WasOpen)
 			m_SelectionCallbacks.Invoke(InActor);

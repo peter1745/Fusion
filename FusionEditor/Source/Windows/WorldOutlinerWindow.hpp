@@ -27,6 +27,7 @@ namespace FusionEditor {
 
 	private:
 		Fusion::Shared<Fusion::World> m_World = nullptr;
+		Fusion::Shared<Fusion::Actor> m_DeletedActor = nullptr;
 		SelectionCallbackList m_SelectionCallbacks;
 	};
 

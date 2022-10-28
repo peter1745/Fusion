@@ -27,6 +27,9 @@ namespace Fusion {
 		template<typename TComponent>
 		const TComponent* FindComponent() const;
 
+		template<typename TComponent>
+		void RemoveComponent();
+
 	private:
 		Actor(World* InWorld, ActorID InActorID = ActorID());
 

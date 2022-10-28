@@ -14,8 +14,8 @@ namespace FusionEditor::UI {
 	void ShiftCursorY(float InAmount);
 	void ShiftCursor(float InAmountX, float InAmountY);
 
-	bool BeginHeader(std::string_view InLabel, bool InDefaultOpen = true);
-	bool BeginComponentHeader(std::string_view InLabel, bool& IsActive);
+	bool BeginHeader(std::string_view InLabel, bool InDefaultOpen = true, bool* OutRightClicked = nullptr);
+	bool BeginComponentHeader(std::string_view InLabel, bool& IsActive, bool* OutRightClicked = nullptr);
 	void EndHeader();
 
 	ImRect RectOffset(const ImRect& InRect, float InOffsetX, float InOffsetY);

@@ -12,7 +12,7 @@ namespace FusionEditor::UI {
 		ShiftCursorY(InAmountY);
 	}
 
-	bool BeginHeader(std::string_view InLabel, bool InDefaultOpen)
+	bool BeginHeader(std::string_view InLabel, bool InDefaultOpen, bool* OutRightClicked)
 	{
 		ImGuiTreeNodeFlags TreeNodeFlags =
 			ImGuiTreeNodeFlags_Framed
@@ -27,13 +27,17 @@ namespace FusionEditor::UI {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 6.0f));
 		const bool IsOpen = ImGui::TreeNodeEx("##HeaderTreeNode", TreeNodeFlags, "%s", InLabel.data());
+
+		if (OutRightClicked)
+			*OutRightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+
 		ImGui::PopStyleVar(2);
 		ImGui::PopID();
 
 		return IsOpen;
 	}
 
-	bool BeginComponentHeader(std::string_view InLabel, bool& IsActive)
+	bool BeginComponentHeader(std::string_view InLabel, bool& IsActive, bool* OutRightClicked)
 	{
 		ImGuiTreeNodeFlags TreeNodeFlags =
 			ImGuiTreeNodeFlags_Framed
@@ -46,6 +50,9 @@ namespace FusionEditor::UI {
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 6.0f));
 		const bool IsOpen = ImGui::TreeNodeEx("##HeaderTreeNode", TreeNodeFlags, "%s", InLabel.data());
+
+		if (OutRightClicked)
+			*OutRightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
 
 		// Component Active Checkbox
 		{
@@ -61,6 +68,8 @@ namespace FusionEditor::UI {
 			ImGui::SameLine(OffsetX);
 			ShiftCursorY(2.0f);
 			ImGui::Checkbox("##IsActive", &IsActive);
+			if (OutRightClicked)
+				*OutRightClicked |= ImGui::IsItemClicked(ImGuiMouseButton_Right);
 			ShiftCursorY(-2.0f);
 			ImGui::PopStyleVar();
 		}

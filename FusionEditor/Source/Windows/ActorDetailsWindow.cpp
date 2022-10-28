@@ -1,11 +1,13 @@
 #include "ActorDetailsWindow.hpp"
 #include "UI/ComponentRenderer.hpp"
+#include "UI/UILibrary.hpp"
 
 #include "WindowManager.hpp"
 #include "WorldOutlinerWindow.hpp"
 
 #include "Fusion/World/World.hpp"
 #include "Fusion/World/Components/AllComponents.hpp"
+#include "Fusion/World/Components/ComponentAttributes.hpp"
 
 namespace FusionEditor {
 
@@ -32,15 +34,50 @@ namespace FusionEditor {
 
 		RenderComponentMenu();
 
-		ComponentUtils::All(m_CurrentActor, [InActor = m_CurrentActor]<typename TComponent>(TComponent* InComp)
+		ComponentUtils::All(m_CurrentActor, [InActor = m_CurrentActor]<typename TComponent>(TComponent* InComp) mutable
 		{
-			ComponentUI<TComponent>::Render(InActor, InComp);
+			bool ShouldRender = true;
+			bool OpenContextMenu = false;
+
+			ImGui::PushID(static_cast<void*>(InComp));
+
+			if constexpr (Fusion::ComponentAttributes<TComponent>::CanDisable)
+				ShouldRender = UI::BeginComponentHeader(ComponentUI<TComponent>::DisplayName, InComp->IsActive, &OpenContextMenu);
+			else
+				ShouldRender = UI::BeginHeader(ComponentUI<TComponent>::DisplayName, &OpenContextMenu);
+
+			if (OpenContextMenu)
+				ImGui::OpenPopup("ComponentContextMenu");
+
+			if (ShouldRender)
+			{
+				bool Removed = false;
+
+				ComponentUI<TComponent>::Render(InActor, InComp);
+
+				if (ImGui::BeginPopup("ComponentContextMenu"))
+				{
+					if constexpr (Fusion::ComponentAttributes<TComponent>::Removable)
+						Removed = ImGui::MenuItem("Remove");
+
+					ImGui::EndPopup();
+				}
+
+				UI::EndHeader();
+				ImGui::PopID();
+
+				if (Removed)
+					InActor->RemoveComponent<TComponent>();
+			}
 		});
 	}
 
 	void ActorDetailsWindow::RenderComponentMenu()
 	{
-		if (!ImGui::BeginPopupContextWindow("AddComponentPopupMenu"))
+		if (ImGui::Button("Add Component"))
+			ImGui::OpenPopup("AddComponentPopupMenu");
+
+		if (!ImGui::BeginPopup("AddComponentPopupMenu"))
 			return;
 
 		RenderComponentMenuItem<SpriteComponent>("Sprite");

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseComponent.hpp"
+#include "ComponentAttributes.hpp"
 #include "Fusion/World/Actor.hpp"
 #include "Fusion/Renderer/WorldCamera.hpp"
 #include "Fusion/AssetSystem/Asset.hpp"
@@ -40,6 +41,15 @@ namespace Fusion {
 	private:
 		glm::quat m_Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		glm::vec3 m_RotationEuler = { 0.0f, 0.0f, 0.0f };
+	};
+
+	template<>
+	struct ComponentAttributes<TransformComponent>
+	{
+		using ComponentType = typename TransformComponent;
+
+		static constexpr bool CanDisable = false;
+		static constexpr bool Removable = false;
 	};
 
 	struct RelationshipComponent

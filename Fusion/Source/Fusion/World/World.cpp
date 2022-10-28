@@ -61,6 +61,15 @@ namespace Fusion {
 		return nullptr;
 	}
 
+	void World::DestroyActor(ActorID InActorID)
+	{
+		FUSION_CORE_VERIFY(m_ActorIDMap.find(InActorID) != m_ActorIDMap.end());
+
+		m_Registry.destroy(m_ActorIDMap.at(InActorID));
+		m_Actors.erase(InActorID);
+		m_ActorIDMap.find(InActorID);
+	}
+
 	Shared<Actor> World::GetMainCameraActor() const
 	{
 		auto EnttView = m_Registry.view<ActorComponent, CameraComponent>();

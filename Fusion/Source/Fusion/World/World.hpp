@@ -24,6 +24,8 @@ namespace Fusion {
 
 		Shared<Actor> FindActorWithID(ActorID InActorID) const;
 
+		void DestroyActor(ActorID InActorID);
+
 		template<typename TComponent, typename... TComponentParams>
 		TComponent* AddActorComponent(ActorID InActorID, TComponentParams&&... InComponentParams)
 		{
@@ -72,6 +74,18 @@ namespace Fusion {
 			return m_Registry.try_get<TComponent>(m_ActorIDMap.at(InActorID));
 		}
 
+		template<typename TComponent>
+		void RemoveActorComponent(ActorID InActorID)
+		{
+			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
+			{
+				FUSION_CORE_WARN("Tried to remove component from an invalid actor!");
+				return;
+			}
+
+			m_Registry.remove<TComponent>(m_ActorIDMap.at(InActorID));
+		}
+
 		template<typename... TComponents>
 		std::vector<Shared<Actor>> FindAllActorsWith() const
 		{
@@ -117,5 +131,8 @@ namespace Fusion {
 
 	template<typename TComponent>
 	const TComponent* Actor::FindComponent() const { return m_World->FindActorComponent<TComponent>(m_ActorID); }
+
+	template<typename TComponent>
+	void Actor::RemoveComponent() { m_World->RemoveActorComponent<TComponent>(m_ActorID); }
 
 }
