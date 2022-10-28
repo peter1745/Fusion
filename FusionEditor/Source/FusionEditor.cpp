@@ -231,6 +231,23 @@ namespace FusionEditor {
 				ImGui::EndMenu();
 			}
 
+			const auto& Windows = m_WindowManager->GetAllWindows();
+
+			if (ImGui::BeginMenu("View"))
+			{
+				for (const auto& [WindowID, Data] : Windows)
+				{
+					if (Data.Window->GetMenuBarLocation() == EMenuBarLocation::View)
+					{
+						std::string_view Title = Data.Window->GetTitle();
+						if (ImGui::MenuItem(Title.data()))
+							m_WindowManager->OpenWindowByID(WindowID);
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 	}

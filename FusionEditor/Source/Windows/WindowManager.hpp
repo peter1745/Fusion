@@ -90,6 +90,8 @@ namespace FusionEditor {
 
 		void OnEvent(Fusion::Event& InEvent);
 
+		const std::unordered_map<uint32_t, WindowData>& GetAllWindows() const { return m_Windows; }
+
 	public:
 		inline static WindowManager* Get() { return s_Instance; }
 

@@ -15,6 +15,8 @@ namespace FusionEditor {
 		virtual void OnRender() override;
 		virtual void OnUpdate(float InDeltaTime) override;
 
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
+
 	protected:
 		virtual void RenderContents() override;
 

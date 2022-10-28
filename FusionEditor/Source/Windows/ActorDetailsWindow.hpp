@@ -12,6 +12,8 @@ namespace FusionEditor {
 		ActorDetailsWindow();
 		~ActorDetailsWindow();
 
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
+
 	protected:
 		virtual void RenderContents() override;
 

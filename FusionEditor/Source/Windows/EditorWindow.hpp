@@ -8,6 +8,8 @@
 #include <imgui.h>
 
 namespace FusionEditor {
+
+	enum class EMenuBarLocation { None, View };
 	
 	class EditorWindow : public Fusion::SharedObject
 	{
@@ -28,6 +30,10 @@ namespace FusionEditor {
 		bool IsMouseInside() const { return m_IsMouseInside; }
 
 		uint32_t GetID() const { return m_WindowID; }
+
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const = 0;
+
+		std::string_view GetTitle() const { return m_Title; }
 
 	protected:
 		EditorWindow(const std::string& InTitle, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);

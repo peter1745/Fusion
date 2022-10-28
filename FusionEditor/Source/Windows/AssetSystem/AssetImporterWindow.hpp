@@ -18,6 +18,8 @@ namespace FusionEditor {
 			m_AssetOutputPath = InAssetOutputPath;
 		}
 
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::None; }
+
 	protected:
 		std::filesystem::path m_SourceAssetPath;
 		std::filesystem::path m_AssetOutputPath;

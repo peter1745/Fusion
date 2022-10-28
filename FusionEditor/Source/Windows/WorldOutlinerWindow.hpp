@@ -17,6 +17,8 @@ namespace FusionEditor {
 
 		SelectionCallbackList& GetSelectionCallbackList() { return m_SelectionCallbacks; }
 
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
+
 	protected:
 		virtual void RenderContents() override;
 

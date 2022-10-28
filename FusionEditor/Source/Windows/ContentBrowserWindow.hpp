@@ -24,6 +24,8 @@ namespace FusionEditor {
 
 		void NavigateToFolder(size_t InFolderIndex);
 
+		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
+
 		const std::filesystem::path& GetCurrentFolderPath() const { return m_CurrentFolderPath; }
 
 	protected:
