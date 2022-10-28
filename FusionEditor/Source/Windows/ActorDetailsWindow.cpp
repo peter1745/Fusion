@@ -55,12 +55,14 @@ namespace FusionEditor {
 
 				ComponentUI<TComponent>::Render(InActor, InComp);
 
-				if (ImGui::BeginPopup("ComponentContextMenu"))
+				if (UI::BeginPopup("ComponentContextMenu", 150.0f))
 				{
 					if constexpr (Fusion::ComponentAttributes<TComponent>::Removable)
+					{
 						Removed = ImGui::MenuItem("Remove");
+					}
 
-					ImGui::EndPopup();
+					UI::EndPopup();
 				}
 
 				UI::EndHeader();

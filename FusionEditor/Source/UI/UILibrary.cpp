@@ -167,6 +167,18 @@ namespace FusionEditor::UI {
 		CurrentWindow->DC.MenuBarAppending = false;
 	}
 
+	bool BeginPopup(std::string_view InLabel, float InMinWidth, ImGuiWindowFlags InFlags)
+	{
+		// NOTE(Peter): Apparently max height HAS to be -1 to preserve the original height. But width is perfectly fine being 0?
+		ImGui::SetNextWindowSizeConstraints({ InMinWidth, 0.0f }, { 0.0f, -1.0f });
+		return ImGui::BeginPopup(InLabel.data(), InFlags);
+	}
+
+	void EndPopup()
+	{
+		ImGui::EndPopup();
+	}
+
 	bool IsMouseHoveringRect(const ImVec2& InMin, const ImVec2& InMax, bool InClip /*= true*/)
 	{
 		ImRect ClippedRect(InMin, InMax);

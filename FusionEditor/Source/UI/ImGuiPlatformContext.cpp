@@ -83,6 +83,9 @@ namespace FusionEditor {
 		UIStyle.Colors[ImGuiCol_TabHovered] = ImVec4(0.22f, 0.37f, 1.0f, 0.58f);
 		UIStyle.TabRounding = 2.0f;
 
+		UIStyle.Colors[ImGuiCol_PopupBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.0f);
+		UIStyle.PopupRounding = 2.0f;
+
 		UIStyle.FramePadding = { 16.0f, 8.0f };
 		UIStyle.FrameRounding = 2.0f;
 		UIStyle.FrameBorderSize = 0.0f;

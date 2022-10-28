@@ -24,6 +24,9 @@ namespace FusionEditor::UI {
 	bool BeginMenuBar(const ImRect& InRect);
 	void EndMenuBar();
 
+	bool BeginPopup(std::string_view InLabel, float InMinWidth = 50.0f, ImGuiWindowFlags InFlags = 0);
+	void EndPopup();
+
 	// Uses Fusion's own mouse position, since ImGui's mouse position becomes invalid if the cursor is hidden or locked
 	bool IsMouseHoveringRect(const ImVec2& InMin, const ImVec2& InMax, bool InClip = true);
 
