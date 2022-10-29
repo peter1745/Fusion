@@ -153,7 +153,7 @@ namespace Fusion {
 
 	void D3D11Context::SetRenderTargets(ID3D11RenderTargetView* InRenderTarget, ID3D11DepthStencilView* InDepthStencil)
 	{
-		m_DeviceContext->OMSetRenderTargets(1, &InRenderTarget, InDepthStencil);
+		
 	}
 
 	void D3D11Context::CreateBackBufferView()

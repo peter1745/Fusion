@@ -3,6 +3,8 @@
 #include "D3D11Context.hpp"
 #include "D3D11Common.hpp"
 
+#include "Fusion/Memory/Utils.h"
+
 namespace Fusion {
 
 	D3D11UniformBuffer::D3D11UniformBuffer(uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage)
@@ -13,7 +15,7 @@ namespace Fusion {
 		D3D11_BUFFER_DESC BufferDesc;
 		ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
 		BufferDesc.Usage = BufferUsageToD3D11Usage(InUsage);
-		BufferDesc.ByteWidth = InSize;
+		BufferDesc.ByteWidth = Align<16>(InSize);
 		BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
@@ -28,7 +30,7 @@ namespace Fusion {
 		D3D11_BUFFER_DESC BufferDesc;
 		ZeroMemory(&BufferDesc, sizeof(D3D11_BUFFER_DESC));
 		BufferDesc.Usage = BufferUsageToD3D11Usage(InUsage);
-		BufferDesc.ByteWidth = InSize;
+		BufferDesc.ByteWidth = Align<16>(InSize);
 		BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 

@@ -15,15 +15,18 @@ namespace FusionEditor {
 		Fusion::RenderTextureInfo RenderTextureCreateInfo;
 		RenderTextureCreateInfo.Width = uint32_t(m_ViewportWidth);
 		RenderTextureCreateInfo.Height = uint32_t(m_ViewportHeight);
+		RenderTextureCreateInfo.ColorAttachments = {
+			{ Fusion::ERenderTextureAttachmentFormat::RGBA8 },
+			{ Fusion::ERenderTextureAttachmentFormat::R32G32UInt, true, glm::vec4(1.0f) }
+		};
+
 		m_RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 	}
 
 	void ViewportWindowBase::OnRender()
 	{
-		static const glm::vec4 s_ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
 		m_RenderTexture->Bind();
-		m_RenderTexture->Clear(s_ClearColor);
+		m_RenderTexture->Clear();
 		RenderWorld();
 		m_RenderTexture->Unbind();
 	}
@@ -49,8 +52,10 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::RenderContents()
 	{
-		ImGui::Image(m_RenderTexture->GetColorTextureID(), ImVec2(float(m_ViewportWidth), float(m_ViewportHeight)));
-	}
+		ImVec2 MinBound = GetMinBound();
+		ImVec2 MaxBound = GetMaxBound();
 
+		ImGui::Image(m_RenderTexture->GetColorTextureID(0), ImVec2(MaxBound.x - MinBound.x, MaxBound.y - MinBound.y));
+	}
 
 }

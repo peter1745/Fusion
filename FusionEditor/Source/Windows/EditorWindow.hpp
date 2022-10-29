@@ -35,6 +35,9 @@ namespace FusionEditor {
 
 		std::string_view GetTitle() const { return m_Title; }
 
+		const ImVec2& GetMinBound() const { return m_MinBound; }
+		const ImVec2& GetMaxBound() const { return m_MaxBound; }
+
 	protected:
 		EditorWindow(const std::string& InTitle, uint32_t InInitialWidth = 0, uint32_t InInitialHeight = 0);
 
@@ -48,6 +51,8 @@ namespace FusionEditor {
 		std::string m_Title = "Editor Window";
 		uint32_t m_Width;
 		uint32_t m_Height;
+
+		ImVec2 m_MinBound, m_MaxBound;
 
 		bool m_IsTabActive = false;
 		bool m_IsMouseInside = false;

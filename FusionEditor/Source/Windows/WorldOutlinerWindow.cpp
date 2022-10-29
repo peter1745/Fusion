@@ -1,5 +1,6 @@
 #include "WorldOutlinerWindow.hpp"
 #include "WindowManager.hpp"
+#include "UI/UILibrary.hpp"
 
 #include "Fusion/World/Components/AllComponents.hpp"
 
@@ -22,7 +23,7 @@ namespace FusionEditor {
 	{
 		auto AllActors = m_World->FindAllActorsWith<Fusion::RelationshipComponent>();
 
-		if (ImGui::BeginPopupContextWindow("WorldOutlinerContextWindow"))
+		if (!ImGui::IsPopupOpen("ActorContextMenu") && ImGui::BeginPopupContextWindow("WorldOutlinerContextWindow"))
 		{
 			if (ImGui::MenuItem("Create Actor"))
 				m_World->CreateActor("New Actor");
@@ -52,17 +53,23 @@ namespace FusionEditor {
 
 	void WorldOutlinerWindow::RenderActorNode(const Fusion::Shared<Fusion::Actor>& InActor)
 	{
-		const bool WasOpen = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(InActor->Name.c_str()));
-		const bool IsOpen = ImGui::TreeNode(InActor->Name.c_str());
+		const std::string Label = std::format("{}##{}", InActor->Name, uint64_t(InActor->GetActorID()));
 
-		if (ImGui::BeginPopupContextWindow("ActorContextMenu"))
+		const bool WasOpen = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(Label.c_str()));
+		const bool IsOpen = ImGui::TreeNode(Label.c_str());
+		const bool WasRightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+
+		if (WasRightClicked)
+			ImGui::OpenPopup("ActorContextMenu");
+
+		if (UI::BeginPopup("ActorContextMenu", 100.0f))
 		{
 			if (ImGui::MenuItem("Delete"))
 			{
 				m_DeletedActor = InActor;
 			}
 
-			ImGui::EndPopup();
+			UI::EndPopup();
 		}
 
 		if (IsOpen != WasOpen)

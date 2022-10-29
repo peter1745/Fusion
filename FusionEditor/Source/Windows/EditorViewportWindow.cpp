@@ -25,6 +25,18 @@ namespace FusionEditor {
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
 
+		FUSION_CORE_INFO("Mouse Inside: {}", IsMouseInside());
+
+		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		{
+			auto MousePos = Fusion::Mouse::Get().GetPosition();
+			MousePos.x -= GetMinBound().x;
+			MousePos.y -= GetMinBound().y;
+
+			Fusion::ActorID ID = m_RenderTexture->ReadPixel(1, uint32_t(MousePos.x), uint32_t(MousePos.y));
+			OnSelectionChanged(m_World->FindActorWithID(ID));
+		}
+
 		m_Camera.SetActive(IsMouseInside() && IsTabActive());
 		m_Camera.OnUpdate(InDeltaTime);
 	}

@@ -13,21 +13,23 @@ namespace FusionEditor {
 		if (GImGui->CurrentWindow == nullptr)
 			return;
 
-		ImVec2 CursorPos = ImGui::GetCursorPos();
-		ImVec2 WindowSize = ImGui::GetWindowSize();
-		ImVec2 WindowPos = ImGui::GetWindowPos();
+		ImVec2 WindowPos = ImGui::GetCursorPos();
+		m_MinBound = ImGui::GetWindowContentRegionMin();
+		m_MinBound.x -= WindowPos.x;
+		m_MinBound.y += WindowPos.y;
 
-		WindowPos.x -= CursorPos.x;
-		WindowPos.y -= CursorPos.y;
+		m_MaxBound = ImGui::GetWindowContentRegionMax();
+		m_MaxBound.x -= WindowPos.x;
+		m_MaxBound.y += WindowPos.y;
 
-		ImVec2 MaxBound = { WindowPos.x + WindowSize.x, WindowPos.y + WindowSize.y };
-
-		m_IsMouseInside = UI::IsMouseHoveringRect(WindowPos, MaxBound);
+		// FIXME(Peter): Min bound Y is too far down?
+		m_IsMouseInside = UI::IsMouseHoveringRect(m_MinBound, m_MaxBound);
 	}
 
 	void EditorWindow::RenderUI(bool& InOpen)
 	{
 		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		const bool IsActive = ImGui::Begin(WindowTitle.c_str(), &InOpen);
 
 		m_IsTabActive = IsActive && InOpen;
@@ -50,5 +52,6 @@ namespace FusionEditor {
 		}
 
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 }

@@ -1,11 +1,12 @@
-cbuffer CameraData
-{
-	float4x4 ViewProjectionMatrix;
-};
-
 cbuffer TransformData
 {
 	float4x4 TransformMatrix;
+	uint2 EnttID;
+};
+
+cbuffer CameraData
+{
+	float4x4 ViewProjectionMatrix;
 };
 
 struct VertexInput
@@ -39,8 +40,17 @@ PixelInput VertexMain(VertexInput InVertexData)
 Texture2D InTexture;
 SamplerState InSampler;
 
-float4 PixelMain(PixelInput InPixelData) : SV_Target
+struct PixelOutput
 {
+	float4 Color : COLOR0;
+	uint2 EnttID : COLOR1;
+};
+
+PixelOutput PixelMain(PixelInput InPixelData) : SV_Target
+{
+	PixelOutput Output;
+	Output.Color = float4(InPixelData.Normal, 1.0f);
+	Output.EnttID = EnttID;
 	//return InTexture.Sample(InSampler, InPixelData.TexCoord);
-	return float4(InPixelData.Normal, 1.0f);
+	return Output;
 }

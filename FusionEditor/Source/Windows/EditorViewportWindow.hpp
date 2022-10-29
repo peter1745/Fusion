@@ -25,8 +25,6 @@ namespace FusionEditor {
 		virtual void RenderWorld() override;
 		virtual void OnResize(uint32_t InWidth, uint32_t InHeight) override;
 
-		void MainpulateGizmos();
-
 		bool OnKeyPressed(Fusion::KeyPressedEvent& InEvent);
 
 		void OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor);

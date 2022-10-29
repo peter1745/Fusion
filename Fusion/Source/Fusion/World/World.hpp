@@ -102,6 +102,8 @@ namespace Fusion {
 			return Result;
 		}
 
+		uint32_t GetEnttID(ActorID InActorID) const { return static_cast<uint32_t>(m_ActorIDMap.at(InActorID)); }
+
 		Shared<Actor> GetMainCameraActor() const;
 
 		void Clear();
