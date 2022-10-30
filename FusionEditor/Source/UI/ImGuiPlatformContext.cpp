@@ -39,7 +39,6 @@ namespace FusionEditor {
 
 	void ImGuiPlatformContext::EndFrame()
 	{
-		ImGui::Render();
 		EndFramePlatform();
 	}
 

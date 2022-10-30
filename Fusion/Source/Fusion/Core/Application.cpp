@@ -31,6 +31,13 @@ namespace Fusion {
 
 		m_Renderer = Renderer::Create(ERendererAPI::D3D11);
 
+		SwapChainInfo SwapChainCreateInfo;
+		SwapChainCreateInfo.Width = m_Window->GetWidth();
+		SwapChainCreateInfo.Height = m_Window->GetHeight();
+		SwapChainCreateInfo.HasDepthBuffer = true;
+		SwapChainCreateInfo.RenderTargetClearColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+		m_SwapChain = SwapChain::Create(SwapChainCreateInfo);
+
 		m_Window->Maximize();
 
 		AssetLoader::RegisterDefaultLoaders();
@@ -59,7 +66,6 @@ namespace Fusion {
 			m_Renderer->Begin();
 			OnUpdate(m_TimeStep);
 			m_Renderer->End();
-			m_Renderer->Present();
 
 			TimePoint time = std::chrono::high_resolution_clock::now();
 			m_FrameTime = std::chrono::duration_cast<std::chrono::duration<float>>(time - m_LastFrameTime).count();
@@ -90,7 +96,7 @@ namespace Fusion {
 
 		Dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& InResizeEvent)
 		{
-			m_Renderer->OnResize(InResizeEvent.GetWidth(), InResizeEvent.GetHeight());
+			m_SwapChain->Resize(InResizeEvent.GetWidth(), InResizeEvent.GetHeight());
 			return false;
 		});
 

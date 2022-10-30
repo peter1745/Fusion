@@ -19,6 +19,8 @@ namespace FusionEditor {
 
 		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
 		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(EditorViewportWindow::OnSelectionChanged));
+
+		m_ActorIDTexture = Texture2D::Create();
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)

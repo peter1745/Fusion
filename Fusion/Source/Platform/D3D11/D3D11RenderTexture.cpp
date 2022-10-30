@@ -64,9 +64,6 @@ namespace Fusion {
 
 	void D3D11RenderTexture::Unbind()
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		ID3D11RenderTargetView* BackBufferView = GraphicsContext::Get<D3D11Context>()->GetBackBufferView();
-		DeviceContext->OMSetRenderTargets(1, &BackBufferView, GraphicsContext::Get<D3D11Context>()->GetDepthStencilView());
 	}
 
 	void D3D11RenderTexture::Clear()

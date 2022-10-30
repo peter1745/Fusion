@@ -141,7 +141,13 @@ namespace FusionEditor {
 
 		ImGui::End();
 
+		ImGui::Render();
+
+		m_SwapChain->Bind();
+		m_SwapChain->Clear();
 		m_ImGuiContext->EndFrame();
+		m_SwapChain->Unbind();
+		m_SwapChain->Present();
 	}
 
 	void FusionEditorApp::DrawMenuBar()
