@@ -82,6 +82,8 @@ namespace Fusion {
 			// TODO(Peter): Handle with event
 			m_Running = !m_Window->ShouldClose();
 		}
+
+		m_Context->WaitForGPU();
 		OnShutdown();
 	}
 

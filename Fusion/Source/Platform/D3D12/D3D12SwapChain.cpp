@@ -173,6 +173,9 @@ namespace Fusion {
 			Context->GetDevice()->CreateRenderTargetView(m_Images[Idx], nullptr, Handle);
 			Handle.ptr += m_RTVHeapIncrement;
 		}
+
+		m_CreateInfo.Width = InWidth;
+		m_CreateInfo.Height = InHeight;
 	}
 
 }
