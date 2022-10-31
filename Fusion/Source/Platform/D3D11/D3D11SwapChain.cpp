@@ -79,7 +79,7 @@ namespace Fusion {
 			DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	void D3D11SwapChain::Present() const
+	void D3D11SwapChain::Present()
 	{
 		m_SwapChain->Present(1, 0);
 	}

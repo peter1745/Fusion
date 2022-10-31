@@ -9,7 +9,6 @@ namespace Fusion {
 
 	struct D3D11RenderStorage
 	{
-		Shared<D3D11Context> Context = nullptr;
 	};
 
 	static D3D11RenderStorage* s_Storage = nullptr;
@@ -18,7 +17,6 @@ namespace Fusion {
 	{
 		FUSION_CORE_VERIFY(!s_Storage);
 		s_Storage = new D3D11RenderStorage();
-		s_Storage->Context = Shared<D3D11Context>::Create();
 	}
 
 	D3D11Renderer::~D3D11Renderer()
@@ -28,14 +26,14 @@ namespace Fusion {
 
 	void D3D11Renderer::Begin()
 	{
-		s_Storage->Context->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//s_Storage->Context->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	void D3D11Renderer::DrawIndexed(const Shared<VertexBuffer>& InVertexBuffer, const Shared<IndexBuffer>& InIndexBuffer, [[maybe_unused]] const Shared<Shader>& InShader)
 	{
-		InVertexBuffer->Bind();
-		InIndexBuffer->Bind();
-		s_Storage->Context->GetDeviceContext()->DrawIndexed(InIndexBuffer->GetCount(), 0, 0);
+		//InVertexBuffer->Bind();
+		//InIndexBuffer->Bind();
+		//s_Storage->Context->GetDeviceContext()->DrawIndexed(InIndexBuffer->GetCount(), 0, 0);
 	}
 
 	void D3D11Renderer::Clear()
@@ -57,6 +55,6 @@ namespace Fusion {
 		//s_Storage->Context->Present();
 	}
 
-	Shared<GraphicsContext> D3D11Renderer::GetContext() const { return s_Storage->Context; }
+	Shared<GraphicsContext> D3D11Renderer::GetContext() const { return nullptr; }
 
 }

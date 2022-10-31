@@ -3,12 +3,11 @@
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
-#include "CommandBuffer.hpp"
 #include "GraphicsContext.hpp"
 
 namespace Fusion {
 
-	enum class ERendererAPI { None = -1, D3D11 };
+	enum class ERendererAPI { None = -1, D3D11, D3D12 };
 
 	class Renderer : public SharedObject
 	{
@@ -30,7 +29,7 @@ namespace Fusion {
 
 	private:
 		static Shared<Renderer> Create(ERendererAPI InRendererAPI);
-		inline static ERendererAPI s_CurrentAPI = ERendererAPI::None;
+		inline static ERendererAPI s_CurrentAPI = ERendererAPI::D3D12;
 
 		friend class Application;
 	};

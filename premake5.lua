@@ -8,7 +8,7 @@ workspace "Fusion"
 
     flags { "MultiProcessorCompile" }
 
-    toolset "clang"
+    toolset "msc"
     warnings "High"
 
 BuildDir = "%{wks.location}/Build/%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"

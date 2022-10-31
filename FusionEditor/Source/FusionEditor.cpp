@@ -42,28 +42,39 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnInit()
 	{
-		m_ImGuiContext = ImGuiPlatformContext::Create();
-		m_ImGuiContext->Init(GetWindow(), m_Renderer->GetContext());
+		//m_ImGuiContext = ImGuiPlatformContext::Create();
+		//m_ImGuiContext->Init(GetWindow(), m_Renderer->GetContext());
 	
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 		
 		m_World = Shared<World>::Create("Empty World");
-		
-		InitWindows();
+		m_WindowManager = MakeUnique<WindowManager>();
+
+		//InitWindows();
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
-		m_WindowManager->OnUpdate(DeltaTime);
-		m_WindowManager->OnRender();
+		m_Context->NextFrame();
 
-		DrawUI();
+		m_SwapChain->Bind();
+		m_SwapChain->Clear();
+		m_SwapChain->Unbind();
+		m_Context->GetCurrentCommandList()->EndRecording();
+		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
+		m_SwapChain->Present();
+		//m_Context->WaitForGPU();
+
+		//m_WindowManager->OnUpdate(DeltaTime);
+		//m_WindowManager->OnRender();
+		//
+		//DrawUI();
 	}
 
 	void FusionEditorApp::OnShutdown()
 	{
 		NFD::Quit();
-		ShutdownImGui();
+		//ShutdownImGui();
 	}
 
 	void FusionEditorApp::OnEvent(Event& InEvent)
@@ -92,7 +103,6 @@ namespace FusionEditor {
 
 	void FusionEditorApp::InitWindows()
 	{
-		m_WindowManager = MakeUnique<WindowManager>();
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
 		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);

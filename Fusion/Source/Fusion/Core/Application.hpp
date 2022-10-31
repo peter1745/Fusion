@@ -2,6 +2,7 @@
 
 #include "Window.hpp"
 #include "Fusion/Renderer/Renderer.hpp"
+#include "Fusion/Renderer/GraphicsContext.hpp"
 #include "Fusion/Renderer/SwapChain.hpp"
 
 #include "Fusion/AssetSystem/AssetStorage.hpp"
@@ -75,8 +76,9 @@ namespace Fusion {
 		Shared<AssetStorage> m_AssetStorage;
 
 	protected:
-		Shared<Renderer> m_Renderer = nullptr;
+		Shared<GraphicsContext> m_Context = nullptr;
 		Shared<SwapChain> m_SwapChain = nullptr;
+		Shared<Renderer> m_Renderer = nullptr;
 
 	};
 

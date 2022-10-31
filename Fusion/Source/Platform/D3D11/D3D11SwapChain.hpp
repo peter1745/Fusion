@@ -12,7 +12,7 @@ namespace Fusion {
 
 		virtual void Bind() override;
 		virtual void Clear() const override;
-		virtual void Present() const override;
+		virtual void Present() override;
 		virtual void Unbind() {}
 
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) override;

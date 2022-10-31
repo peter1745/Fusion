@@ -45,6 +45,7 @@ project "FusionEditor"
 
         links
         {
+            "d3d12.lib",
             "d3d11.lib",
             "dxgi.lib",
             "d3dcompiler.lib"

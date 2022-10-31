@@ -11,15 +11,14 @@ namespace Fusion {
 
 	Shared<Renderer> Renderer::Create(ERendererAPI InRendererAPI)
 	{
-		s_CurrentAPI = InRendererAPI;
+		//s_CurrentAPI = InRendererAPI;
 
-		switch (InRendererAPI)
+		switch (s_CurrentAPI)
 		{
 		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return Shared<D3D11Renderer>::Create();
 		}
 
-		FUSION_CORE_VERIFY(false);
 		return nullptr;
 	}
 

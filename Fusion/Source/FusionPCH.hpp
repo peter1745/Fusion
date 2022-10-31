@@ -20,5 +20,4 @@
 #if defined(FUSION_PLATFORM_WINDOWS)
 	#include <Windows.h>
 	#include <d3d11.h>
-	#include <dxgi.h>
 #endif
