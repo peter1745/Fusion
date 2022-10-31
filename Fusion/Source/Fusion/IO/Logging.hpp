@@ -35,6 +35,8 @@ namespace Fusion {
 	private:
 		static Logger s_FusionLogger;
 		static Logger s_ClientLogger;
+
+		static bool s_Initialized;
 	};
 
 }
@@ -57,6 +59,9 @@ namespace Fusion {
 	template<typename... TArgs>
 	void Logging::PrintMessage(bool IsFusionLogger, Level InLevel, TArgs&&... InArgs)
 	{
+		if (!s_Initialized)
+			return;
+
 		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
 		switch (InLevel)
 		{
@@ -81,6 +86,9 @@ namespace Fusion {
 	template<typename... TArgs>
 	void Logging::PrintVerifyMessage(bool IsFusionLogger, std::string_view InPrefix, TArgs&&... InArgs)
 	{
+		if (!s_Initialized)
+			return;
+		
 		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
 		LoggerPtr->critical("{0}: {1}", InPrefix, fmt::format(std::forward<TArgs>(InArgs)...));
 	}
@@ -88,6 +96,9 @@ namespace Fusion {
 	template<>
 	inline void Logging::PrintVerifyMessage(bool IsFusionLogger, std::string_view InPrefix)
 	{
+		if (!s_Initialized)
+			return;
+
 		auto LoggerPtr = IsFusionLogger ? GetFusionLogger() : GetClientLogger();
 		LoggerPtr->critical("{0}", InPrefix);
 	}

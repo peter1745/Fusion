@@ -9,9 +9,10 @@ namespace Fusion {
 	struct VertexBufferInfo
 	{
 		uint32_t BufferSize = 0;
+		uint32_t Stride = 0;
 		void* Data = nullptr;
-		VertexBufferLayout Layout;
 		EBufferUsage Usage = EBufferUsage::Static;
+		VertexBufferLayout Layout;
 	};
 
 	class VertexBuffer : public SharedObject

@@ -50,10 +50,10 @@ namespace Fusion {
 
 		FUSION_CORE_VERIFY(DXGIAdapter.IsValid(), "Failed to find suitable GPU!");
 
-		D3D12CreateDevice(DXGIAdapter, D3D_FEATURE_LEVEL_12_2, m_Device, m_Device);
+		D3D12CreateDevice(DXGIAdapter.Get(), D3D_FEATURE_LEVEL_12_2, m_Device, m_Device);
 
 		if (SUCCEEDED(m_Device->QueryInterface(m_InfoQueue, m_InfoQueue)))
-			m_InfoQueue->RegisterMessageCallback(&MessageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, nullptr);
+			m_InfoQueue->RegisterMessageCallback(&MessageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &m_MessageCallbackCookie);
 
 		D3D12_COMMAND_QUEUE_DESC CommandQueueDesc = {};
 		CommandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -78,11 +78,11 @@ namespace Fusion {
 
 	D3D12Context::~D3D12Context() {}
 
-	void D3D12Context::ExecuteCommandLists(const std::vector<Shared<CommandList>>& InCommandLists)
+	void D3D12Context::ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists)
 	{
 		std::vector<ID3D12CommandList*> CommandLists(InCommandLists.size());
 		for (size_t Idx = 0; Idx < InCommandLists.size(); Idx++)
-			CommandLists[Idx] = InCommandLists[Idx].As<D3D12CommandList>()->GetNativeList();
+			CommandLists[Idx] = static_cast<D3D12CommandList*>(InCommandLists[Idx])->GetNativeList();
 		m_CommandQueue->ExecuteCommandLists(uint32_t(InCommandLists.size()), CommandLists.data());
 	}
 
@@ -96,7 +96,7 @@ namespace Fusion {
 
 		if (m_FrameFence->GetCompletedValue() < m_FrameValues[m_FrameIndex])
 		{
-			FUSION_CORE_INFO("Rendered {} frames before waiting", m_FramesBeforeWait);
+			//FUSION_CORE_INFO("Rendered {} frames before waiting", m_FramesBeforeWait);
 			m_FramesBeforeWait = 0;
 			m_FrameFence->SetEventOnCompletion(m_FrameValues[m_FrameIndex], m_FrameEvent);
 			WaitForSingleObjectEx(m_FrameEvent, INFINITE, false);

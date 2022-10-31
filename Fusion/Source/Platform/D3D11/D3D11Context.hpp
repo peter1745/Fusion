@@ -14,8 +14,8 @@ namespace Fusion {
 		~D3D11Context();
 
 		virtual Shared<CommandAllocator> GetCommandAllocator() const override { return nullptr; }
-		virtual Shared<CommandList> GetCurrentCommandList() const override { return nullptr; }
-		virtual void ExecuteCommandLists(const std::vector<Shared<CommandList>>& InCommandLists) override {}
+		virtual CommandList* GetCurrentCommandList() const override { return nullptr; }
+		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) override {}
 
 		virtual void NextFrame() override {}
 		virtual void WaitForGPU() override {}

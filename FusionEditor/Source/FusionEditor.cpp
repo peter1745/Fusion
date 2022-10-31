@@ -17,6 +17,7 @@
 #include "AssetSystem/AssetUtils.hpp"
 
 #include <Fusion/Renderer/Mesh.hpp>
+#include <Fusion/Renderer/GraphicsPipeline.hpp>
 #include <Fusion/Serialization/World/WorldSerializer.hpp>
 #include <Fusion/IO/FileIO.hpp>
 #include <Fusion/IO/Keyboard.hpp>
@@ -24,6 +25,8 @@
 #include <NFD-Extended/nfd.hpp>
 
 #include <GLFW/glfw3.h>
+
+#define TRIANGLE 1
 
 namespace FusionEditor {
 
@@ -40,35 +43,91 @@ namespace FusionEditor {
 		});
 	}
 
+	Unique<PipelineLayout> Layout;
+	Unique<GraphicsPipeline> Pipeline;
+	Shared<VertexBuffer> VertexBuf;
+
+	struct Vertex2
+	{
+		glm::vec4 Position;
+		glm::vec3 Normal;
+		glm::vec2 TextureCoordinate;
+	};
+
+	static Vertex2 s_Vertices[] = {
+		{ { 0.0f, 0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+		{ { 0.5f, -0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+		{ { -0.5f, -0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }
+	};
+
 	void FusionEditorApp::OnInit()
 	{
-		//m_ImGuiContext = ImGuiPlatformContext::Create();
-		//m_ImGuiContext->Init(GetWindow(), m_Renderer->GetContext());
+		m_ImGuiContext = ImGuiPlatformContext::Create();
+		m_ImGuiContext->Init(GetWindow(), m_Context);
 	
+		PipelineLayoutInfo LayoutInfo = {};
+		LayoutInfo.Flags |= EPipelineLayoutFlags::AllowInputAssemblerInputLayout;
+		Layout = PipelineLayout::Create(LayoutInfo);
+
+		GraphicsPipelineInfo PipelineInfo = {};
+		PipelineInfo.Layout = Layout.get();
+		PipelineInfo.Inputs = {
+			{ "POSITION", 0, EGraphicsFormat::RGBA32Float, 0, AppendAlignedElement, 0 },
+			{ "NORMAL",   0, EGraphicsFormat::RGB32Float, 0, AppendAlignedElement, 0 },
+			{ "TEXCOORD", 0, EGraphicsFormat::RG32Float,  0, AppendAlignedElement, 0 },
+		};
+
+		PipelineInfo.PipelineShader = Shader::Create({ "Resources/Shaders/D3D12.hlsl" });
+		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
+		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
+		PipelineInfo.RenderTargetCount = 1;
+		PipelineInfo.RenderTargetFormats[0] = EGraphicsFormat::RGBA8Unorm;
+		PipelineInfo.DepthStencilFormat = EGraphicsFormat::D24UnormS8UInt;
+		Pipeline = GraphicsPipeline::Create(PipelineInfo);
+
+		VertexBufferInfo VertexBufferCreateInfo = {};
+		VertexBufferCreateInfo.BufferSize = 3 * sizeof(Vertex2);
+		VertexBufferCreateInfo.Data = s_Vertices;
+		VertexBufferCreateInfo.Stride = sizeof(Vertex2);
+		VertexBuf = VertexBuffer::Create(VertexBufferCreateInfo);
+
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 		
 		m_World = Shared<World>::Create("Empty World");
 		m_WindowManager = MakeUnique<WindowManager>();
 
-		//InitWindows();
+#if !TRIANGLE
+		InitWindows();
+#endif
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
+		// NextFrame also resets the active command list (should maybe be a separate call?)
 		m_Context->NextFrame();
 
+		m_WindowManager->OnUpdate(DeltaTime);
+		
+#if TRIANGLE
 		m_SwapChain->Bind();
 		m_SwapChain->Clear();
+		
+		Pipeline->Bind();
+
+		VertexBuf->Bind();
+
+		m_WindowManager->OnRender();
+
+		m_Context->GetCurrentCommandList()->DrawInstanced(3, 1, 0, 0);
+
 		m_SwapChain->Unbind();
 		m_Context->GetCurrentCommandList()->EndRecording();
 		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
 		m_SwapChain->Present();
-		//m_Context->WaitForGPU();
-
-		//m_WindowManager->OnUpdate(DeltaTime);
-		//m_WindowManager->OnRender();
-		//
-		//DrawUI();
+#else
+		m_WindowManager->OnRender();
+		DrawUI();
+#endif
 	}
 
 	void FusionEditorApp::OnShutdown()
@@ -105,8 +164,8 @@ namespace FusionEditor {
 	{
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
-		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
-		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
+		//m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
+		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 
 		m_AssetImporterWindows[EAssetType::Mesh] = m_WindowManager->RegisterWindow<MeshImporterWindow>(false);
@@ -157,6 +216,10 @@ namespace FusionEditor {
 		m_SwapChain->Clear();
 		m_ImGuiContext->EndFrame();
 		m_SwapChain->Unbind();
+		m_Context->GetCurrentCommandList()->EndRecording();
+
+		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
+
 		m_SwapChain->Present();
 	}
 

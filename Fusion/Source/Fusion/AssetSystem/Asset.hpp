@@ -6,6 +6,8 @@
 
 #include "Fusion/Renderer/Mesh.hpp"
 
+#include <concepts>
+
 namespace Fusion {
 
 	enum class EAssetType { Mesh };

@@ -65,7 +65,7 @@ namespace Fusion {
 	void D3D12SwapChain::Bind()
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = Context->GetCurrentCommandList().As<D3D12CommandList>()->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
 
 		D3D12_VIEWPORT Viewport = {};
 		Viewport.TopLeftX = 0.0f;
@@ -102,7 +102,7 @@ namespace Fusion {
 	void D3D12SwapChain::Clear() const
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = Context->GetCurrentCommandList().As<D3D12CommandList>()->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE CurrentImageHandle = m_RTVHeapStart;
 		CurrentImageHandle.ptr += m_CurrentImageIndex * m_RTVHeapIncrement;
@@ -125,7 +125,7 @@ namespace Fusion {
 	void D3D12SwapChain::Unbind()
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = Context->GetCurrentCommandList().As<D3D12CommandList>()->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
 
 		// Transition image from rendering to present mode
 		D3D12_RESOURCE_BARRIER Barrier = {};

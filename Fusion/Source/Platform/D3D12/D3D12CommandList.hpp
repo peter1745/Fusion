@@ -17,8 +17,10 @@ namespace Fusion {
 		virtual void BeginRecording() override;
 		virtual void SetViewports(const std::vector<Viewport>& InViewports) override;
 
-		virtual void EndRecording() override;
+		virtual void DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation) override;
 
+		virtual void EndRecording() override;
+				
 		auto& GetNativeList() { return m_CommandList; }
 
 	private:

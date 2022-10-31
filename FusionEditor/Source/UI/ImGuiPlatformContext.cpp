@@ -4,6 +4,7 @@
 
 #ifdef FUSION_PLATFORM_WINDOWS
 	#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
+	#include "Platform/D3D12/ImGuiPlatformContextD3D12.hpp"
 #endif
 
 #include <ImGui/imgui.h>
@@ -54,6 +55,7 @@ namespace FusionEditor {
 		{
 		case Fusion::ERendererAPI::None: return nullptr;
 		case Fusion::ERendererAPI::D3D11: return std::make_unique<ImGuiPlatformContextD3D11>();
+		case Fusion::ERendererAPI::D3D12: return std::make_unique<ImGuiPlatformContextD3D12>();
 		}
 
 		return nullptr;

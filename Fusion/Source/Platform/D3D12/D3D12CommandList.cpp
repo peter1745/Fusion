@@ -30,6 +30,12 @@ namespace Fusion {
 		m_CommandList->RSSetViewports(uint32_t(D3DViewports.size()), D3DViewports.data());
 	}
 
+	void D3D12CommandList::DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation)
+	{
+		m_CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_CommandList->DrawInstanced(InInstanceVertexCount, InInstanceCount, InStartVertexLocation, InStartInstanceLocation);
+	}
+
 	void D3D12CommandList::EndRecording()
 	{
 		m_CommandList->Close();

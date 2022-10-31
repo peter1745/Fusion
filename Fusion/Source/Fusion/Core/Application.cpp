@@ -37,7 +37,7 @@ namespace Fusion {
 		SwapChainCreateInfo.Width = m_Window->GetWidth();
 		SwapChainCreateInfo.Height = m_Window->GetHeight();
 		SwapChainCreateInfo.HasDepthBuffer = false;
-		SwapChainCreateInfo.RenderTargetClearColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+		SwapChainCreateInfo.RenderTargetClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		m_SwapChain = SwapChain::Create(SwapChainCreateInfo);
 
 		m_Window->Maximize();

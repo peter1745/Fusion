@@ -41,6 +41,8 @@ namespace Fusion {
 		s_ClientLogger = std::make_shared<spdlog::logger>("Client", ClientSinks.begin(), ClientSinks.end());
 		s_ClientLogger->set_level(spdlog::level::trace);
 
+		s_Initialized = true;
+
 		FUSION_CORE_INFO("Initialized Logging System");
 	}
 
@@ -48,9 +50,12 @@ namespace Fusion {
 	{
 		s_FusionLogger.reset();
 		s_ClientLogger.reset();
+
+		s_Initialized = false;
 	}
 
 	std::shared_ptr<spdlog::logger> Logging::s_FusionLogger;
 	std::shared_ptr<spdlog::logger> Logging::s_ClientLogger;
+	bool Logging::s_Initialized = false;
 
 }

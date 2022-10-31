@@ -35,31 +35,29 @@ namespace Fusion {
 		m_CommandLists.clear();
 	}
 
-	Shared<CommandList> D3D12CommandAllocator::AllocateCommandList()
+	CommandList* D3D12CommandAllocator::AllocateCommandList()
 	{
 		return AllocateCommandList(GraphicsContext::Get<D3D12Context>()->GetDevice());
 	}
 
-	Shared<CommandList> D3D12CommandAllocator::AllocateCommandList(D3D12ComPtr<ID3D12Device9> InDevice)
+	CommandList* D3D12CommandAllocator::AllocateCommandList(D3D12ComPtr<ID3D12Device9> InDevice)
 	{
 		auto D3D12CommandListType = ECommandListTypeToD3D12CommandListType(m_CreateInfo.ListType);
 
 		D3D12ComPtr<ID3D12GraphicsCommandList6> GraphicsCommandList;
 		InDevice->CreateCommandList1(0, D3D12CommandListType, D3D12_COMMAND_LIST_FLAG_NONE, GraphicsCommandList, GraphicsCommandList);
-
-		Shared<D3D12CommandList> Result = Shared<D3D12CommandList>::Create(this, GraphicsCommandList);
-		m_CommandLists.push_back(Result);
-		return Result;
+		auto& Result = m_CommandLists.emplace_back(MakeUnique<D3D12CommandList>(this, GraphicsCommandList));
+		return Result.get();
 	}
 
-	std::vector<Shared<CommandList>> D3D12CommandAllocator::AllocateCommandLists(size_t InCount)
+	std::vector<CommandList*> D3D12CommandAllocator::AllocateCommandLists(size_t InCount)
 	{
 		return AllocateCommandLists(GraphicsContext::Get<D3D12Context>()->GetDevice(), InCount);
 	}
 
-	std::vector<Shared<CommandList>> D3D12CommandAllocator::AllocateCommandLists(D3D12ComPtr<ID3D12Device9> InDevice, size_t InCount)
+	std::vector<CommandList*> D3D12CommandAllocator::AllocateCommandLists(D3D12ComPtr<ID3D12Device9> InDevice, size_t InCount)
 	{
-		std::vector<Shared<CommandList>> Result;
+		std::vector<CommandList*> Result;
 		Result.reserve(InCount);
 		for (size_t Idx = 0; Idx < InCount; Idx++)
 			Result.push_back(AllocateCommandList(InDevice));
@@ -69,7 +67,7 @@ namespace Fusion {
 	void D3D12CommandAllocator::Reset()
 	{
 		m_Allocator->Reset();
-		for (auto CmdList : m_CommandLists)
+		for (auto& CmdList : m_CommandLists)
 			CmdList->m_CommandList->Reset(m_Allocator, nullptr);
 	}
 

@@ -14,8 +14,8 @@ namespace Fusion {
 		~D3D12Context();
 
 		virtual Shared<CommandAllocator> GetCommandAllocator() const override { return m_CommandAllocators[m_FrameIndex]; }
-		virtual Shared<CommandList> GetCurrentCommandList() const override { return m_CommandAllocators[m_FrameIndex]->GetCommandList(0); }
-		virtual void ExecuteCommandLists(const std::vector<Shared<CommandList>>& InCommandLists) override;
+		virtual CommandList* GetCurrentCommandList() const override { return m_CommandAllocators[m_FrameIndex]->GetCommandList(0); }
+		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) override;
 
 		virtual void NextFrame() override;
 		virtual void WaitForGPU() override;
@@ -23,6 +23,8 @@ namespace Fusion {
 		auto& GetDXGIFactory() { return m_Factory; }
 		auto& GetDevice() { return m_Device; }
 		auto& GetCommandQueue() { return m_CommandQueue; }
+
+		uint32_t GetFramesInFlight() const { return m_FrameCount; }
 
 	private:
 		static void MessageCallback(D3D12_MESSAGE_CATEGORY InCategory, D3D12_MESSAGE_SEVERITY InSeverity, D3D12_MESSAGE_ID InID, LPCSTR InDescription, void* InContext);
@@ -43,6 +45,8 @@ namespace Fusion {
 		D3D12ComPtr<ID3D12Fence1> m_FrameFence;
 		HANDLE m_FrameEvent;
 		std::vector<uint64_t> m_FrameValues;
+
+		DWORD m_MessageCallbackCookie;
 	};
 
 }
