@@ -6,15 +6,22 @@
 
 namespace Fusion {
 
-	enum class EPipelineLayoutDescriptorRangeFlags
-	{
-		None,
-		VolatileDescriptor,
-		VolatileData,
-		StaticData
-	};
+	using EPipelineLayoutDescriptorRangeFlags = Flags<>;
+	using EPipelineLayoutFlags = Flags<>;
 
-	enum class EPipelineLayoutFlags { None, AllowInputAssemblerInputLayout };
+	namespace DescriptorRangeFlags
+	{
+		static constexpr EPipelineLayoutDescriptorRangeFlags None = (1 << 0);
+		static constexpr EPipelineLayoutDescriptorRangeFlags VolatileDescriptor = (1 << 1);
+		static constexpr EPipelineLayoutDescriptorRangeFlags VolatileData = (1 << 2);
+		static constexpr EPipelineLayoutDescriptorRangeFlags StaticData = (1 << 3);
+	}
+
+	namespace PipelineLayoutFlags
+	{
+		static constexpr EPipelineLayoutFlags None = (1 << 0);
+		static constexpr EPipelineLayoutFlags AllowInputAssemblerInputLayout = (1 << 1);
+	}
 
 	enum class EPipelineParameterType
 	{
@@ -60,7 +67,7 @@ namespace Fusion {
 		uint32_t Binding;
 		uint32_t Space;
 		uint32_t Offset;
-		Enum<EPipelineLayoutDescriptorRangeFlags> Flags;
+		EPipelineLayoutDescriptorRangeFlags Flags;
 	};
 
 	struct PipelineLayoutDescriptorTable
@@ -78,7 +85,7 @@ namespace Fusion {
 	struct PipelineLayoutInfo
 	{
 		std::vector<PipelineLayoutParameter> Parameters;
-		Enum<EPipelineLayoutFlags> Flags;
+		EPipelineLayoutFlags Flags;
 	};
 
 	class PipelineLayout

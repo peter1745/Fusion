@@ -4,13 +4,14 @@
 
 #include <Fusion/Renderer/WorldRenderer.hpp>
 #include <Fusion/Renderer/RenderTexture.hpp>
+#include <Fusion/Renderer/DescriptorHeap.hpp>
 
 namespace FusionEditor {
 
 	class ViewportWindowBase : public EditorWindow
 	{
 	public:
-		ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld);
+		ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap);
 
 		virtual void OnRender() override;
 		virtual void OnUpdate(float InDeltaTime) override;
@@ -31,6 +32,9 @@ namespace FusionEditor {
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		bool m_IsHovered = false;
+
+		Fusion::DescriptorHeap* m_DescriptorHeap = nullptr;
+		std::vector<Fusion::DescriptorHeapAllocation> m_RTVAllocations;
 	};
 
 }

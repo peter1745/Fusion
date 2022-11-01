@@ -6,24 +6,26 @@
 
 namespace Fusion {
 
+	using EBufferState = Flags<>;
+
 	enum class EHeapType { Default, Upload };
 
-	enum class EBufferState
+	namespace BufferStates
 	{
-		Common,
-		VertexAndConstant,
-		Index,
-		UnorderedAccess,
-		NonPixelShaderResource,
-		IndirectArgument,
-		CopyDestination,
-		CopySource
-	};
+		static constexpr EBufferState Common = (1 << 0);
+		static constexpr EBufferState VertexAndConstant = (1 << 1);
+		static constexpr EBufferState Index = (1 << 2);
+		static constexpr EBufferState UnorderedAccess = (1 << 3);
+		static constexpr EBufferState NonPixelShaderResource = (1 << 4);
+		static constexpr EBufferState IndirectArgument = (1 << 5);
+		static constexpr EBufferState CopyDestination = (1 << 6);
+		static constexpr EBufferState CopySource = (1 << 7);
+	}
 
 	struct BufferInfo
 	{
 		EHeapType HeapType;
-		Enum<EBufferState> State;
+		EBufferState State;
 		uint64_t Alignment;
 		uint64_t Size;
 

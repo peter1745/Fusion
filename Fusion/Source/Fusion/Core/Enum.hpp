@@ -1,100 +1,192 @@
 #pragma once
 
-#include <concepts>
+#include <cstdint>
 
-namespace Fusion {
+#include <ostream>
+#include <utility>
 
-	template<typename TEnum>
-	struct Enum
+namespace Fusion
+{
+	template <class T = std::uint32_t, T D = T{ 0 } >
+	struct Flags
 	{
-		using UnderlyingType = std::underlying_type_t<TEnum>;
+	public:
+		using ValueT = T;
 
-		constexpr Enum()
-			: Value(0) {}
-
-		constexpr Enum(UnderlyingType InValue)
-			: Value(1 << InValue) {}
-
-		constexpr Enum(TEnum InValue)
-			: Value(1 << static_cast<UnderlyingType>(InValue)) {}
-
-		template<typename TOtherEnum>
-		friend constexpr Enum operator|(const Enum& InLHS, const Enum<TOtherEnum>& InRHS)
+	public:
+		constexpr Flags()
+			: m_Value(D) {}
+		constexpr Flags(const ValueT& value)
+			: m_Value(value) {}
+		constexpr Flags(ValueT&& value)
+			: m_Value(std::move(value)) {}
+		template <class U, T E>
+		constexpr Flags(const Flags<U, E>& flags)
+			: m_Value(flags.m_Value)
 		{
-			return InLHS.Value | InRHS.Value;
+		}
+		template <class U, T E>
+		constexpr Flags(Flags<U, E>&& flags)
+			: m_Value(std::move(flags.m_Value))
+		{
 		}
 
-		template<typename TOtherEnum>
-		constexpr Enum& operator|=(const Enum<TOtherEnum>& InOther)
+		constexpr Flags& operator=(const ValueT& value)
 		{
-			Value |= InOther.Value;
+			m_Value = value;
+			return *this;
+		}
+		constexpr Flags& operator=(ValueT&& value)
+		{
+			m_Value = std::move(value);
+			return *this;
+		}
+		template <class U, T E>
+		constexpr Flags& operator=(const Flags<U, E>& flags)
+		{
+			m_Value = flags.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		constexpr Flags& operator=(Flags<U, E>&& flags)
+		{
+			m_Value = std::move(flags.m_Value);
 			return *this;
 		}
 
-		template<typename TOtherEnum>
-		friend constexpr Enum operator|(const Enum& InLHS, TOtherEnum InRHS)
-		{
-			return InLHS.Value | 1 << static_cast<UnderlyingType>(InRHS);
-		}
+		constexpr         operator ValueT& () { return m_Value; }
+		constexpr ValueT& getValue() { return m_Value; }
 
-		template<typename TOtherEnum>
-		constexpr Enum& operator|=(TOtherEnum InOther)
+		friend constexpr Flags operator~(const Flags& flags) { return ~flags.m_Value; }
+		template <class U, T E>
+		friend constexpr bool operator==(const Flags& lhs, const Flags<U, E>& rhs)
 		{
-			Value |= 1 << static_cast<UnderlyingType>(InOther);
+			return lhs.m_Value == rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr bool operator!=(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value != rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr bool operator<(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value < rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr bool operator<=(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value <= rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr bool operator>(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value > rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr bool operator>=(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value >= rhs.m_Value;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator&(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value & rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator&=(const Flags<U, E>& rhs)
+		{
+			m_Value &= rhs.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator|(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value | rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator|=(const Flags<U, E>& rhs)
+		{
+			m_Value |= rhs.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator^(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value ^ rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator^=(const Flags<U, E>& rhs)
+		{
+			m_Value ^= rhs.m_Value;
+			return *this;
+		}
+		friend constexpr Flags operator<<(const Flags& lhs, std::size_t count)
+		{
+			return lhs.m_Value << count;
+		}
+		constexpr Flags& operator<<=(std::size_t count)
+		{
+			m_Value <<= count;
+			return *this;
+		}
+		friend constexpr Flags operator>>(const Flags& lhs, std::size_t count)
+		{
+			return lhs.m_Value >> count;
+		}
+		constexpr Flags& operator>>=(std::size_t count)
+		{
+			m_Value >>= count;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator-(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value - rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator-=(const Flags<U, E>& rhs)
+		{
+			m_Value -= rhs.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator+(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value + rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator+=(const Flags<U, E>& rhs)
+		{
+			m_Value += rhs.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator*(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value * rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator*=(const Flags<U, E>& rhs)
+		{
+			m_Value *= rhs.m_Value;
+			return *this;
+		}
+		template <class U, T E>
+		friend constexpr Flags operator/(const Flags& lhs, const Flags<U, E>& rhs)
+		{
+			return lhs.m_Value / rhs.m_Value;
+		}
+		template <class U, T E>
+		constexpr Flags& operator/=(const Flags<U, E>& rhs)
+		{
+			m_Value /= rhs.m_Value;
 			return *this;
 		}
 
-		template<typename TOtherEnum>
-		friend constexpr Enum operator&(const Enum& InLHS, const Enum<TOtherEnum>& InRHS)
-		{
-			return InLHS.Value & InRHS.Value;
-		}
+		friend std::ostream& operator<<(std::ostream& stream, const Flags& flags) { return stream << flags.m_Value; }
 
-		template<typename TOtherEnum>
-		constexpr Enum& operator&=(const Enum<TOtherEnum>& InOther)
-		{
-			Value &= InOther.Value;
-			return *this;
-		}
-
-		template<typename TOtherEnum>
-		friend constexpr Enum operator&(const Enum& InLHS, TOtherEnum InRHS)
-		{
-			return InLHS.Value & 1 << static_cast<UnderlyingType>(InRHS);
-		}
-
-		template<typename TOtherEnum>
-		constexpr Enum& operator&=(TOtherEnum InOther)
-		{
-			Value &= 1 << static_cast<UnderlyingType>(InOther);
-			return *this;
-		}
-		
-		template<typename TOtherEnum>
-		constexpr bool operator!=(const Enum<TOtherEnum>& InOther)
-		{
-			return Value != InOther.Value;
-		}
-
-		template<typename TOtherEnum>
-		constexpr bool operator!=(TOtherEnum InOther)
-		{
-			return Value != static_cast<UnderlyingType>(InOther);
-		}
-
-		template<typename TOtherEnum>
-		constexpr bool operator==(const Enum<TOtherEnum>& InOther)
-		{
-			return Value == InOther.Value;
-		}
-
-		template<typename TOtherEnum>
-		constexpr bool operator==(TOtherEnum InOther)
-		{
-			return Value == static_cast<UnderlyingType>(InOther);
-		}
-
-		UnderlyingType Value;
+	public:
+		ValueT m_Value;
 	};
-
 }

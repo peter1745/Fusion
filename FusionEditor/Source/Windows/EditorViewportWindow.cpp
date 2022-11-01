@@ -12,8 +12,8 @@
 
 namespace FusionEditor {
 
-	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld)
-		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720)
+	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap)
+		: ViewportWindowBase("MainViewport", InWorld, InDescriptorHeap), m_Camera(1280, 720)
 	{
 		SetTitle("Viewport");
 

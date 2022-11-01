@@ -24,6 +24,7 @@ namespace Fusion {
 		auto& GetDevice() { return m_Device; }
 		auto& GetCommandQueue() { return m_CommandQueue; }
 
+		virtual uint32_t GetCurrentFrameIndex() const override { return m_FrameIndex; }
 		uint32_t GetFramesInFlight() const { return m_FrameCount; }
 
 	private:

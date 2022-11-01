@@ -146,7 +146,7 @@ namespace Fusion {
 		auto Context = GraphicsContext::Get<D3D12Context>();
 
 		m_Images.clear();
-		m_RTVDescriptorHeap.Release();
+		//m_RTVDescriptorHeap.Release();
 
 		Context->WaitForGPU();
 
@@ -156,15 +156,15 @@ namespace Fusion {
 		m_SwapChain->GetDesc1(&SwapChainDesc);
 		m_Images.resize(SwapChainDesc.BufferCount);
 
-		D3D12_DESCRIPTOR_HEAP_DESC RTVDescriptorHeapDesc = {};
+		/*D3D12_DESCRIPTOR_HEAP_DESC RTVDescriptorHeapDesc = {};
 		RTVDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 		RTVDescriptorHeapDesc.NumDescriptors = SwapChainDesc.BufferCount;
 		RTVDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		RTVDescriptorHeapDesc.NodeMask = 0;
-		Context->GetDevice()->CreateDescriptorHeap(&RTVDescriptorHeapDesc, m_RTVDescriptorHeap, m_RTVDescriptorHeap);
+		Context->GetDevice()->CreateDescriptorHeap(&RTVDescriptorHeapDesc, m_RTVDescriptorHeap, m_RTVDescriptorHeap);*/
 
-		m_RTVHeapStart = m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		m_RTVHeapIncrement = Context->GetDevice()->GetDescriptorHandleIncrementSize(RTVDescriptorHeapDesc.Type);
+		/*m_RTVHeapStart = m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		m_RTVHeapIncrement = Context->GetDevice()->GetDescriptorHandleIncrementSize(RTVDescriptorHeapDesc.Type);*/
 
 		auto Handle = m_RTVHeapStart;
 		for (uint32_t Idx = 0; Idx < SwapChainDesc.BufferCount; Idx++)

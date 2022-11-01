@@ -1,27 +1,46 @@
 #pragma once
 
 #include "Fusion/Memory/Shared.hpp"
+#include "CommonTypes.hpp"
+#include "Fusion/Core/Enum.hpp"
 
 #include <glm/glm.hpp>
 
+#include <vector>
+
 namespace Fusion {
 
-	enum class ERenderTextureAttachmentFormat
+	using EImageFlag = Flags<>;
+	using EImageState = Flags<>;
+
+	namespace ImageStates
 	{
-		None, RGBA8, R32UInt, R32G32UInt, Depth24
+		static constexpr EImageState RenderTarget = (1 << 0);
+		static constexpr EImageState DepthWrite = (1 << 1);
+		static constexpr EImageState DepthRead = (1 << 2);
+		static constexpr EImageState UnorderedAccess = (1 << 3);
+		static constexpr EImageState NonPixelShaderResource = (1 << 4);
+		static constexpr EImageState PixelShaderResource = (1 << 5);
+		static constexpr EImageState IndirectArgument = (1 << 6);
+		static constexpr EImageState CopyDst = (1 << 7);
+		static constexpr EImageState CopySrc = (1 << 8);
+		static constexpr EImageState ResolveDst = (1 << 9);
+		static constexpr EImageState ResolveSrc = (1 << 10);
+		static constexpr EImageState ShadingRateSrc = (1 << 11);
 	};
 
-	/*enum class ERenderTextureAttachmentUsage
+	namespace ImageFlags
 	{
-		Default
-	};*/
+		static constexpr EImageFlag AllowRenderTarget = (1 << 0);
+		static constexpr EImageFlag AllowDepthStencil = (1 << 1);
+	}
 
 	struct RenderTextureAttachment
 	{
-		ERenderTextureAttachmentFormat Format;
-		//ERenderTextureAttachmentUsage Usage = ERenderTextureAttachmentUsage::Default;
-		bool RequiresCPUAccess = false;
+		EGraphicsFormat Format;
 		glm::vec4 ClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		EImageState InitialState;
+		EImageFlag Flags;
 	};
 
 	struct RenderTextureInfo
@@ -29,7 +48,7 @@ namespace Fusion {
 		uint32_t Width;
 		uint32_t Height;
 		std::vector<RenderTextureAttachment> ColorAttachments;
-		RenderTextureAttachment DepthAttachment = { ERenderTextureAttachmentFormat::Depth24 };
+		RenderTextureAttachment DepthAttachment;
 	};
 
 	class RenderTexture : public SharedObject
@@ -48,7 +67,11 @@ namespace Fusion {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
+		virtual void TransitionImages(EImageState InColorAttachmentState, EImageState InDepthStencilState) = 0;
+
 		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const = 0;
+
+		virtual const RenderTextureInfo& GetInfo() const = 0;
 
 	public:
 		static Shared<RenderTexture> Create(const RenderTextureInfo& InCreateInfo);

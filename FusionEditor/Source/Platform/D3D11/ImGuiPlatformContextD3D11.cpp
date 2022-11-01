@@ -13,7 +13,7 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContextD3D11::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContextD3D11::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, Fusion::DescriptorHeap* InDescriptorHeap)
 	{
 		Fusion::Shared<Fusion::D3D11Context> D3DContext = InContext.As<Fusion::D3D11Context>();
 		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(InWindow->GetWindowHandle()), true);

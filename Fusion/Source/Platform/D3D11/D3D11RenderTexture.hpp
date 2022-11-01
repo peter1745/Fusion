@@ -21,11 +21,15 @@ namespace Fusion {
 		virtual uint32_t GetWidth() const override { return m_CreateInfo.Width; }
 		virtual uint32_t GetHeight() const override { return m_CreateInfo.Height; }
 
+		virtual void TransitionImages(EImageState InColorAttachmentState, EImageState InDepthStencilState) override {}
+
 		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const override
 		{
 			FUSION_CORE_VERIFY(InColorAttachmentIdx < m_ColorAttachmentResourceViews.size());
 			return static_cast<void*>(m_ColorAttachmentResourceViews[InColorAttachmentIdx]);
 		}
+
+		virtual const RenderTextureInfo& GetInfo() const override { return m_CreateInfo; }
 
 	private:
 		void Invalidate();

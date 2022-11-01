@@ -12,24 +12,21 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContextD3D12::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContextD3D12::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, Fusion::DescriptorHeap* InDescriptorHeap)
 	{
 		Fusion::Shared<Fusion::D3D12Context> D3DContext = InContext.As<Fusion::D3D12Context>();
 
-		D3D12_DESCRIPTOR_HEAP_DESC DescriptorHeapDesc = {};
-		DescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		DescriptorHeapDesc.NumDescriptors = 1;
-		DescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		D3DContext->GetDevice()->CreateDescriptorHeap(&DescriptorHeapDesc, m_ImGuiDescriptorHeap, m_ImGuiDescriptorHeap);
+		m_DescriptorHeap = static_cast<Fusion::D3D12DescriptorHeap*>(InDescriptorHeap);
+		auto HeapRef = m_DescriptorHeap->Reserve();
 
 		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(InWindow->GetWindowHandle()), true);
 		ImGui_ImplDX12_Init(
 			D3DContext->GetDevice().Get(),
 			D3DContext->GetFramesInFlight(),
 			DXGI_FORMAT_R8G8B8A8_UNORM,
-			m_ImGuiDescriptorHeap.Get(),
-			m_ImGuiDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			m_ImGuiDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
+			m_DescriptorHeap->GetHeap(),
+			m_DescriptorHeap->GetCPUDescriptorHandle(HeapRef.Index),
+			m_DescriptorHeap->GetGPUDescriptorHandle(HeapRef.Index)
 		);
 	}
 
@@ -43,7 +40,7 @@ namespace FusionEditor {
 	{
 		auto Context = Fusion::GraphicsContext::Get<Fusion::D3D12Context>();
 		auto& CmdList = static_cast<Fusion::D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
-		CmdList->SetDescriptorHeaps(1, m_ImGuiDescriptorHeap);
+		CmdList->SetDescriptorHeaps(1, m_DescriptorHeap->GetHeap());
 
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CmdList);
 

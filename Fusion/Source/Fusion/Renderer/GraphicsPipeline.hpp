@@ -7,19 +7,6 @@
 
 namespace Fusion {
 
-	enum class EGraphicsFormat
-	{
-		Unknown,
-		RGBA32Float, RGBA32UInt,
-		RGB32Float, RGB32UInt,
-		RG32Float, RG32UInt,
-		R32Float, R32UInt,
-
-		RGBA8Unorm, RGBA8UInt,
-
-		D24UnormS8UInt
-	};
-
 	enum class EPrimitiveTopology
 	{
 		Triangles

@@ -17,6 +17,8 @@ namespace Fusion {
 		virtual CommandList* GetCurrentCommandList() const override { return nullptr; }
 		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) override {}
 
+		virtual uint32_t GetCurrentFrameIndex() const override { return 0; }
+
 		virtual void NextFrame() override {}
 		virtual void WaitForGPU() override {}
 

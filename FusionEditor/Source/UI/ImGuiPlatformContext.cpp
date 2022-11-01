@@ -13,7 +13,7 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, Fusion::DescriptorHeap* InDescriptorHeap)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -28,7 +28,7 @@ namespace FusionEditor {
 		IO.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		InitStyle();
-		InitPlatform(InWindow, InContext);
+		InitPlatform(InWindow, InContext, InDescriptorHeap);
 	}
 
 	void ImGuiPlatformContext::BeginFrame()

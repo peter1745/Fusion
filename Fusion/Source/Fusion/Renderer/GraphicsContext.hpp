@@ -20,6 +20,8 @@ namespace Fusion {
 		virtual void NextFrame() = 0;
 		virtual void WaitForGPU() = 0;
 
+		virtual uint32_t GetCurrentFrameIndex() const = 0;
+
 	public:
 		template<typename TContext>
 		inline static Shared<TContext> Get() { return Shared<GraphicsContext>(s_CurrentContext).As<TContext>(); }

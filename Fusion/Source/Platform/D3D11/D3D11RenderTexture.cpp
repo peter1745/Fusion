@@ -7,20 +7,6 @@ using namespace std::chrono_literals;
 
 namespace Fusion {
 
-	static DXGI_FORMAT AttachmentFormatToDXGIFormat(ERenderTextureAttachmentFormat InFormat)
-	{
-		switch (InFormat)
-		{
-		case ERenderTextureAttachmentFormat::None: return DXGI_FORMAT_UNKNOWN;
-		case ERenderTextureAttachmentFormat::RGBA8: return DXGI_FORMAT_R8G8B8A8_UNORM;
-		case ERenderTextureAttachmentFormat::R32UInt: return DXGI_FORMAT_R32_UINT;
-		case ERenderTextureAttachmentFormat::R32G32UInt: return DXGI_FORMAT_R32G32_UINT;
-		case ERenderTextureAttachmentFormat::Depth24: return DXGI_FORMAT_D24_UNORM_S8_UINT;
-		}
-
-		return DXGI_FORMAT_UNKNOWN;
-	}
-
 	/*static D3D11_USAGE AttachmentUsageToD3D11Usage(ERenderTextureAttachmentUsage InUsage)
 	{
 		switch (InUsage)
@@ -139,7 +125,7 @@ namespace Fusion {
 			ColorAttachmentDesc.Height = m_CreateInfo.Height;
 			ColorAttachmentDesc.MipLevels = 1;
 			ColorAttachmentDesc.ArraySize = 1;
-			ColorAttachmentDesc.Format = AttachmentFormatToDXGIFormat(AttachmentInfo.Format);
+			//ColorAttachmentDesc.Format = AttachmentFormatToDXGIFormat(AttachmentInfo.Format);
 			ColorAttachmentDesc.SampleDesc.Count = 1;
 			ColorAttachmentDesc.Usage = D3D11_USAGE_DEFAULT;// AttachmentUsageToD3D11Usage(AttachmentInfo.Usage);
 			ColorAttachmentDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -162,7 +148,7 @@ namespace Fusion {
 			ShaderResourceViewDesc.Texture2D.MipLevels = 1;
 			Device->CreateShaderResourceView(m_ColorAttachmentTextures[Idx], &ShaderResourceViewDesc, &m_ColorAttachmentResourceViews[Idx]);
 
-			if (AttachmentInfo.RequiresCPUAccess)
+			/*if (AttachmentInfo.RequiresCPUAccess)
 			{
 				D3D11_TEXTURE2D_DESC StagingTextureDesc;
 				ZeroMemory(&StagingTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
@@ -176,29 +162,29 @@ namespace Fusion {
 				StagingTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 				StagingTextureDesc.MiscFlags = 0;
 				Device->CreateTexture2D(&StagingTextureDesc, nullptr, &m_StagingTextures[Idx]);
-			}
+			}*/
 		}
 
 		// Create depth stencil buffer if necessary
-		if (m_CreateInfo.DepthAttachment.Format == ERenderTextureAttachmentFormat::Depth24)
-		{
-			D3D11_TEXTURE2D_DESC DepthStencilDesc;
-			ZeroMemory(&DepthStencilDesc, sizeof(D3D11_TEXTURE2D_DESC));
-			DepthStencilDesc.Width = m_CreateInfo.Width;
-			DepthStencilDesc.Height = m_CreateInfo.Height;
-			DepthStencilDesc.MipLevels = 1;
-			DepthStencilDesc.ArraySize = 1;
-			DepthStencilDesc.Format = AttachmentFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
-			DepthStencilDesc.SampleDesc.Count = 1;
-			DepthStencilDesc.SampleDesc.Quality = 0;
-			DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;// AttachmentUsageToD3D11Usage(m_CreateInfo.DepthAttachment.Usage);
-			DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			DepthStencilDesc.CPUAccessFlags = 0;
-			DepthStencilDesc.MiscFlags = 0;
+		//if (m_CreateInfo.DepthAttachment.Format == ERenderTextureAttachmentFormat::Depth24)
+		//{
+		//	D3D11_TEXTURE2D_DESC DepthStencilDesc;
+		//	ZeroMemory(&DepthStencilDesc, sizeof(D3D11_TEXTURE2D_DESC));
+		//	DepthStencilDesc.Width = m_CreateInfo.Width;
+		//	DepthStencilDesc.Height = m_CreateInfo.Height;
+		//	DepthStencilDesc.MipLevels = 1;
+		//	DepthStencilDesc.ArraySize = 1;
+		//	DepthStencilDesc.Format = AttachmentFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
+		//	DepthStencilDesc.SampleDesc.Count = 1;
+		//	DepthStencilDesc.SampleDesc.Quality = 0;
+		//	DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;// AttachmentUsageToD3D11Usage(m_CreateInfo.DepthAttachment.Usage);
+		//	DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		//	DepthStencilDesc.CPUAccessFlags = 0;
+		//	DepthStencilDesc.MiscFlags = 0;
 
-			Device->CreateTexture2D(&DepthStencilDesc, NULL, &m_DepthStencilTexture);
-			Device->CreateDepthStencilView(m_DepthStencilTexture, NULL, &m_DepthStencilView);
-		}
+		//	Device->CreateTexture2D(&DepthStencilDesc, NULL, &m_DepthStencilTexture);
+		//	Device->CreateDepthStencilView(m_DepthStencilTexture, NULL, &m_DepthStencilView);
+		//}
 
 		ZeroMemory(&m_Viewport, sizeof(D3D11_VIEWPORT));
 		m_Viewport.TopLeftX = 0;

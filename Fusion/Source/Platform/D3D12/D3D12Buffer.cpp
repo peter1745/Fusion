@@ -5,32 +5,32 @@
 
 namespace Fusion {
 
-	static constexpr D3D12_RESOURCE_STATES EBufferStateToD3D12ResourceState(Enum<EBufferState> InState)
+	static constexpr D3D12_RESOURCE_STATES EBufferStateToD3D12ResourceState(EBufferState InState)
 	{
 		uint64_t Result = 0;
 
-		if ((InState & EBufferState::Common) != 0)
+		if (InState & BufferStates::Common)
 			Result |= D3D12_RESOURCE_STATE_COMMON;
 		
-		if ((InState & EBufferState::VertexAndConstant) != 0)
+		if (InState & BufferStates::VertexAndConstant)
 			Result |= D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 		
-		if ((InState & EBufferState::Index) != 0)
+		if (InState & BufferStates::Index)
 			Result |= D3D12_RESOURCE_STATE_INDEX_BUFFER;
 		
-		if ((InState & EBufferState::UnorderedAccess) != 0)
+		if (InState & BufferStates::UnorderedAccess)
 			Result |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		
-		if ((InState & EBufferState::NonPixelShaderResource) != 0)
+		if (InState & BufferStates::NonPixelShaderResource)
 			Result |= D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 		
-		if ((InState & EBufferState::IndirectArgument) != 0)
+		if (InState & BufferStates::IndirectArgument)
 			Result |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
 		
-		if ((InState & EBufferState::CopyDestination) != 0)
+		if (InState & BufferStates::CopyDestination)
 			Result |= D3D12_RESOURCE_STATE_COPY_DEST;
 
-		if ((InState & EBufferState::CopySource) != 0)
+		if (InState & BufferStates::CopySource)
 			Result |= D3D12_RESOURCE_STATE_COPY_SOURCE;
 		
 		return static_cast<D3D12_RESOURCE_STATES>(Result);

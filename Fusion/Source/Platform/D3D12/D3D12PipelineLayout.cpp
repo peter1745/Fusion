@@ -44,22 +44,22 @@ namespace Fusion {
 		return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 	}
 
-	static constexpr D3D12_DESCRIPTOR_RANGE_FLAGS EDescriptorRangeFlagsD3D12DescriptorRangeFlags(Enum<EPipelineLayoutDescriptorRangeFlags> InFlags)
+	static constexpr D3D12_DESCRIPTOR_RANGE_FLAGS EDescriptorRangeFlagsD3D12DescriptorRangeFlags(EPipelineLayoutDescriptorRangeFlags InFlags)
 	{
 		uint32_t Result = 0;
 
-		if ((InFlags & EPipelineLayoutDescriptorRangeFlags::VolatileDescriptor) != 0) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
-		if ((InFlags & EPipelineLayoutDescriptorRangeFlags::VolatileData) != 0) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
-		if ((InFlags & EPipelineLayoutDescriptorRangeFlags::StaticData) != 0) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC;
+		if (InFlags & DescriptorRangeFlags::VolatileDescriptor) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+		if (InFlags & DescriptorRangeFlags::VolatileData) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+		if (InFlags & DescriptorRangeFlags::StaticData) Result |= D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC;
 
 		return static_cast<D3D12_DESCRIPTOR_RANGE_FLAGS>(Result);
 	}
 
-	static constexpr D3D12_ROOT_SIGNATURE_FLAGS EPipelineLayoutFlagsToD3D12RootSignatureFlags(Enum<EPipelineLayoutFlags> InFlags)
+	static constexpr D3D12_ROOT_SIGNATURE_FLAGS EPipelineLayoutFlagsToD3D12RootSignatureFlags(EPipelineLayoutFlags InFlags)
 	{
 		uint32_t Result = 0;
 
-		if ((InFlags & EPipelineLayoutFlags::AllowInputAssemblerInputLayout) != 0) Result |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		if (InFlags & PipelineLayoutFlags::AllowInputAssemblerInputLayout) Result |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		return static_cast<D3D12_ROOT_SIGNATURE_FLAGS>(Result);
 	}
