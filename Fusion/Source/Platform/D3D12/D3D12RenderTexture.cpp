@@ -49,7 +49,7 @@ namespace Fusion {
 
 			Attachment.Images.resize(Context->GetFramesInFlight());
 			Attachment.States.resize(Context->GetFramesInFlight(), AttachmentInfo.InitialState);
-			Attachment.Sizes.resize(Context->GetFramesInFlight());
+			Attachment.Sizes.resize(Context->GetFramesInFlight(), { InCreateInfo.Width, InCreateInfo.Height });
 
 			D3D12_HEAP_PROPERTIES HeapProperties = {};
 			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -138,7 +138,7 @@ namespace Fusion {
 
 			m_DepthStencilAttachment.Images.resize(Context->GetFramesInFlight());
 			m_DepthStencilAttachment.States.resize(Context->GetFramesInFlight(), AttachmentInfo.InitialState);
-			m_DepthStencilAttachment.Sizes.resize(Context->GetFramesInFlight());
+			m_DepthStencilAttachment.Sizes.resize(Context->GetFramesInFlight(), { InCreateInfo.Width, InCreateInfo.Height });
 
 			D3D12_HEAP_PROPERTIES HeapProperties = {};
 			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -250,21 +250,24 @@ namespace Fusion {
 	void D3D12RenderTexture::Unbind() {}
 	void D3D12RenderTexture::Clear() {}
 
-	void D3D12RenderTexture::Resize(uint32_t InWidth, uint32_t InHeight)
+	AttachmentSize D3D12RenderTexture::GetImageSize(uint32_t InAttachmentIndex, uint32_t InFrameIndex) const
 	{
-		if (InWidth == 0 || InHeight == 0 || InWidth == m_CreateInfo.Width || InHeight == m_CreateInfo.Height)
+		return m_Attachments[InAttachmentIndex].Sizes[InFrameIndex];
+	}
+
+	void D3D12RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize)
+	{
+		if (InSize.Width == 0 || InSize.Height == 0)
 			return;
 
-		m_CreateInfo.Width = InWidth;
-		m_CreateInfo.Height = InHeight;
+ 		m_Attachments[InAttachmentIndex].Sizes[InFrameIndex] = InSize;
 
 		auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& Device = Context->GetDevice();
 
-		for (size_t Idx = 0; Idx < m_CreateInfo.ColorAttachments.size(); Idx++)
 		{
-			const auto& AttachmentInfo = m_CreateInfo.ColorAttachments[Idx];
-			auto& Attachment = m_Attachments[Idx];
+			const auto& AttachmentInfo = m_CreateInfo.ColorAttachments[InAttachmentIndex];
+			auto& Attachment = m_Attachments[InAttachmentIndex];
 
 			D3D12_HEAP_PROPERTIES HeapProperties = {};
 			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -276,8 +279,8 @@ namespace Fusion {
 			D3D12_RESOURCE_DESC1 ResourceDesc = {};
 			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = m_CreateInfo.Width;
-			ResourceDesc.Height = m_CreateInfo.Height;
+			ResourceDesc.Width = InSize.Width;
+			ResourceDesc.Height = InSize.Height;
 			ResourceDesc.DepthOrArraySize = 1;
 			ResourceDesc.MipLevels = 1;
 			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
@@ -303,38 +306,27 @@ namespace Fusion {
 				memcpy(ClearValue.Color, &AttachmentInfo.ClearColor[0], sizeof(AttachmentInfo.ClearColor));
 			}
 
-			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
-			{
-				Device->CreateCommittedResource2(
-					&HeapProperties,
-					D3D12_HEAP_FLAG_NONE,
-					&ResourceDesc,
-					EImageStatesToD3D12ResourceStates(Attachment.States[ImageIdx] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-					&ClearValue,
-					nullptr,
-					Attachment.Images[ImageIdx], Attachment.Images[ImageIdx]
-				);
-			}
-		}
+			Attachment.Images[InFrameIndex].Release();
+			Device->CreateCommittedResource2(
+				&HeapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&ResourceDesc,
+				EImageStatesToD3D12ResourceStates(Attachment.States[InFrameIndex] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
+				&ClearValue,
+				nullptr,
+				Attachment.Images[InFrameIndex], Attachment.Images[InFrameIndex]
+			);
 
-		for (size_t Idx = 0; Idx < m_Attachments.size(); Idx++)
-		{
-			const auto& AttachmentInfo = m_CreateInfo.ColorAttachments[Idx];
-			auto& Attachment = m_Attachments[Idx];
 
 			D3D12_RENDER_TARGET_VIEW_DESC ViewDesc = {};
 			ViewDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
 			ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
 			ViewDesc.Texture2D.MipSlice = 0;
 			ViewDesc.Texture2D.PlaneSlice = 0;
 
-			for (size_t ImageIdx = 0; ImageIdx < Attachment.Images.size(); ImageIdx++)
-			{
-				D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_RenderTargetViewHandle;
-				Handle.ptr += (ImageIdx * m_Attachments.size() + Idx) * m_RenderTargetViewHandleIncrementSize;
-				Device->CreateRenderTargetView(Attachment.Images[ImageIdx], &ViewDesc, Handle);
-			}
+			D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_RenderTargetViewHandle;
+			Handle.ptr += (InFrameIndex * m_Attachments.size() + InAttachmentIndex) * m_RenderTargetViewHandleIncrementSize;
+			Device->CreateRenderTargetView(Attachment.Images[InFrameIndex], &ViewDesc, Handle);
 		}
 
 		// Depth Stencil Attachment
@@ -351,8 +343,8 @@ namespace Fusion {
 			D3D12_RESOURCE_DESC1 ResourceDesc = {};
 			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = m_CreateInfo.Width;
-			ResourceDesc.Height = m_CreateInfo.Height;
+			ResourceDesc.Width = InSize.Width;
+			ResourceDesc.Height = InSize.Height;
 			ResourceDesc.DepthOrArraySize = 1;
 			ResourceDesc.MipLevels = 1;
 			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
@@ -370,34 +362,27 @@ namespace Fusion {
 			ClearValue.DepthStencil.Depth = 1.0f;
 			ClearValue.DepthStencil.Stencil = 0.0f;
 
-			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
-			{
-				Device->CreateCommittedResource2(
-					&HeapProperties,
-					D3D12_HEAP_FLAG_NONE,
-					&ResourceDesc,
-					EImageStatesToD3D12ResourceStates(m_DepthStencilAttachment.States[ImageIdx] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-					&ClearValue,
-					nullptr,
-					m_DepthStencilAttachment.Images[ImageIdx], m_DepthStencilAttachment.Images[ImageIdx]
-				);
-			}
-		}
+			m_DepthStencilAttachment.Images[InFrameIndex].Release();
+			Device->CreateCommittedResource2(
+				&HeapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&ResourceDesc,
+				EImageStatesToD3D12ResourceStates(m_DepthStencilAttachment.States[InFrameIndex] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
+				&ClearValue,
+				nullptr,
+				m_DepthStencilAttachment.Images[InFrameIndex], m_DepthStencilAttachment.Images[InFrameIndex]
+			);
 
-		if (IsDepthFormat(m_CreateInfo.DepthAttachment.Format))
-		{
+
 			D3D12_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
 			DepthStencilViewDesc.Format = EGraphicsFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
 			DepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;
 
-			for (size_t Idx = 0; Idx < Context->GetFramesInFlight(); Idx++)
-			{
-				D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_DepthStencilViewHandle;
-				Handle.ptr += Idx * m_DepthStencilViewHandleIncrementSize;
-				Device->CreateDepthStencilView(m_DepthStencilAttachment.Images[Idx], &DepthStencilViewDesc, Handle);
-			}
+			D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_DepthStencilViewHandle;
+			Handle.ptr += InFrameIndex * m_DepthStencilViewHandleIncrementSize;
+			Device->CreateDepthStencilView(m_DepthStencilAttachment.Images[InFrameIndex], &DepthStencilViewDesc, Handle);
 		}
 	}
 

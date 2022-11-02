@@ -35,6 +35,8 @@ namespace Fusion {
 		static constexpr EImageFlag AllowDepthStencil = (1 << 1);
 	}
 
+	struct AttachmentSize { uint32_t Width; uint32_t Height; };
+
 	struct RenderTextureAttachment
 	{
 		EGraphicsFormat Format;
@@ -60,7 +62,9 @@ namespace Fusion {
 		virtual void Unbind() = 0;
 
 		virtual void Clear() = 0;
-		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;
+
+		virtual AttachmentSize GetImageSize(uint32_t InAttachmentIndex, uint32_t InFrameIndex) const = 0;
+		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize) = 0;
 
 		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) = 0;
 

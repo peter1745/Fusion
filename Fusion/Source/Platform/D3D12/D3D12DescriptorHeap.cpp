@@ -38,6 +38,44 @@ namespace Fusion {
 		m_HeapIncrementSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 	}
 
+	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
+	{
+		auto Context = GraphicsContext::Get<Fusion::D3D12Context>();
+		auto& Device = Context->GetDevice();
+
+		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
+		const auto& RTInfo = D3DRenderTexture->GetInfo();
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+		SRVDesc.Format = EGraphicsFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
+		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		SRVDesc.Texture2D.MipLevels = 1;
+		SRVDesc.Texture2D.MostDetailedMip = 0;
+		SRVDesc.Texture2D.PlaneSlice = 0;
+		SRVDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+		auto& Attachment = D3DRenderTexture->GetColorAttachments()[InAttachmentIndex];
+
+		DescriptorHeapAllocation Allocation = {};
+
+		uint32_t FreeHeapIdx = FindFreeIndex();
+		if (FreeHeapIdx == ~0U)
+			return { nullptr, ~0U };
+
+		m_SearchStart = FreeHeapIdx >> 6;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
+		DescriptorHandle.ptr += FreeHeapIdx * m_HeapIncrementSize;
+
+		Device->CreateShaderResourceView(Attachment.Images[InFrameIdx], &SRVDesc, DescriptorHandle);
+
+		m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
+		m_Count++;
+
+		return { this, FreeHeapIdx };
+	}
+
 	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
 		auto Context = GraphicsContext::Get<Fusion::D3D12Context>();
@@ -47,7 +85,7 @@ namespace Fusion {
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = EGraphicsFormatToDXGIFormat(RTInfo.ColorAttachments[0].Format);
+		SRVDesc.Format = EGraphicsFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		SRVDesc.Texture2D.MipLevels = 1;
@@ -78,6 +116,19 @@ namespace Fusion {
 		}
 
 		return Allocations;
+	}
+
+	void D3D12DescriptorHeap::Deallocate(uint32_t InAllocIndex)
+	{
+		m_SearchStart = InAllocIndex >> 6;
+		m_AllocationMap[m_SearchStart] |= 1ULL << (InAllocIndex & 0x3F);
+		m_Count--;
+	}
+
+	void D3D12DescriptorHeap::Deallocate(const std::vector<DescriptorHeapAllocation>& InAllocations)
+	{
+		for (const auto& Allocation : InAllocations)
+			Deallocate(Allocation.Index);
 	}
 
 	Fusion::DescriptorHeapAllocation D3D12DescriptorHeap::Reserve()

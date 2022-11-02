@@ -14,7 +14,9 @@ namespace Fusion {
 		virtual void Unbind() override;
 
 		virtual void Clear() override;
-		virtual void Resize(uint32_t InWidth, uint32_t InHeight) override;
+	
+		virtual AttachmentSize GetImageSize(uint32_t InAttachmentIndex, uint32_t InFrameIndex) const override { return {}; };
+		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize) override;
 
 		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) override;
 

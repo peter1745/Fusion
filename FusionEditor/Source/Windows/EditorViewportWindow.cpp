@@ -25,8 +25,6 @@ namespace FusionEditor {
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
 
-		FUSION_CORE_INFO("Mouse Inside: {}", IsMouseInside());
-
 		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
 		{
 			auto MousePos = Fusion::Mouse::Get().GetPosition();

@@ -9,8 +9,6 @@
 
 namespace Fusion {
 
-	struct AttachmentSize { float Width; float Height; };
-
 	struct D3D12RenderTextureAttachment
 	{
 		std::vector<D3D12ComPtr<ID3D12Resource2>> Images;
@@ -27,7 +25,9 @@ namespace Fusion {
 		virtual void Unbind() override;
 
 		virtual void Clear() override;
-		virtual void Resize(uint32_t InWidth, uint32_t InHeight) override;
+
+		virtual AttachmentSize GetImageSize(uint32_t InAttachmentIndex, uint32_t InFrameIndex) const override;
+		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize) override;
 
 		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) override { return 0; }
 

@@ -29,7 +29,6 @@ namespace FusionEditor {
 		Fusion::Shared<Fusion::World> m_World = nullptr;
 		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;
 		Fusion::Shared<Fusion::RenderTexture> m_RenderTexture = nullptr;
-		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		bool m_IsHovered = false;
 

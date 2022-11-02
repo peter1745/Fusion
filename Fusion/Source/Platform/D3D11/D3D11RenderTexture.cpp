@@ -62,15 +62,15 @@ namespace Fusion {
 		DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	void D3D11RenderTexture::Resize(uint32_t InWidth, uint32_t InHeight)
+	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize)
 	{
-		if (InWidth == 0 || InHeight == 0)
+		/*if (InWidth == 0 || InHeight == 0)
 			return;
 
 		m_CreateInfo.Width = InWidth;
 		m_CreateInfo.Height = InHeight;
 
-		Invalidate();
+		Invalidate();*/
 	}
 
 	uint64_t D3D11RenderTexture::ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY)

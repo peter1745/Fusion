@@ -11,7 +11,10 @@ namespace Fusion {
 	public:
 		D3D12DescriptorHeap(const DescriptorHeapInfo& InCreateInfo);
 
+		virtual DescriptorHeapAllocation AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
 		virtual std::vector<DescriptorHeapAllocation> AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
+		virtual void Deallocate(const std::vector<DescriptorHeapAllocation>& InAllocations) override;
+		virtual void Deallocate(uint32_t InAllocIndex) override;
 
 		virtual DescriptorHeapAllocation Reserve() override;
 
