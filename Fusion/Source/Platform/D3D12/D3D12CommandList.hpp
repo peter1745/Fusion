@@ -10,7 +10,7 @@ namespace Fusion {
 	class D3D12CommandList : public CommandList
 	{
 	public:
-		D3D12CommandList(const Shared<D3D12CommandAllocator>& InAllocator, D3D12ComPtr<ID3D12GraphicsCommandList6> InCommandList);
+		D3D12CommandList(const Shared<D3D12CommandAllocator>& InAllocator, const D3D12ComPtr<ID3D12GraphicsCommandList6>& InCommandList);
 
 		virtual void Reset() override;
 

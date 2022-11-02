@@ -10,6 +10,13 @@ namespace Fusion {
 		VertexShader, PixelShader, Both
 	};
 
+	struct ConstantBufferInfo
+	{
+		uint32_t Size;
+		EShaderBindPoint BindPoint;
+		EBufferUsage Usage;
+	};
+
 	class UniformBuffer : public SharedObject
 	{
 	public:
@@ -21,7 +28,7 @@ namespace Fusion {
 		virtual EShaderBindPoint GetBindPoint() const = 0;
 
 	public:
-		static Shared<UniformBuffer> Create(uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage = EBufferUsage::Dynamic);
+		static Shared<UniformBuffer> Create(const ConstantBufferInfo& InCreateInfo);
 		static Shared<UniformBuffer> Create(void* InData, uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage = EBufferUsage::Dynamic);
 	};
 

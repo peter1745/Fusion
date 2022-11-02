@@ -6,12 +6,12 @@
 
 namespace Fusion {
 
-	Shared<UniformBuffer> UniformBuffer::Create(uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage /*= EBufferUsage::Dynamic*/)
+	Shared<UniformBuffer> UniformBuffer::Create(const ConstantBufferInfo& InCreateInfo)
 	{
 		switch (Renderer::CurrentAPI())
 		{
 		case ERendererAPI::None: return nullptr;
-		case ERendererAPI::D3D11: return Shared<D3D11UniformBuffer>::Create(InSize, InBindPoint, InUsage);
+		case ERendererAPI::D3D11: return Shared<D3D11UniformBuffer>::Create(InCreateInfo.Size, InCreateInfo.BindPoint, InCreateInfo.Usage);
 		}
 
 		FUSION_CORE_VERIFY(false, "Unsupported API!");

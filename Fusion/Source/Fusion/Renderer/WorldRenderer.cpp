@@ -44,6 +44,21 @@ namespace Fusion {
 
 		PipelineLayoutInfo LayoutInfo = {};
 		LayoutInfo.Flags |= PipelineLayoutFlags::AllowInputAssemblerInputLayout;
+
+		PipelineLayoutDescriptorRange ConstantBufferRange = {};
+		ConstantBufferRange.Type = EPipelineLayoutDescriptorRangeType::ConstantBufferView;
+		ConstantBufferRange.NumDescriptors = 1;
+		ConstantBufferRange.Binding = 0;
+		ConstantBufferRange.Space = 0;
+		ConstantBufferRange.Offset = 0;
+		ConstantBufferRange.Flags = DescriptorRangeFlags::StaticData;
+
+		PipelineLayoutParameter ConstantBufferParam = {};
+		ConstantBufferParam.Type = EPipelineParameterType::DescriptorTable;
+		ConstantBufferParam.Visibility = EShaderVisibility::All;
+		ConstantBufferParam.Value = PipelineLayoutDescriptorTable{ { ConstantBufferRange } };
+		LayoutInfo.Parameters.push_back(ConstantBufferParam);
+
 		Layout = PipelineLayout::Create(LayoutInfo);
 
 		GraphicsPipelineInfo PipelineInfo = {};

@@ -116,6 +116,33 @@ namespace Fusion {
 		return Allocations;
 	}
 
+	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateConstantBufferView(D3D12Buffer* InBuffer, uint32_t InSize)
+	{
+		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
+
+		DescriptorHeapAllocation Allocation = {};
+
+		uint32_t FreeHeapIdx = FindFreeIndex();
+		if (FreeHeapIdx == ~0U)
+			return { nullptr, ~0U };
+
+		m_SearchStart = FreeHeapIdx >> 6;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
+		DescriptorHandle.ptr += FreeHeapIdx * m_HeapIncrementSize;
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC ViewDesc = {};
+		ViewDesc.BufferLocation = InBuffer->GetGPUBufferLocation();
+		ViewDesc.SizeInBytes = InSize;
+
+		Device->CreateConstantBufferView(&ViewDesc, DescriptorHandle);
+
+		m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
+		m_Count++;
+
+		return { this, FreeHeapIdx };
+	}
+
 	void D3D12DescriptorHeap::Deallocate(uint32_t InAllocIndex)
 	{
 		m_SearchStart = InAllocIndex >> 6;

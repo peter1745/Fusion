@@ -1,3 +1,8 @@
+cbuffer Test
+{
+	float3 Color = float3(1.0f, 0.0f, 0.0f);
+};
+
 struct VertexInput
 {
 	float4 Position : POSITION;
@@ -33,6 +38,6 @@ struct PixelOutput
 PixelOutput PixelMain(PixelInput InPixelData) : SV_Target
 {
 	PixelOutput Output;
-	Output.Color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	Output.Color = float4(Color, 1.0f);
 	return Output;
 }

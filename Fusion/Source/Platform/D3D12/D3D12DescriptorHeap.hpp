@@ -3,6 +3,7 @@
 #include "Fusion/Renderer/DescriptorHeap.hpp"
 
 #include "D3D12Common.hpp"
+#include "D3D12Buffer.hpp"
 
 namespace Fusion {
 
@@ -13,6 +14,9 @@ namespace Fusion {
 
 		virtual DescriptorHeapAllocation AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
 		virtual std::vector<DescriptorHeapAllocation> AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
+
+		DescriptorHeapAllocation AllocateConstantBufferView(D3D12Buffer* InBuffer, uint32_t InSize);
+
 		virtual void Deallocate(const std::vector<DescriptorHeapAllocation>& InAllocations) override;
 		virtual void Deallocate(uint32_t InAllocIndex) override;
 

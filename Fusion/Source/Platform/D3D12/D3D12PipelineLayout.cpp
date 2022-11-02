@@ -65,6 +65,7 @@ namespace Fusion {
 	}
 
 	D3D12PipelineLayout::D3D12PipelineLayout(const PipelineLayoutInfo& InCreateInfo)
+		: m_CreateInfo(InCreateInfo)
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& Device = Context->GetDevice();
@@ -86,7 +87,7 @@ namespace Fusion {
 
 		std::vector<D3D12_DESCRIPTOR_RANGE1> DescriptorRanges(TotalRangeCount);
 		size_t RangeOffset = 0;
-		std::vector<D3D12_ROOT_PARAMETER1> Parameters(m_CreateInfo.Parameters.size());
+		std::vector<D3D12_ROOT_PARAMETER1> Parameters(InCreateInfo.Parameters.size());
 
 		for (size_t Idx = 0; Idx < Parameters.size(); Idx++)
 		{
