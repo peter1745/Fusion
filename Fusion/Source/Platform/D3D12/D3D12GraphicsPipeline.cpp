@@ -94,7 +94,7 @@ namespace Fusion {
 
 			InputElement.SemanticName = InputData.Name.c_str();
 			InputElement.SemanticIndex = InputData.Index;
-			InputElement.Format = EGraphicsFormatToDXGIFormat(InputData.Format);
+			InputElement.Format = ImageFormatToDXGIFormat(InputData.Format);
 			InputElement.InputSlot = InputData.Binding;
 			InputElement.AlignedByteOffset = InputData.Offset;
 			InputElement.InputSlotClass = InputData.InstanceStep == 0 ? D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA : D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
@@ -112,9 +112,9 @@ namespace Fusion {
 
 		PipelineStateDesc.NumRenderTargets = InCreateInfo.RenderTargetCount;
 		for (uint8_t Idx = 0; Idx < InCreateInfo.RenderTargetCount; Idx++)
-			PipelineStateDesc.RTVFormats[Idx] = EGraphicsFormatToDXGIFormat(InCreateInfo.RenderTargetFormats[Idx]);
+			PipelineStateDesc.RTVFormats[Idx] = ImageFormatToDXGIFormat(InCreateInfo.RenderTargetFormats[Idx]);
 
-		PipelineStateDesc.DSVFormat = EGraphicsFormatToDXGIFormat(InCreateInfo.DepthStencilFormat);
+		PipelineStateDesc.DSVFormat = ImageFormatToDXGIFormat(InCreateInfo.DepthStencilFormat);
 
 		PipelineStateDesc.SampleDesc.Count = 1;
 		PipelineStateDesc.SampleDesc.Quality = 0;

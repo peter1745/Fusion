@@ -49,17 +49,17 @@ namespace Fusion {
 		GraphicsPipelineInfo PipelineInfo = {};
 		PipelineInfo.Layout = Layout.get();
 		PipelineInfo.Inputs = {
-			{ "POSITION", 0, EGraphicsFormat::RGBA32Float, 0, AppendAlignedElement, 0 },
-			{ "NORMAL",   0, EGraphicsFormat::RGB32Float, 0, AppendAlignedElement, 0 },
-			{ "TEXCOORD", 0, EGraphicsFormat::RG32Float,  0, AppendAlignedElement, 0 },
+			{ "POSITION", 0, EFormat::RGBA32Float, 0, AppendAlignedElement, 0 },
+			{ "NORMAL",   0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
+			{ "TEXCOORD", 0, EFormat::RG32Float,  0, AppendAlignedElement, 0 },
 		};
 
 		PipelineInfo.PipelineShader = Shader::Create({ "Resources/Shaders/D3D12.hlsl" });
 		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
 		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
 		PipelineInfo.RenderTargetCount = 1;
-		PipelineInfo.RenderTargetFormats[0] = EGraphicsFormat::RGBA8Unorm;
-		PipelineInfo.DepthStencilFormat = EGraphicsFormat::D24UnormS8UInt;
+		PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
+		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
 		Pipeline = GraphicsPipeline::Create(PipelineInfo);
 
 		VertexBufferInfo VertexBufferCreateInfo = {};

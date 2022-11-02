@@ -41,14 +41,14 @@ namespace Fusion {
 		}
 	}
 
-	void D3D11RenderTexture::Bind()
+	void D3D11RenderTexture::Bind(CommandList* InCommandList)
 	{
 		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
 		DeviceContext->RSSetViewports(1, &m_Viewport);
 		DeviceContext->OMSetRenderTargets(UINT(m_ColorAttachmentViews.size()), m_ColorAttachmentViews.data(), m_DepthStencilView);
 	}
 
-	void D3D11RenderTexture::Unbind()
+	void D3D11RenderTexture::Unbind(CommandList* InCommandList)
 	{
 	}
 
@@ -62,7 +62,7 @@ namespace Fusion {
 		DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize)
+	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize)
 	{
 		/*if (InWidth == 0 || InHeight == 0)
 			return;

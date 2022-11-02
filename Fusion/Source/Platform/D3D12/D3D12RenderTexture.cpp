@@ -4,36 +4,6 @@
 
 namespace Fusion {
 
-	static D3D12_RESOURCE_FLAGS EImageFlagsToD3D12ResourceFlags(EImageFlag InFlags)
-	{
-		uint64_t Result = 0;
-
-		if (InFlags & ImageFlags::AllowRenderTarget) Result |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-		if (InFlags & ImageFlags::AllowDepthStencil) Result |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-		return static_cast<D3D12_RESOURCE_FLAGS>(Result);
-	}
-
-	static D3D12_RESOURCE_STATES EImageStatesToD3D12ResourceStates(EImageState InStates)
-	{
-		uint64_t Result = 0;
-
-		if (InStates & ImageStates::RenderTarget) Result |= D3D12_RESOURCE_STATE_RENDER_TARGET;
-		if (InStates & ImageStates::DepthWrite) Result |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		if (InStates & ImageStates::DepthRead) Result |= D3D12_RESOURCE_STATE_DEPTH_READ;
-		if (InStates & ImageStates::UnorderedAccess) Result |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		if (InStates & ImageStates::NonPixelShaderResource) Result |= D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-		if (InStates & ImageStates::PixelShaderResource) Result |= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		if (InStates & ImageStates::IndirectArgument) Result |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
-		if (InStates & ImageStates::CopyDst) Result |= D3D12_RESOURCE_STATE_COPY_DEST;
-		if (InStates & ImageStates::CopySrc) Result |= D3D12_RESOURCE_STATE_COPY_SOURCE;
-		if (InStates & ImageStates::ResolveDst) Result |= D3D12_RESOURCE_STATE_RESOLVE_DEST;
-		if (InStates & ImageStates::ResolveSrc) Result |= D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
-		if (InStates & ImageStates::ShadingRateSrc) Result |= D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE;
-
-		return static_cast<D3D12_RESOURCE_STATES>(Result);
-	}
-
 	D3D12RenderTexture::D3D12RenderTexture(const RenderTextureInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
@@ -47,61 +17,19 @@ namespace Fusion {
 			const auto& AttachmentInfo = InCreateInfo.ColorAttachments[Idx];
 			auto& Attachment = m_Attachments[Idx];
 
-			Attachment.Images.resize(Context->GetFramesInFlight());
-			Attachment.States.resize(Context->GetFramesInFlight(), AttachmentInfo.InitialState);
-			Attachment.Sizes.resize(Context->GetFramesInFlight(), { InCreateInfo.Width, InCreateInfo.Height });
-
-			D3D12_HEAP_PROPERTIES HeapProperties = {};
-			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-			HeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-			HeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-			HeapProperties.CreationNodeMask = 0;
-			HeapProperties.VisibleNodeMask = 0;
-
-			D3D12_RESOURCE_DESC1 ResourceDesc = {};
-			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = InCreateInfo.Width;
-			ResourceDesc.Height = InCreateInfo.Height;
-			ResourceDesc.DepthOrArraySize = 1;
-			ResourceDesc.MipLevels = 1;
-			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
-			ResourceDesc.SampleDesc.Count = 1;
-			ResourceDesc.SampleDesc.Quality = 0;
-			ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-			ResourceDesc.Flags = EImageFlagsToD3D12ResourceFlags(AttachmentInfo.Flags);
-
-			ResourceDesc.SamplerFeedbackMipRegion.Width = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Height = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Depth = 0;
-
-			D3D12_CLEAR_VALUE ClearValue = {};
-			ClearValue.Format = ResourceDesc.Format;
-
-			if (IsDepthFormat(AttachmentInfo.Format))
-			{
-				ClearValue.DepthStencil.Depth = 1.0f;
-				ClearValue.DepthStencil.Stencil = 0.0f;
-			}
-			else
-			{
-				memcpy(ClearValue.Color, &AttachmentInfo.ClearColor[0], sizeof(AttachmentInfo.ClearColor));
-			}
+			Image2DInfo ImageInfo = {};
+			ImageInfo.Size = { InCreateInfo.Width, InCreateInfo.Height };
+			ImageInfo.Usage = EImageUsage::Attachment;
+			ImageInfo.Format = AttachmentInfo.Format;
+			ImageInfo.Flags = AttachmentInfo.Flags;
+			ImageInfo.InitialState = AttachmentInfo.InitialState;
+			ImageInfo.ClearColor = AttachmentInfo.ClearColor;
 
 			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
-			{
-				Device->CreateCommittedResource2(
-					&HeapProperties,
-					D3D12_HEAP_FLAG_NONE,
-					&ResourceDesc,
-					EImageStatesToD3D12ResourceStates(Attachment.States[ImageIdx] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-					&ClearValue,
-					nullptr,
-					Attachment.Images[ImageIdx], Attachment.Images[ImageIdx]
-				);
-			}
+				Attachment.Images.push_back(Shared<D3D12Image2D>::Create(ImageInfo));
 		}
 
+		// NOTE(Peter): Probably better to have a really large heap for RTVs, and then simply allocate into it
 		D3D12_DESCRIPTOR_HEAP_DESC DescriptorHeapDesc = {};
 		DescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 		DescriptorHeapDesc.NumDescriptors = Context->GetFramesInFlight() * m_Attachments.size();
@@ -118,7 +46,7 @@ namespace Fusion {
 			auto& Attachment = m_Attachments[Idx];
 
 			D3D12_RENDER_TARGET_VIEW_DESC ViewDesc = {};
-			ViewDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
+			ViewDesc.Format = ImageFormatToDXGIFormat(AttachmentInfo.Format);
 			ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 			ViewDesc.Texture2D.MipSlice = 0;
@@ -126,65 +54,31 @@ namespace Fusion {
 
 			for (size_t ImageIdx = 0; ImageIdx < Attachment.Images.size(); ImageIdx++)
 			{
+				auto& Resource = Attachment.Images[ImageIdx]->GetResource();
 				D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_RenderTargetViewHandle;
 				Handle.ptr += (ImageIdx * m_Attachments.size() + Idx) * m_RenderTargetViewHandleIncrementSize;
-				Device->CreateRenderTargetView(Attachment.Images[ImageIdx], &ViewDesc, Handle);
+				Device->CreateRenderTargetView(Resource, &ViewDesc, Handle);
 			}
 		}
 
+		m_HasDepthStencilAttachment = IsDepthFormat(InCreateInfo.DepthAttachment.Format);
+
 		// Depth Stencil Attachment
+		if (m_HasDepthStencilAttachment)
 		{
 			const auto& AttachmentInfo = InCreateInfo.DepthAttachment;
 
-			m_DepthStencilAttachment.Images.resize(Context->GetFramesInFlight());
-			m_DepthStencilAttachment.States.resize(Context->GetFramesInFlight(), AttachmentInfo.InitialState);
-			m_DepthStencilAttachment.Sizes.resize(Context->GetFramesInFlight(), { InCreateInfo.Width, InCreateInfo.Height });
-
-			D3D12_HEAP_PROPERTIES HeapProperties = {};
-			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-			HeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-			HeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-			HeapProperties.CreationNodeMask = 0;
-			HeapProperties.VisibleNodeMask = 0;
-
-			D3D12_RESOURCE_DESC1 ResourceDesc = {};
-			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = InCreateInfo.Width;
-			ResourceDesc.Height = InCreateInfo.Height;
-			ResourceDesc.DepthOrArraySize = 1;
-			ResourceDesc.MipLevels = 1;
-			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
-			ResourceDesc.SampleDesc.Count = 1;
-			ResourceDesc.SampleDesc.Quality = 0;
-			ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-			ResourceDesc.Flags = EImageFlagsToD3D12ResourceFlags(AttachmentInfo.Flags);
-
-			ResourceDesc.SamplerFeedbackMipRegion.Width = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Height = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Depth = 0;
-
-			D3D12_CLEAR_VALUE ClearValue = {};
-			ClearValue.Format = ResourceDesc.Format;
-			ClearValue.DepthStencil.Depth = 1.0f;
-			ClearValue.DepthStencil.Stencil = 0.0f;
+			Image2DInfo DepthImageInfo = {};
+			DepthImageInfo.Size = { InCreateInfo.Width, InCreateInfo.Height };
+			DepthImageInfo.Usage = EImageUsage::Attachment;
+			DepthImageInfo.Format = AttachmentInfo.Format;
+			DepthImageInfo.Flags = AttachmentInfo.Flags;
+			DepthImageInfo.InitialState = AttachmentInfo.InitialState;
 
 			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
-			{
-				Device->CreateCommittedResource2(
-					&HeapProperties,
-					D3D12_HEAP_FLAG_NONE,
-					&ResourceDesc,
-					EImageStatesToD3D12ResourceStates(m_DepthStencilAttachment.States[ImageIdx] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-					&ClearValue,
-					nullptr,
-					m_DepthStencilAttachment.Images[ImageIdx], m_DepthStencilAttachment.Images[ImageIdx]
-				);
-			}
-		}
+				m_DepthStencilAttachment.Images.push_back(Shared<D3D12Image2D>::Create(DepthImageInfo));
 
-		if (IsDepthFormat(InCreateInfo.DepthAttachment.Format))
-		{
+			// NOTE(Peter): Again, probably should have a global heap for DSVs that we allocate into
 			DescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 			DescriptorHeapDesc.NumDescriptors = Context->GetFramesInFlight();
 			Device->CreateDescriptorHeap(&DescriptorHeapDesc, m_DepthStencilDescriptorHeap, m_DepthStencilDescriptorHeap);
@@ -193,26 +87,27 @@ namespace Fusion {
 			m_DepthStencilViewHandleIncrementSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 
 			D3D12_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
-			DepthStencilViewDesc.Format = EGraphicsFormatToDXGIFormat(InCreateInfo.DepthAttachment.Format);
+			DepthStencilViewDesc.Format = ImageFormatToDXGIFormat(InCreateInfo.DepthAttachment.Format);
 			DepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;
 
-			for (size_t Idx = 0; Idx < Context->GetFramesInFlight(); Idx++)
+			for (size_t DepthImageIdx = 0; DepthImageIdx < Context->GetFramesInFlight(); DepthImageIdx++)
 			{
+				auto& Resource = m_DepthStencilAttachment.Images[DepthImageIdx]->GetResource();
 				D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_DepthStencilViewHandle;
-				Handle.ptr += Idx * m_DepthStencilViewHandleIncrementSize;
-				Device->CreateDepthStencilView(m_DepthStencilAttachment.Images[Idx], &DepthStencilViewDesc, Handle);
+				Handle.ptr += DepthImageIdx * m_DepthStencilViewHandleIncrementSize;
+				Device->CreateDepthStencilView(Resource, &DepthStencilViewDesc, Handle);
 			}
 		}
 	}
 
-	void D3D12RenderTexture::Bind()
+	void D3D12RenderTexture::Bind(CommandList* InCommandList)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& Device = Context->GetDevice();
-		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
-		uint32_t CurrentFrameIdx = Context->GetCurrentFrameIndex();
+		// TODO(Peter): Maybe take in the desired frame index as a parameter?
+		uint32_t CurrentFrameIdx = GraphicsContext::Get<D3D12Context>()->GetCurrentFrameIndex();
+		
+		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
 
 		// Set render targets + depth stencil (if available)
 		{
@@ -222,24 +117,21 @@ namespace Fusion {
 			auto DepthStencilStart = m_DepthStencilViewHandle;
 			DepthStencilStart.ptr += CurrentFrameIdx * m_DepthStencilViewHandleIncrementSize;
 
-			CmdList->OMSetRenderTargets(m_Attachments.size(), &RTVStart, true, m_DepthStencilDescriptorHeap.IsValid() ? &DepthStencilStart : nullptr);
+			CmdList->OMSetRenderTargets(m_Attachments.size(), &RTVStart, true, m_HasDepthStencilAttachment ? &DepthStencilStart : nullptr);
 		}
 
 		// Clear render targets
+		for (size_t Idx = 0; Idx < m_Attachments.size(); Idx++)
 		{
-			for (size_t Idx = 0; Idx < m_Attachments.size(); Idx++)
-			{
-				auto Handle = m_RenderTargetViewHandle;
-				Handle.ptr += (CurrentFrameIdx * m_Attachments.size() + Idx) * m_RenderTargetViewHandleIncrementSize;
+			const auto& ClearColor = m_CreateInfo.ColorAttachments[Idx].ClearColor;
 
-				const auto& ClearColor = m_CreateInfo.ColorAttachments[Idx].ClearColor;
-
-				CmdList->ClearRenderTargetView(Handle, &ClearColor[0], 0, nullptr);
-			}
+			auto Handle = m_RenderTargetViewHandle;
+			Handle.ptr += (CurrentFrameIdx * m_Attachments.size() + Idx) * m_RenderTargetViewHandleIncrementSize;
+			CmdList->ClearRenderTargetView(Handle, &ClearColor[0], 0, nullptr);
 		}
 
 		// Clear depth stencil
-		if (m_DepthStencilDescriptorHeap.IsValid())
+		if (m_HasDepthStencilAttachment)
 		{
 			auto Handle = m_DepthStencilViewHandle;
 			Handle.ptr += CurrentFrameIdx * m_DepthStencilViewHandleIncrementSize;
@@ -247,189 +139,112 @@ namespace Fusion {
 		}
 	}
 
-	void D3D12RenderTexture::Unbind() {}
+	void D3D12RenderTexture::Unbind(CommandList* InCommandList) {}
 	void D3D12RenderTexture::Clear() {}
 
-	AttachmentSize D3D12RenderTexture::GetImageSize(uint32_t InAttachmentIndex, uint32_t InFrameIndex) const
-	{
-		return m_Attachments[InAttachmentIndex].Sizes[InFrameIndex];
-	}
-
-	void D3D12RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const AttachmentSize& InSize)
+	void D3D12RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize)
 	{
 		if (InSize.Width == 0 || InSize.Height == 0)
 			return;
 
- 		m_Attachments[InAttachmentIndex].Sizes[InFrameIndex] = InSize;
+		// NOTE(Peter): Is it realistic for different attachment images to have different sizes?
+		m_CreateInfo.Width = InSize.Width;
+		m_CreateInfo.Height = InSize.Height;
 
-		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& Device = Context->GetDevice();
+		auto& Device = GraphicsContext::Get<D3D12Context>()->GetDevice();
 
+		// Resize attachment image
 		{
-			const auto& AttachmentInfo = m_CreateInfo.ColorAttachments[InAttachmentIndex];
 			auto& Attachment = m_Attachments[InAttachmentIndex];
+			const auto& AttachmentInfo = m_CreateInfo.ColorAttachments[InAttachmentIndex];
 
-			D3D12_HEAP_PROPERTIES HeapProperties = {};
-			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-			HeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-			HeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-			HeapProperties.CreationNodeMask = 0;
-			HeapProperties.VisibleNodeMask = 0;
-
-			D3D12_RESOURCE_DESC1 ResourceDesc = {};
-			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = InSize.Width;
-			ResourceDesc.Height = InSize.Height;
-			ResourceDesc.DepthOrArraySize = 1;
-			ResourceDesc.MipLevels = 1;
-			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
-			ResourceDesc.SampleDesc.Count = 1;
-			ResourceDesc.SampleDesc.Quality = 0;
-			ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-			ResourceDesc.Flags = EImageFlagsToD3D12ResourceFlags(AttachmentInfo.Flags);
-
-			ResourceDesc.SamplerFeedbackMipRegion.Width = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Height = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Depth = 0;
-
-			D3D12_CLEAR_VALUE ClearValue = {};
-			ClearValue.Format = ResourceDesc.Format;
-
-			if (IsDepthFormat(AttachmentInfo.Format))
-			{
-				ClearValue.DepthStencil.Depth = 1.0f;
-				ClearValue.DepthStencil.Stencil = 0.0f;
-			}
-			else
-			{
-				memcpy(ClearValue.Color, &AttachmentInfo.ClearColor[0], sizeof(AttachmentInfo.ClearColor));
-			}
-
-			Attachment.Images[InFrameIndex].Release();
-			Device->CreateCommittedResource2(
-				&HeapProperties,
-				D3D12_HEAP_FLAG_NONE,
-				&ResourceDesc,
-				EImageStatesToD3D12ResourceStates(Attachment.States[InFrameIndex] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-				&ClearValue,
-				nullptr,
-				Attachment.Images[InFrameIndex], Attachment.Images[InFrameIndex]
-			);
-
+			Attachment.Images[InFrameIndex]->Resize(InSize);
 
 			D3D12_RENDER_TARGET_VIEW_DESC ViewDesc = {};
-			ViewDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
+			ViewDesc.Format = ImageFormatToDXGIFormat(AttachmentInfo.Format);
 			ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			ViewDesc.Texture2D.MipSlice = 0;
 			ViewDesc.Texture2D.PlaneSlice = 0;
 
 			D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_RenderTargetViewHandle;
 			Handle.ptr += (InFrameIndex * m_Attachments.size() + InAttachmentIndex) * m_RenderTargetViewHandleIncrementSize;
-			Device->CreateRenderTargetView(Attachment.Images[InFrameIndex], &ViewDesc, Handle);
+			Device->CreateRenderTargetView(Attachment.Images[InFrameIndex]->GetResource(), &ViewDesc, Handle);
 		}
 
-		// Depth Stencil Attachment
+		// Resize depth stencil if it exists
+		if (m_HasDepthStencilAttachment)
 		{
 			const auto& AttachmentInfo = m_CreateInfo.DepthAttachment;
 
-			D3D12_HEAP_PROPERTIES HeapProperties = {};
-			HeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-			HeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-			HeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-			HeapProperties.CreationNodeMask = 0;
-			HeapProperties.VisibleNodeMask = 0;
-
-			D3D12_RESOURCE_DESC1 ResourceDesc = {};
-			ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			ResourceDesc.Alignment = 0;
-			ResourceDesc.Width = InSize.Width;
-			ResourceDesc.Height = InSize.Height;
-			ResourceDesc.DepthOrArraySize = 1;
-			ResourceDesc.MipLevels = 1;
-			ResourceDesc.Format = EGraphicsFormatToDXGIFormat(AttachmentInfo.Format);
-			ResourceDesc.SampleDesc.Count = 1;
-			ResourceDesc.SampleDesc.Quality = 0;
-			ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-			ResourceDesc.Flags = EImageFlagsToD3D12ResourceFlags(AttachmentInfo.Flags);
-
-			ResourceDesc.SamplerFeedbackMipRegion.Width = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Height = 0;
-			ResourceDesc.SamplerFeedbackMipRegion.Depth = 0;
-
-			D3D12_CLEAR_VALUE ClearValue = {};
-			ClearValue.Format = ResourceDesc.Format;
-			ClearValue.DepthStencil.Depth = 1.0f;
-			ClearValue.DepthStencil.Stencil = 0.0f;
-
-			m_DepthStencilAttachment.Images[InFrameIndex].Release();
-			Device->CreateCommittedResource2(
-				&HeapProperties,
-				D3D12_HEAP_FLAG_NONE,
-				&ResourceDesc,
-				EImageStatesToD3D12ResourceStates(m_DepthStencilAttachment.States[InFrameIndex] & ~(ImageStates::CopySrc | ImageStates::CopyDst)),
-				&ClearValue,
-				nullptr,
-				m_DepthStencilAttachment.Images[InFrameIndex], m_DepthStencilAttachment.Images[InFrameIndex]
-			);
-
+			m_DepthStencilAttachment.Images[InFrameIndex]->Resize(InSize);
 
 			D3D12_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
-			DepthStencilViewDesc.Format = EGraphicsFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
+			DepthStencilViewDesc.Format = ImageFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
 			DepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;
 
 			D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_DepthStencilViewHandle;
 			Handle.ptr += InFrameIndex * m_DepthStencilViewHandleIncrementSize;
-			Device->CreateDepthStencilView(m_DepthStencilAttachment.Images[InFrameIndex], &DepthStencilViewDesc, Handle);
+			Device->CreateDepthStencilView(m_DepthStencilAttachment.Images[InFrameIndex]->GetResource(), &DepthStencilViewDesc, Handle);
 		}
 	}
 
-	void D3D12RenderTexture::TransitionImages(EImageState InColorAttachmentState, EImageState InDepthStencilState)
+	Shared<Image2D> D3D12RenderTexture::GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const
+	{
+		return m_Attachments[InAttachmentIndex].Images[InImageIndex];
+	}
+
+	void D3D12RenderTexture::TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState)
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& Device = Context->GetDevice();
-		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
+		uint32_t CurrentFrameIdx = Context->GetCurrentFrameIndex();
 
-		// Transition Attachment Images
-		uint32_t MaxBarrierCount = m_Attachments.size() + (m_DepthStencilDescriptorHeap.IsValid() ? 1 : 0);
+		// NOTE(Peter): We don't call Image2D::Transition here because it's more efficient to batch
+		//				the barriers together, instead of doing them one at a time
 
 		std::vector<D3D12_RESOURCE_BARRIER> Barriers;
-		Barriers.reserve(MaxBarrierCount);
-		uint32_t CurrentFrameIdx = Context->GetCurrentFrameIndex();
+		Barriers.reserve(m_Attachments.size());
 
 		for (size_t Idx = 0; Idx < m_Attachments.size(); Idx++)
 		{
-			if (m_Attachments[Idx].States[CurrentFrameIdx] == InColorAttachmentState)
+			auto& Image = m_Attachments[Idx].Images[CurrentFrameIdx];
+
+			if (Image->m_State == InColorAttachmentState)
 				continue;
 
 			auto& Barrier = Barriers.emplace_back();
 			Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			Barrier.Transition.pResource = m_Attachments[Idx].Images[CurrentFrameIdx];
-			Barrier.Transition.StateBefore = EImageStatesToD3D12ResourceStates(m_Attachments[Idx].States[CurrentFrameIdx]);
-			Barrier.Transition.StateAfter = EImageStatesToD3D12ResourceStates(InColorAttachmentState);
+			Barrier.Transition.pResource = Image->m_Resource;
+			Barrier.Transition.StateBefore = ImageStatesToD3D12ResourceStates(Image->m_State);
+			Barrier.Transition.StateAfter = ImageStatesToD3D12ResourceStates(InColorAttachmentState);
 			Barrier.Transition.Subresource = 0;
 
-			m_Attachments[Idx].States[CurrentFrameIdx] = InColorAttachmentState;
+			Image->m_State = InColorAttachmentState;
 		}
 
-		// Depth Stencil
-		if (m_DepthStencilDescriptorHeap.IsValid() && m_DepthStencilAttachment.States[CurrentFrameIdx] != InDepthStencilState)
+		if (m_HasDepthStencilAttachment)
 		{
-			auto& Barrier = Barriers.emplace_back();
-			Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			Barrier.Transition.pResource = m_DepthStencilAttachment.Images[CurrentFrameIdx];
-			Barrier.Transition.StateBefore = EImageStatesToD3D12ResourceStates(m_DepthStencilAttachment.States[CurrentFrameIdx]);
-			Barrier.Transition.StateAfter = EImageStatesToD3D12ResourceStates(InDepthStencilState);
-			Barrier.Transition.Subresource = 0;
+			auto& DepthImage = m_DepthStencilAttachment.Images[CurrentFrameIdx];
 
-			m_DepthStencilAttachment.States[CurrentFrameIdx] = InDepthStencilState;
+			if (DepthImage->m_State != InDepthStencilState)
+			{
+				auto& Barrier = Barriers.emplace_back();
+				Barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				Barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				Barrier.Transition.pResource = DepthImage->m_Resource;
+				Barrier.Transition.StateBefore = ImageStatesToD3D12ResourceStates(DepthImage->m_State);
+				Barrier.Transition.StateAfter = ImageStatesToD3D12ResourceStates(InDepthStencilState);
+				Barrier.Transition.Subresource = 0;
+
+				DepthImage->m_State = InDepthStencilState;
+			}
 		}
 
-		CmdList->ResourceBarrier(Barriers.size(), Barriers.data());
+		if (Barriers.size() > 0)
+			CmdList->ResourceBarrier(Barriers.size(), Barriers.data());
 	}
 
 	void* D3D12RenderTexture::GetColorTextureID(uint32_t InColorAttachmentIdx) const

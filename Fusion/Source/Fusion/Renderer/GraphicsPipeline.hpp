@@ -20,7 +20,7 @@ namespace Fusion {
 	{
 		std::string Name;
 		uint32_t Index;
-		EGraphicsFormat Format;
+		EFormat Format;
 		uint32_t Binding;
 		uint32_t Offset;
 		uint32_t InstanceStep;
@@ -39,8 +39,8 @@ namespace Fusion {
 		EWindingOrder WindingOrder;
 
 		uint8_t RenderTargetCount;
-		std::array<EGraphicsFormat, 8> RenderTargetFormats;
-		EGraphicsFormat DepthStencilFormat;
+		std::array<EFormat, 8> RenderTargetFormats;
+		EFormat DepthStencilFormat;
 	};
 
 	class GraphicsPipeline : public SharedObject

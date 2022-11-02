@@ -135,9 +135,6 @@ namespace FusionEditor {
 		ImGui::Begin("MainDockspaceWindow", nullptr, DockspaceWindowFlags);
 		ImGui::PopStyleVar(3);
 
-		/*static bool s_Open = true;
-		ImGui::ShowDemoWindow(&s_Open);*/
-
 		DrawMenuBar();
 
 		DrawNewProjectPopup();

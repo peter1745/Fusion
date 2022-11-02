@@ -40,14 +40,13 @@ namespace Fusion {
 
 	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
 	{
-		auto Context = GraphicsContext::Get<Fusion::D3D12Context>();
-		auto& Device = Context->GetDevice();
+		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
 
 		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = EGraphicsFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
+		SRVDesc.Format = ImageFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		SRVDesc.Texture2D.MipLevels = 1;
@@ -68,7 +67,7 @@ namespace Fusion {
 		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 		DescriptorHandle.ptr += FreeHeapIdx * m_HeapIncrementSize;
 
-		Device->CreateShaderResourceView(Attachment.Images[InFrameIdx], &SRVDesc, DescriptorHandle);
+		Device->CreateShaderResourceView(Attachment.Images[InFrameIdx]->GetResource(), &SRVDesc, DescriptorHandle);
 
 		m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
 		m_Count++;
@@ -78,14 +77,13 @@ namespace Fusion {
 
 	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
-		auto Context = GraphicsContext::Get<Fusion::D3D12Context>();
-		auto& Device = Context->GetDevice();
+		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
 
 		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = EGraphicsFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
+		SRVDesc.Format = ImageFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		SRVDesc.Texture2D.MipLevels = 1;
@@ -107,7 +105,7 @@ namespace Fusion {
 			D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 			DescriptorHandle.ptr += FreeHeapIdx * m_HeapIncrementSize;
 
-			Device->CreateShaderResourceView(Attachment.Images[Idx], &SRVDesc, DescriptorHandle);
+			Device->CreateShaderResourceView(Attachment.Images[Idx]->GetResource(), &SRVDesc, DescriptorHandle);
 
 			m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
 			m_Count++;
