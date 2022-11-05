@@ -20,6 +20,8 @@ namespace Fusion {
 		virtual uint32_t GetSize() const override;
 		virtual EShaderBindPoint GetBindPoint() const override;
 
+		const Unique<D3D12Buffer>& GetBuffer() const { return m_Buffer; }
+
 	private:
 		Unique<D3D12Buffer> m_Buffer;
 		DescriptorHeap* m_Heap = nullptr;

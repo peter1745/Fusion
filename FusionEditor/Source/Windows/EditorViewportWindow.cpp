@@ -19,20 +19,26 @@ namespace FusionEditor {
 
 		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
 		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(EditorViewportWindow::OnSelectionChanged));
+
+		Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
+		StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
+		m_StagingBuffer = Fusion::StagingBuffer::Create(StagingBufferCreateInfo);
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
 	{
 		ViewportWindowBase::OnUpdate(InDeltaTime);
 
-		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		if (m_ShouldCopyFromBuffer)
 		{
-			auto MousePos = Fusion::Mouse::Get().GetPosition();
-			MousePos.x -= GetMinBound().x;
-			MousePos.y -= GetMinBound().y;
+			Fusion::ActorID SelectedActorID = 0;
+			Fusion::Byte* BufferStart = m_StagingBuffer->Map();
+			memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
+			m_StagingBuffer->Unmap(BufferStart);
 
-			Fusion::ActorID ID = m_RenderTexture->ReadPixel(1, uint32_t(MousePos.x), uint32_t(MousePos.y));
-			OnSelectionChanged(m_World->FindActorWithID(ID));
+			FUSION_CORE_INFO("Clicked: {}", uint64_t(SelectedActorID));
+
+			m_ShouldCopyFromBuffer = false;
 		}
 
 		m_Camera.SetActive(IsMouseInside() && IsTabActive());
@@ -105,9 +111,33 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderWorld()
 	{
+		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
+
+		uint32_t FrameIndex = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentFrameIndex();
+
 		m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
 		m_WorldRenderer->Render();
 		m_WorldRenderer->End();
+
+		auto MousePos = Fusion::Mouse::Get().GetPosition();
+		MousePos.x -= GetMinBound().x;
+		MousePos.y -= GetMinBound().y;
+
+		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		{
+			Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
+			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
+
+			Fusion::CopyRegionInfo CopyRegion = {};
+			CopyRegion.Left = MousePos.x;
+			CopyRegion.Top = MousePos.y;
+			CopyRegion.Right = MousePos.x + 1;
+			CopyRegion.Bottom = MousePos.y + 1;
+			m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
+			m_ShouldCopyFromBuffer = true;
+	
+			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);
+		}
 	}
 
 	void EditorViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)

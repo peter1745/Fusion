@@ -26,6 +26,11 @@ namespace Fusion {
 		uint32_t InstanceStep;
 	};
 
+	struct RenderTargetBlendStateInfo
+	{
+		bool EnableBlending = false;
+	};
+
 	struct GraphicsPipelineInfo
 	{
 		PipelineLayout* Layout;
@@ -40,6 +45,7 @@ namespace Fusion {
 
 		uint8_t RenderTargetCount;
 		std::array<EFormat, 8> RenderTargetFormats;
+		std::array<RenderTargetBlendStateInfo, 8> RenderTargetBlendStates;
 		EFormat DepthStencilFormat;
 	};
 

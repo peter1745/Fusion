@@ -1,6 +1,8 @@
-cbuffer Test
+cbuffer TransformData
 {
-	float3 Color = float3(1.0f, 0.0f, 0.0f);
+	float4x4 ViewProjection;
+	float4x4 Transform;
+	uint2 ActorID;
 };
 
 struct VertexInput
@@ -23,7 +25,8 @@ PixelInput VertexMain(VertexInput InVertexData)
 	
 	InVertexData.Position.w = 1.0f;
 
-	Output.Position = InVertexData.Position;
+	float4 WorldPosition = mul(Transform, InVertexData.Position);
+	Output.Position = mul(ViewProjection, WorldPosition);
 	Output.Normal = InVertexData.Normal;
 	Output.TexCoord = InVertexData.TexCoord;
 	
@@ -38,6 +41,6 @@ struct PixelOutput
 PixelOutput PixelMain(PixelInput InPixelData) : SV_Target
 {
 	PixelOutput Output;
-	Output.Color = float4(Color, 1.0f);
+	Output.Color = float4(InPixelData.Normal, 1.0f);
 	return Output;
 }

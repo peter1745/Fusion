@@ -44,20 +44,20 @@ namespace Fusion {
 
 		PipelineStateDesc.BlendState.AlphaToCoverageEnable = false;
 		PipelineStateDesc.BlendState.IndependentBlendEnable = false;
-		//for (std::uint8_t i = 0; i < 8; ++i)
-		//{
-			auto& renderTarget = PipelineStateDesc.BlendState.RenderTarget[0];
-			renderTarget.BlendEnable = true;
-			renderTarget.LogicOpEnable = false;
-			renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-			renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
-			renderTarget.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
-			renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-			renderTarget.LogicOp = D3D12_LOGIC_OP_CLEAR;
-			renderTarget.RenderTargetWriteMask = 0xF;
-		//}
+		for (uint8_t Idx = 0; Idx < InCreateInfo.RenderTargetCount; Idx++)
+		{
+			auto& RenderTarget = PipelineStateDesc.BlendState.RenderTarget[Idx];
+			RenderTarget.BlendEnable = InCreateInfo.RenderTargetBlendStates[Idx].EnableBlending;
+			RenderTarget.LogicOpEnable = false;
+			RenderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+			RenderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+			RenderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+			RenderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
+			RenderTarget.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+			RenderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+			RenderTarget.LogicOp = D3D12_LOGIC_OP_CLEAR;
+			RenderTarget.RenderTargetWriteMask = 0xF;
+		}
 
 		PipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 		PipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
@@ -71,9 +71,9 @@ namespace Fusion {
 		PipelineStateDesc.RasterizerState.ForcedSampleCount = 0;
 		PipelineStateDesc.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 		
-		PipelineStateDesc.DepthStencilState.DepthEnable = false;
+		PipelineStateDesc.DepthStencilState.DepthEnable = IsDepthFormat(InCreateInfo.DepthStencilFormat);
 		PipelineStateDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		PipelineStateDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+		PipelineStateDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 		PipelineStateDesc.DepthStencilState.StencilEnable = false;
 		PipelineStateDesc.DepthStencilState.StencilReadMask = 0xFF;
 		PipelineStateDesc.DepthStencilState.StencilWriteMask = 0xFF;

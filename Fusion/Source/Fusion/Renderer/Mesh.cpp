@@ -8,6 +8,7 @@ namespace Fusion {
 	{
 		VertexBufferInfo CreateInfo;
 		CreateInfo.BufferSize = uint32_t(m_Vertices.size()) * sizeof(Vertex);
+		CreateInfo.Stride = sizeof(Vertex);
 		CreateInfo.Data = static_cast<void*>(m_Vertices.data());
 		CreateInfo.Layout = {
 			{ "POSITION", ShaderDataType::Float3, 0 },

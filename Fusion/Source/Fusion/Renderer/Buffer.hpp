@@ -5,4 +5,17 @@
 
 namespace Fusion {
 
+	enum class EBufferType
+	{
+		VertexBuffer, IndexBuffer, ConstantBuffer, StagingBuffer
+	};
+
+	class Buffer
+	{
+	public:
+		virtual ~Buffer() = default;
+
+
+	};
+
 }

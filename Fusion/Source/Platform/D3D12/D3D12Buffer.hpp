@@ -38,7 +38,12 @@ namespace Fusion {
 		D3D12Buffer(const BufferInfo& InCreateInfo);
 		~D3D12Buffer();
 
+		const auto& GetInfo() const { return m_CreateInfo; }
+
 		auto GetGPUBufferLocation() { return m_Buffer->GetGPUVirtualAddress(); }
+
+		auto& GetBuffer() { return m_Buffer; }
+		const auto& GetBuffer() const { return m_Buffer; }
 
 	private:
 		BufferInfo m_CreateInfo;

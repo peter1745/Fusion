@@ -1,17 +1,13 @@
 cbuffer TransformData
 {
-	float4x4 TransformMatrix;
-	uint2 EnttID;
-};
-
-cbuffer CameraData
-{
 	float4x4 ViewProjectionMatrix;
+	float4x4 TransformMatrix;
+	uint2 ActorID;
 };
 
 struct VertexInput
 {
-    float4 Position : POSITION;
+    float3 Position : POSITION;
 	float3 Normal : NORMAL;
 	float2 TexCoord : TEXCOORD;
 };
@@ -26,10 +22,8 @@ struct PixelInput
 PixelInput VertexMain(VertexInput InVertexData)
 {
 	PixelInput Output;
-	
-	InVertexData.Position.w = 1.0f;
 
-	float4 WorldPosition = mul(TransformMatrix, InVertexData.Position);
+	float4 WorldPosition = mul(TransformMatrix, float4(InVertexData.Position, 1.0f));
 	Output.Position = mul(ViewProjectionMatrix, WorldPosition);
 	Output.Normal = InVertexData.Normal;
 	Output.TexCoord = InVertexData.TexCoord;
@@ -43,14 +37,14 @@ SamplerState InSampler;
 struct PixelOutput
 {
 	float4 Color : COLOR0;
-	uint2 EnttID : COLOR1;
+	uint2 ActorID : COLOR1;
 };
 
 PixelOutput PixelMain(PixelInput InPixelData) : SV_Target
 {
 	PixelOutput Output;
 	Output.Color = float4(InPixelData.Normal, 1.0f);
-	Output.EnttID = EnttID;
+	Output.ActorID = ActorID;
 	//return InTexture.Sample(InSampler, InPixelData.TexCoord);
 	return Output;
 }

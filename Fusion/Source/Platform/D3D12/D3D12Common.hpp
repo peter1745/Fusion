@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Fusion/IO/Logging.hpp"
+#include "Fusion/Renderer/CommonTypes.hpp"
+
+#include "D3D12ComPtr.hpp"
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
-
-#include "Fusion/Renderer/CommonTypes.hpp"
-#include "D3D12ComPtr.hpp"
 
 #define FUSION_RELEASE_D3D_RESOURCE(InResource) if (InResource != nullptr) { InResource->Release(); InResource = nullptr; }
 
@@ -29,6 +31,28 @@ namespace Fusion {
 		}
 
 		return DXGI_FORMAT_UNKNOWN;
+	}
+
+	static constexpr size_t GetFormatSize(EFormat InFormat)
+	{
+		switch (InFormat)
+		{
+		case EFormat::Unknown: return 0;
+		case EFormat::RGBA32Float: return 4 * sizeof(float);
+		case EFormat::RGBA32UInt: return 4 * sizeof(uint32_t);
+		case EFormat::RGB32Float: return 3 * sizeof(float);
+		case EFormat::RGB32UInt: return 3 * sizeof(uint32_t);
+		case EFormat::RG32Float: return 2 * sizeof(float);
+		case EFormat::RG32UInt: return 2 * sizeof(uint32_t);
+		case EFormat::R32Float: return 1 * sizeof(float);
+		case EFormat::R32UInt: return 1 * sizeof(uint32_t);
+		case EFormat::RGBA8Unorm: return 4 * sizeof(uint8_t);
+		case EFormat::RGBA8UInt: return 4 * sizeof(uint8_t);
+		case EFormat::D24UnormS8UInt:  return 4 * sizeof(uint8_t);
+		}
+
+		FUSION_CORE_VERIFY(false);
+		return 0;
 	}
 
 	static constexpr D3D12_RESOURCE_FLAGS ImageFlagsToD3D12ResourceFlags(EImageFlag InFlags)

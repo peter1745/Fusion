@@ -23,6 +23,8 @@ namespace Fusion {
 
 		virtual EImageState GetState() const override { return m_State; }
 
+		virtual const Image2DInfo& GetInfo() const override { return m_CreateInfo; }
+
 		auto& GetResource() { return m_Resource; }
 		const auto& GetResource() const { return m_Resource; }
 

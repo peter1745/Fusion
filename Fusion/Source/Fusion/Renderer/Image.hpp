@@ -41,6 +41,8 @@ namespace Fusion {
 
 		virtual EImageState GetState() const = 0;
 
+		virtual const Image2DInfo& GetInfo() const = 0;
+
 	public:
 		static Shared<Image2D> Create(const Image2DInfo& InCreateInfo);
 	};

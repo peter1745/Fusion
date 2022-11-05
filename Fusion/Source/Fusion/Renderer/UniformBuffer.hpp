@@ -17,6 +17,8 @@ namespace Fusion {
 		EBufferUsage Usage;
 	};
 
+	class DescriptorHeap;
+
 	class UniformBuffer : public SharedObject
 	{
 	public:
@@ -28,7 +30,7 @@ namespace Fusion {
 		virtual EShaderBindPoint GetBindPoint() const = 0;
 
 	public:
-		static Shared<UniformBuffer> Create(const ConstantBufferInfo& InCreateInfo);
+		static Shared<UniformBuffer> Create(DescriptorHeap* InDescriptorHeap, const ConstantBufferInfo& InCreateInfo);
 		static Shared<UniformBuffer> Create(void* InData, uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage = EBufferUsage::Dynamic);
 	};
 

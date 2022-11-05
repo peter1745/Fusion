@@ -26,22 +26,9 @@ namespace Fusion {
 		{ { -0.5f, -0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }
 	};
 
-	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
+	WorldRenderer::WorldRenderer(DescriptorHeap* InDescriptorHeap, const Shared<World>& InWorld)
 		: m_World(InWorld)
 	{
-		/*ShaderSpecification PBRSpec;
-		PBRSpec.FilePath = "Resources/Shaders/FusionPBR.hlsl";
-		PBRSpec.InputLayout = {
-			{ "POSITION", ShaderDataType::Float3, 0 },
-			{ "NORMAL", ShaderDataType::Float3, 0 },
-			{ "TEXCOORD", ShaderDataType::Float2, 0 }
-		};
-		m_PBRShader = Shader::Create(PBRSpec);
-
-		m_Renderer = Application::Get().GetRenderer();
-		m_CameraDataBuffer = UniformBuffer::Create(sizeof(glm::mat4), EShaderBindPoint::VertexShader);
-		m_TransformDataBuffer = UniformBuffer::Create(sizeof(glm::mat4) + sizeof(uint64_t), EShaderBindPoint::Both);*/
-
 		PipelineLayoutInfo LayoutInfo = {};
 		LayoutInfo.Flags |= PipelineLayoutFlags::AllowInputAssemblerInputLayout;
 
@@ -54,9 +41,9 @@ namespace Fusion {
 		ConstantBufferRange.Flags = DescriptorRangeFlags::StaticData;
 
 		PipelineLayoutParameter ConstantBufferParam = {};
-		ConstantBufferParam.Type = EPipelineParameterType::DescriptorTable;
+		ConstantBufferParam.Type = EPipelineParameterType::ConstantBufferView;
 		ConstantBufferParam.Visibility = EShaderVisibility::All;
-		ConstantBufferParam.Value = PipelineLayoutDescriptorTable{ { ConstantBufferRange } };
+		ConstantBufferParam.Value = PipelineLayoutDescriptor{ 0, 0 };
 		LayoutInfo.Parameters.push_back(ConstantBufferParam);
 
 		Layout = PipelineLayout::Create(LayoutInfo);
@@ -64,16 +51,17 @@ namespace Fusion {
 		GraphicsPipelineInfo PipelineInfo = {};
 		PipelineInfo.Layout = Layout.get();
 		PipelineInfo.Inputs = {
-			{ "POSITION", 0, EFormat::RGBA32Float, 0, AppendAlignedElement, 0 },
+			{ "POSITION", 0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
 			{ "NORMAL",   0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
 			{ "TEXCOORD", 0, EFormat::RG32Float,  0, AppendAlignedElement, 0 },
 		};
 
-		PipelineInfo.PipelineShader = Shader::Create({ "Resources/Shaders/D3D12.hlsl" });
+		PipelineInfo.PipelineShader = Shader::Create({ "Resources/Shaders/FusionPBR.hlsl" });
 		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
 		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
-		PipelineInfo.RenderTargetCount = 1;
+		PipelineInfo.RenderTargetCount = 2;
 		PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
+		PipelineInfo.RenderTargetFormats[1] = EFormat::RG32UInt;
 		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
 		Pipeline = GraphicsPipeline::Create(PipelineInfo);
 
@@ -82,54 +70,50 @@ namespace Fusion {
 		VertexBufferCreateInfo.Data = s_Vertices;
 		VertexBufferCreateInfo.Stride = sizeof(Vertex1);
 		VertexBuf = VertexBuffer::Create(VertexBufferCreateInfo);
+
+		ConstantBufferInfo TransformBufferInfo = {};
+		TransformBufferInfo.Size = sizeof(TransformData);
+		TransformBufferInfo.Usage = EBufferUsage::Dynamic;
+		TransformBufferInfo.BindPoint = EShaderBindPoint::Both;
+		m_TransformBuffer = UniformBuffer::Create(InDescriptorHeap, TransformBufferInfo);
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
 	{
-		/*glm::mat4 ViewProjectionMatrix = InCamera.GetProjectionMatrix() * InViewMatrix;
-		m_CameraDataBuffer->SetData(&ViewProjectionMatrix);
-
-		m_PBRShader->Bind();
-		m_PBRShader->Set(1, m_CameraDataBuffer);*/
+		m_TransformData.ViewProjection = InCamera.GetProjectionMatrix() * InViewMatrix;
+		m_TransformData.Transform = glm::mat4(1.0f);
 	}
 
 	void WorldRenderer::Render()
 	{
 		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
 		Pipeline->Bind();
-		VertexBuf->Bind();
-		CmdList->DrawInstanced(3, 1, 0, 0);
 
-		//const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
+		const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
 
-		//for (auto Actor : MeshActors)
-		//{
-		//	const MeshComponent* MeshComp = Actor->FindComponent<MeshComponent>();
+		for (auto Actor : MeshActors)
+		{
+			const MeshComponent* MeshComp = Actor->FindComponent<MeshComponent>();
 
-		//	if (!MeshComp->IsActive || !MeshComp->MeshHandle.IsValid())
-		//		continue;
+			if (!MeshComp->IsActive || !MeshComp->MeshHandle.IsValid())
+				continue;
 
-		//	const TransformComponent* TransformComp = Actor->FindComponent<TransformComponent>();
-		//	const AssetContainer<MeshAsset> ActorMesh = Application::Get().GetAssetStorage()->GetAsset<MeshAsset>(MeshComp->MeshHandle);
+			const TransformComponent* TransformComp = Actor->FindComponent<TransformComponent>();
+			const AssetContainer<MeshAsset> ActorMesh = Application::Get().GetAssetStorage()->GetAsset<MeshAsset>(MeshComp->MeshHandle);
 
-		//	uint32_t EnttID = m_World->GetEnttID(Actor->GetActorID());
+			m_TransformData.Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location)
+				* glm::toMat4(TransformComp->GetRotation())
+				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
+			m_TransformData.ActorID = Actor->GetActorID();
+			m_TransformBuffer->SetData(&m_TransformData);
+			//MeshComp->Texture->Bind(0);
 
-		//	struct TransformData
-		//	{
-		//		glm::mat4 Transform;
-		//		uint64_t EnttID;
-		//	} TData;
+			CmdList->SetConstantBuffer(0, m_TransformBuffer);
 
-		//	TData.Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location)
-		//		* glm::toMat4(TransformComp->GetRotation())
-		//		* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
-		//	TData.EnttID = Actor->GetActorID();
-		//	m_TransformDataBuffer->SetData(&TData);
-		//	m_PBRShader->Set(0, m_TransformDataBuffer);
-		//	//MeshComp->Texture->Bind(0);
+			ActorMesh->GetMesh()->GetVertexBuffer()->Bind();
 
-		//	m_Renderer->DrawIndexed(ActorMesh->GetMesh()->GetVertexBuffer(), ActorMesh->GetMesh()->GetIndexBuffer(), m_PBRShader);
-		//}
+			CmdList->DrawIndexed(ActorMesh->GetMesh()->GetIndexBuffer());
+		}
 	}
 
 	void WorldRenderer::End()

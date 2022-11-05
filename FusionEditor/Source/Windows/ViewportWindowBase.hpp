@@ -34,6 +34,8 @@ namespace FusionEditor {
 
 		Fusion::DescriptorHeap* m_DescriptorHeap = nullptr;
 		std::vector<Fusion::DescriptorHeapAllocation> m_RTVAllocations;
+		std::vector<Fusion::DescriptorHeapAllocation> m_ColorPickingRTVAllocations;
+
 	};
 
 }

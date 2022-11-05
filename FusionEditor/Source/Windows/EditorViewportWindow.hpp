@@ -5,6 +5,8 @@
 
 #include <Fusion/Events/KeyboardEvents.hpp>
 
+#include <Fusion/Renderer/StagingBuffer.hpp>
+
 namespace FusionEditor {
 
 	enum class EGizmoType { None = -1, Translate, Rotate, Scale };
@@ -35,6 +37,9 @@ namespace FusionEditor {
 		EGizmoSpace m_GizmoSpace = EGizmoSpace::World;
 
 		Fusion::Shared<Fusion::Actor> m_SelectedActor = nullptr;
+
+		Fusion::Unique<Fusion::StagingBuffer> m_StagingBuffer;
+		bool m_ShouldCopyFromBuffer = false;
 	};
 
 }

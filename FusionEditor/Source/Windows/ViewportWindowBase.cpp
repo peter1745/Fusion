@@ -11,7 +11,7 @@ namespace FusionEditor {
 	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap)
 		: EditorWindow(InTitle, 300, 300), m_World(InWorld), m_DescriptorHeap(InDescriptorHeap)
 	{
-		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
+		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(m_DescriptorHeap, InWorld);
 
 		Fusion::RenderTextureAttachment ColorAttachment = {};
 		ColorAttachment.Format = Fusion::EFormat::RGBA8Unorm;
@@ -19,14 +19,21 @@ namespace FusionEditor {
 		ColorAttachment.InitialState = Fusion::ImageStates::RenderTarget;
 		ColorAttachment.ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+		Fusion::RenderTextureAttachment ColorPickingAttachment = {};
+		ColorPickingAttachment.Format = Fusion::EFormat::RG32UInt;
+		ColorPickingAttachment.Flags = Fusion::ImageFlags::AllowRenderTarget;
+		ColorPickingAttachment.InitialState = Fusion::ImageStates::RenderTarget;
+		ColorPickingAttachment.ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 		Fusion::RenderTextureInfo RenderTextureCreateInfo;
 		RenderTextureCreateInfo.Width = 300U;
 		RenderTextureCreateInfo.Height = 300U;
-		RenderTextureCreateInfo.ColorAttachments = { ColorAttachment };
+		RenderTextureCreateInfo.ColorAttachments = { ColorAttachment, ColorPickingAttachment };
 		RenderTextureCreateInfo.DepthAttachment = { Fusion::EFormat::D24UnormS8UInt, Fusion::ImageFlags::AllowDepthStencil, Fusion::ImageStates::DepthWrite };
 		m_RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 
 		m_RTVAllocations = InDescriptorHeap->AllocateRenderTextureViews(m_RenderTexture, 0);
+		m_ColorPickingRTVAllocations = InDescriptorHeap->AllocateRenderTextureViews(m_RenderTexture, 1);
 	}
 
 	void ViewportWindowBase::OnRender()
@@ -47,7 +54,7 @@ namespace FusionEditor {
 		m_RenderTexture->Clear();
 
 		RenderWorld();
-		
+
 		m_RenderTexture->Unbind(CmdList);
 		m_RenderTexture->TransitionImages(CmdList, Fusion::ImageStates::PixelShaderResource, Fusion::ImageStates::PixelShaderResource);
 	}
@@ -63,8 +70,13 @@ namespace FusionEditor {
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		{
 			m_DescriptorHeap->Deallocate(m_RTVAllocations[FrameIndex].Index);
+			m_DescriptorHeap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex].Index);
+
 			m_RenderTexture->Resize(0, FrameIndex, { ViewportWidth, ViewportHeight });
+			m_RenderTexture->Resize(1, FrameIndex, { ViewportWidth, ViewportHeight });
+			
 			m_RTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateRenderTextureView(m_RenderTexture, 0, FrameIndex);
+			m_ColorPickingRTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateRenderTextureView(m_RenderTexture, 1, FrameIndex);
 
 			OnResize(ViewportWidth, ViewportHeight);
 		}

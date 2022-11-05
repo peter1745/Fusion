@@ -3,6 +3,8 @@
 #include "D3D12Context.hpp"
 #include "D3D12RenderTexture.hpp"
 
+#include "Fusion/Memory/Utils.h"
+
 #include <intrin.h>
 
 namespace Fusion {
@@ -133,7 +135,7 @@ namespace Fusion {
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC ViewDesc = {};
 		ViewDesc.BufferLocation = InBuffer->GetGPUBufferLocation();
-		ViewDesc.SizeInBytes = InSize;
+		ViewDesc.SizeInBytes = Align<256>(InSize);
 
 		Device->CreateConstantBufferView(&ViewDesc, DescriptorHandle);
 
