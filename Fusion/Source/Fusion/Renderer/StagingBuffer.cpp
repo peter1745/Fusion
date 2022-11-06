@@ -2,6 +2,7 @@
 #include "StagingBuffer.hpp"
 #include "Renderer.hpp"
 
+#include <Platform/D3D11/D3D11StagingBuffer.hpp>
 #include <Platform/D3D12/D3D12StagingBuffer.hpp>
 
 namespace Fusion {
@@ -11,7 +12,7 @@ namespace Fusion {
 		switch (Renderer::CurrentAPI())
 		{
 		case ERendererAPI::None: return nullptr;
-		case ERendererAPI::D3D11: return nullptr;
+		case ERendererAPI::D3D11: return MakeUnique<D3D11StagingBuffer>(InCreateInfo);
 		case ERendererAPI::D3D12: return MakeUnique<D3D12StagingBuffer>(InCreateInfo);
 		}
 

@@ -21,6 +21,7 @@ namespace FusionEditor {
 		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(EditorViewportWindow::OnSelectionChanged));
 
 		Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
+		StagingBufferCreateInfo.Format = Fusion::EFormat::RG32UInt;
 		StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
 		m_StagingBuffer = Fusion::StagingBuffer::Create(StagingBufferCreateInfo);
 	}
@@ -36,6 +37,8 @@ namespace FusionEditor {
 			memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
 			m_StagingBuffer->Unmap(BufferStart);
 			m_ShouldCopyFromBuffer = false;
+
+			FUSION_CORE_INFO("Actor ID: {}", uint64_t(SelectedActorID));
 		}
 
 		m_Camera.SetActive(IsMouseInside() && IsTabActive());
@@ -120,7 +123,7 @@ namespace FusionEditor {
 		MousePos.x -= GetMinBound().x;
 		MousePos.y -= GetMinBound().y;
 
-		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left) && m_StagingBuffer)
+		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
 		{
 			Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
 			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);

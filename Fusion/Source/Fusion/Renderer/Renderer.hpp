@@ -29,7 +29,7 @@ namespace Fusion {
 
 	private:
 		static Shared<Renderer> Create(ERendererAPI InRendererAPI);
-		inline static ERendererAPI s_CurrentAPI = ERendererAPI::D3D12;
+		inline static ERendererAPI s_CurrentAPI = ERendererAPI::D3D11;
 
 		friend class Application;
 	};

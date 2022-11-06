@@ -9,6 +9,7 @@ namespace Fusion {
 
 	struct StagingBufferInfo
 	{
+		EFormat Format;
 		uint32_t Size;
 	};
 
