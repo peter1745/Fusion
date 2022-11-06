@@ -28,7 +28,7 @@ namespace Fusion {
 
 	}
 
-	void D3D12IndexBuffer::Bind() const
+	void D3D12IndexBuffer::Bind()
 	{
 
 	}

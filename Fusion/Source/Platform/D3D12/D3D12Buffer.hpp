@@ -47,7 +47,7 @@ namespace Fusion {
 
 	private:
 		BufferInfo m_CreateInfo;
-		D3D12ComPtr<ID3D12Resource2> m_Buffer;
+		D3DComPtr<ID3D12Resource2> m_Buffer;
 	};
 
 }

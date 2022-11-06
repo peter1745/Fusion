@@ -46,7 +46,7 @@ namespace Fusion {
 			auto& Attachment = m_Attachments[Idx];
 
 			D3D12_RENDER_TARGET_VIEW_DESC ViewDesc = {};
-			ViewDesc.Format = ImageFormatToDXGIFormat(AttachmentInfo.Format);
+			ViewDesc.Format = EFormatToDXGIFormat(AttachmentInfo.Format);
 			ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 			ViewDesc.Texture2D.MipSlice = 0;
@@ -87,7 +87,7 @@ namespace Fusion {
 			m_DepthStencilViewHandleIncrementSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 
 			D3D12_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
-			DepthStencilViewDesc.Format = ImageFormatToDXGIFormat(InCreateInfo.DepthAttachment.Format);
+			DepthStencilViewDesc.Format = EFormatToDXGIFormat(InCreateInfo.DepthAttachment.Format);
 			DepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;
@@ -161,7 +161,7 @@ namespace Fusion {
 			Attachment.Images[InFrameIndex]->Resize(InSize);
 
 			D3D12_RENDER_TARGET_VIEW_DESC ViewDesc = {};
-			ViewDesc.Format = ImageFormatToDXGIFormat(AttachmentInfo.Format);
+			ViewDesc.Format = EFormatToDXGIFormat(AttachmentInfo.Format);
 			ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			ViewDesc.Texture2D.MipSlice = 0;
 			ViewDesc.Texture2D.PlaneSlice = 0;
@@ -179,7 +179,7 @@ namespace Fusion {
 			m_DepthStencilAttachment.Images[InFrameIndex]->Resize(InSize);
 
 			D3D12_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
-			DepthStencilViewDesc.Format = ImageFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
+			DepthStencilViewDesc.Format = EFormatToDXGIFormat(m_CreateInfo.DepthAttachment.Format);
 			DepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;

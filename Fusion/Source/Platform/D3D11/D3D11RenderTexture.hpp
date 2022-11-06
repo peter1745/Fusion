@@ -2,6 +2,9 @@
 
 #include "Fusion/Renderer/RenderTexture.hpp"
 
+#include "D3D11Common.hpp"
+#include "D3D11Image.hpp"
+
 namespace Fusion {
 
 	class D3D11RenderTexture : public RenderTexture
@@ -20,9 +23,7 @@ namespace Fusion {
 		virtual uint32_t GetWidth() const override { return m_CreateInfo.Width; }
 		virtual uint32_t GetHeight() const override { return m_CreateInfo.Height; }
 
-		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override { return nullptr; }
-
-		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) override;
+		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override;
 
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override {}
 
@@ -39,16 +40,13 @@ namespace Fusion {
 
 	private:
 		RenderTextureInfo m_CreateInfo;
-		D3D11_VIEWPORT m_Viewport;
+		std::vector<Shared<D3D11Image2D>> m_AttachmentImages;
+		std::vector<D3DComPtr<ID3D11RenderTargetView>> m_AttachmentRenderTargetViews;
+		Shared<D3D11Image2D> m_DepthStencilImage;
+		D3DComPtr<ID3D11DepthStencilView> m_DepthStencilView;
+		bool m_HasDepthStencilAttachment = false;
 
-		std::vector<ID3D11Texture2D*> m_ColorAttachmentTextures;
-		std::vector<ID3D11RenderTargetView*> m_ColorAttachmentViews;
 		std::vector<ID3D11ShaderResourceView*> m_ColorAttachmentResourceViews;
-
-		std::unordered_map<size_t, ID3D11Texture2D*> m_StagingTextures;
-
-		ID3D11Texture2D* m_DepthStencilTexture = nullptr;
-		ID3D11DepthStencilView* m_DepthStencilView = nullptr;
 
 	};
 

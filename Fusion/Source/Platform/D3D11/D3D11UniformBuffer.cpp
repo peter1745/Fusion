@@ -19,7 +19,7 @@ namespace Fusion {
 		BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, nullptr, &m_Buffer);
+		Context->GetDevice()->CreateBuffer(&BufferDesc, nullptr, m_Buffer);
 	}
 
 	D3D11UniformBuffer::D3D11UniformBuffer(void* InData, uint32_t InSize, EShaderBindPoint InBindPoint, EBufferUsage InUsage)
@@ -40,12 +40,11 @@ namespace Fusion {
 		InitialData.SysMemPitch = 0;
 		InitialData.SysMemSlicePitch = 0;
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, &m_Buffer);
+		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, m_Buffer);
 	}
 
 	D3D11UniformBuffer::~D3D11UniformBuffer()
 	{
-		FUSION_RELEASE_COM(m_Buffer);
 	}
 
 	void D3D11UniformBuffer::SetData(void* InData)

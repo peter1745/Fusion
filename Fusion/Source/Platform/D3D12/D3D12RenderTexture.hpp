@@ -28,8 +28,6 @@ namespace Fusion {
 
 		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override;
 
-		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) override { return 0; }
-
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override;
 
 		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const override;
@@ -45,8 +43,8 @@ namespace Fusion {
 		D3D12RenderTextureAttachment m_DepthStencilAttachment{};
 		bool m_HasDepthStencilAttachment = false;
 
-		D3D12ComPtr<ID3D12DescriptorHeap> m_RenderTargetDescriptorHeap;
-		D3D12ComPtr<ID3D12DescriptorHeap> m_DepthStencilDescriptorHeap;
+		D3DComPtr<ID3D12DescriptorHeap> m_RenderTargetDescriptorHeap;
+		D3DComPtr<ID3D12DescriptorHeap> m_DepthStencilDescriptorHeap;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE m_RenderTargetViewHandle{};
 		uint32_t m_RenderTargetViewHandleIncrementSize = 0;

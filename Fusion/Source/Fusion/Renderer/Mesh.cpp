@@ -10,11 +10,6 @@ namespace Fusion {
 		CreateInfo.BufferSize = uint32_t(m_Vertices.size()) * sizeof(Vertex);
 		CreateInfo.Stride = sizeof(Vertex);
 		CreateInfo.Data = static_cast<void*>(m_Vertices.data());
-		CreateInfo.Layout = {
-			{ "POSITION", ShaderDataType::Float3, 0 },
-			{ "NORMAL", ShaderDataType::Float3, 0 },
-			{ "TEXCOORD", ShaderDataType::Float2, 0 }
-		};
 		CreateInfo.Usage = EBufferUsage::Immutable;
 		m_VertexBuffer = VertexBuffer::Create(CreateInfo);
 		m_IndexBuffer = IndexBuffer::Create(uint32_t(m_Indices.size()) * 3 * sizeof(uint32_t), m_Indices.data());

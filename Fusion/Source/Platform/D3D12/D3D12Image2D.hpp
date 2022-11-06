@@ -34,7 +34,7 @@ namespace Fusion {
 	private:
 		Image2DInfo m_CreateInfo;
 
-		D3D12ComPtr<ID3D12Resource2> m_Resource;
+		D3DComPtr<ID3D12Resource2> m_Resource;
 		EImageState m_State;
 
 		friend class D3D12RenderTexture;

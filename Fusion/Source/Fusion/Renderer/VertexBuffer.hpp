@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GraphicsContext.hpp"
-#include "VertexBufferLayout.hpp"
 #include "CommonTypes.hpp"
 
 namespace Fusion {
@@ -12,7 +11,6 @@ namespace Fusion {
 		uint32_t Stride = 0;
 		void* Data = nullptr;
 		EBufferUsage Usage = EBufferUsage::Static;
-		VertexBufferLayout Layout;
 	};
 
 	class VertexBuffer : public SharedObject
@@ -20,7 +18,7 @@ namespace Fusion {
 	public:
 		virtual ~VertexBuffer() = default;
 
-		virtual void Bind() const = 0;
+		virtual void Bind() = 0;
 		virtual void Resize(uint32_t InNewSize) = 0;
 		virtual void SetData(void* InData, uint32_t InSize) = 0;
 

@@ -2,6 +2,8 @@
 
 #include "Fusion/Renderer/SwapChain.hpp"
 
+#include "D3D11Common.hpp"
+
 namespace Fusion {
 
 	class D3D11SwapChain : public SwapChain
@@ -11,7 +13,7 @@ namespace Fusion {
 		~D3D11SwapChain();
 
 		virtual void Bind() override;
-		virtual void Clear() const override;
+		virtual void Clear() override;
 		virtual void Present() override;
 		virtual void Unbind() {}
 
@@ -23,11 +25,8 @@ namespace Fusion {
 	private:
 		SwapChainInfo m_CreateInfo;
 
-		IDXGISwapChain* m_SwapChain = nullptr;
-		ID3D11RenderTargetView* m_RenderTargetView = nullptr;
-
-		ID3D11Texture2D* m_DepthStencilBuffer = nullptr;
-		ID3D11DepthStencilView* m_DepthStencilView = nullptr;
+		D3DComPtr<IDXGISwapChain> m_SwapChain;
+		D3DComPtr<ID3D11RenderTargetView> m_RenderTargetView;
 
 		D3D11_VIEWPORT m_Viewport = { 0 };
 	};

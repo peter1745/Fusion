@@ -6,7 +6,7 @@
 
 namespace Fusion {
 
-	D3D12CommandList::D3D12CommandList(const Shared<D3D12CommandAllocator>& InAllocator, const D3D12ComPtr<ID3D12GraphicsCommandList6>& InCommandList)
+	D3D12CommandList::D3D12CommandList(const Shared<D3D12CommandAllocator>& InAllocator, const D3DComPtr<ID3D12GraphicsCommandList6>& InCommandList)
 		: m_Allocator(InAllocator), m_CommandList(InCommandList)
 	{
 	}
@@ -35,7 +35,7 @@ namespace Fusion {
 		m_CommandList->RSSetScissorRects(uint32_t(D3DScissorRects.size()), D3DScissorRects.data());
 	}
 
-	void D3D12CommandList::SetConstantBuffer(uint32_t InIndex, const Shared<UniformBuffer>& InConstantBuffer)
+	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<UniformBuffer>& InConstantBuffer)
 	{
 		m_CommandList->SetGraphicsRootConstantBufferView(InIndex, InConstantBuffer.As<D3D12UniformBuffer>()->GetBuffer()->GetGPUBufferLocation());
 	}

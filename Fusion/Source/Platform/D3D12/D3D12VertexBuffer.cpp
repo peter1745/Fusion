@@ -23,7 +23,7 @@ namespace Fusion {
 		m_VertexBufferView.StrideInBytes = InCreateInfo.Stride;
 	}
 
-	void D3D12VertexBuffer::Bind() const
+	void D3D12VertexBuffer::Bind()
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();

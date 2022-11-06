@@ -11,7 +11,7 @@ namespace Fusion {
 	public:
 		D3D12VertexBuffer(const VertexBufferInfo& InCreateInfo);
 
-		virtual void Bind() const override;
+		virtual void Bind() override;
 		virtual void Resize(uint32_t InNewSize) override;
 		virtual void SetData(void* InData, uint32_t InSize) override;
 

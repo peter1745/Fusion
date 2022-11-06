@@ -66,14 +66,14 @@ namespace Fusion {
 				InitialData.SysMemSlicePitch = InitialData.SysMemPitch * InCreateInfo.Height;
 			}
 
-			D3DContext->GetDevice()->CreateTexture2D(&TextureDesc, &InitialData, &m_TextureBuffer);
+			D3DContext->GetDevice()->CreateTexture2D(&TextureDesc, &InitialData, m_TextureBuffer);
 			m_CreateInfo.Data = nullptr;
 			break;
 		}
 		case ETextureUsage::Staging:
 		{
 			TextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-			D3DContext->GetDevice()->CreateTexture2D(&TextureDesc, nullptr, &m_TextureBuffer);
+			D3DContext->GetDevice()->CreateTexture2D(&TextureDesc, nullptr, m_TextureBuffer);
 			break;
 		}
 		}
@@ -85,7 +85,7 @@ namespace Fusion {
 			ShaderResourceViewDesc.Format = TextureDesc.Format;
 			ShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			ShaderResourceViewDesc.Texture2D.MipLevels = 1;
-			D3DContext->GetDevice()->CreateShaderResourceView(m_TextureBuffer, &ShaderResourceViewDesc, &m_ShaderResourceView);
+			D3DContext->GetDevice()->CreateShaderResourceView(m_TextureBuffer, &ShaderResourceViewDesc, m_ShaderResourceView);
 
 			D3D11_SAMPLER_DESC TextureSamplerDesc;
 			ZeroMemory(&TextureSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
@@ -102,22 +102,19 @@ namespace Fusion {
 			TextureSamplerDesc.BorderColor[3] = 0.0f;
 			TextureSamplerDesc.MinLOD = -FLT_MAX;
 			TextureSamplerDesc.MaxLOD = FLT_MAX;
-			D3DContext->GetDevice()->CreateSamplerState(&TextureSamplerDesc, &m_SamplerState);
+			D3DContext->GetDevice()->CreateSamplerState(&TextureSamplerDesc, m_SamplerState);
 		}
 	}
 
 	D3D11Texture2D::~D3D11Texture2D()
 	{
-		FUSION_RELEASE_COM(m_SamplerState);
-		FUSION_RELEASE_COM(m_ShaderResourceView);
-		FUSION_RELEASE_COM(m_TextureBuffer);
 	}
 
 	void D3D11Texture2D::Bind(uint32_t InSlot) const
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->PSSetShaderResources(InSlot, 1, &m_ShaderResourceView);
-		DeviceContext->PSSetSamplers(InSlot, 1, &m_SamplerState);
+		/*ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		DeviceContext->PSSetShaderResources(InSlot, 1, m_ShaderResourceView);
+		DeviceContext->PSSetSamplers(InSlot, 1, m_SamplerState);*/
 	}
 
 	void D3D11Texture2D::CopyFrom(const Shared<Texture2D>& InOther)

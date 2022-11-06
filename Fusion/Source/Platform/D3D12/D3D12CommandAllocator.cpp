@@ -16,7 +16,7 @@ namespace Fusion {
 		return D3D12_COMMAND_LIST_TYPE_DIRECT;
 	}
 
-	D3D12CommandAllocator::D3D12CommandAllocator(D3D12ComPtr<ID3D12Device9> InDevice, const CommandAllocatorInfo& InCreateInfo)
+	D3D12CommandAllocator::D3D12CommandAllocator(D3DComPtr<ID3D12Device9> InDevice, const CommandAllocatorInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
 		FUSION_CORE_VERIFY(InCreateInfo.ListType == ECommandListType::Direct, "Currently only supports Direct Command Lists!");
@@ -40,11 +40,11 @@ namespace Fusion {
 		return AllocateCommandList(GraphicsContext::Get<D3D12Context>()->GetDevice());
 	}
 
-	CommandList* D3D12CommandAllocator::AllocateCommandList(D3D12ComPtr<ID3D12Device9> InDevice)
+	CommandList* D3D12CommandAllocator::AllocateCommandList(D3DComPtr<ID3D12Device9> InDevice)
 	{
 		auto D3D12CommandListType = ECommandListTypeToD3D12CommandListType(m_CreateInfo.ListType);
 
-		D3D12ComPtr<ID3D12GraphicsCommandList6> GraphicsCommandList;
+		D3DComPtr<ID3D12GraphicsCommandList6> GraphicsCommandList;
 		InDevice->CreateCommandList1(0, D3D12CommandListType, D3D12_COMMAND_LIST_FLAG_NONE, GraphicsCommandList, GraphicsCommandList);
 		auto& Result = m_CommandLists.emplace_back(MakeUnique<D3D12CommandList>(this, GraphicsCommandList));
 		return Result.get();
@@ -55,7 +55,7 @@ namespace Fusion {
 		return AllocateCommandLists(GraphicsContext::Get<D3D12Context>()->GetDevice(), InCount);
 	}
 
-	std::vector<CommandList*> D3D12CommandAllocator::AllocateCommandLists(D3D12ComPtr<ID3D12Device9> InDevice, size_t InCount)
+	std::vector<CommandList*> D3D12CommandAllocator::AllocateCommandLists(D3DComPtr<ID3D12Device9> InDevice, size_t InCount)
 	{
 		std::vector<CommandList*> Result;
 		Result.reserve(InCount);

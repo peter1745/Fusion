@@ -12,21 +12,21 @@ namespace Fusion {
 	public:
 		D3D12DescriptorHeap(const DescriptorHeapInfo& InCreateInfo);
 
-		virtual DescriptorHeapAllocation AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
-		virtual std::vector<DescriptorHeapAllocation> AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
+		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
+		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
 
 		DescriptorHeapAllocation AllocateConstantBufferView(D3D12Buffer* InBuffer, uint32_t InSize);
 
 		virtual void Deallocate(const std::vector<DescriptorHeapAllocation>& InAllocations) override;
-		virtual void Deallocate(uint32_t InAllocIndex) override;
+		virtual void Deallocate(const DescriptorHeapAllocation& InAlloc) override;
 
 		virtual DescriptorHeapAllocation Reserve() override;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleStart() const { return m_CPUStart; }
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandleStart() const { return m_GPUStart; }
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t InIndex) const;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t InIndex) const;
+		uintptr_t GetCPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const;
+		uintptr_t GetGPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const;
 
 		auto& GetHeap() { return m_DescriptorHeap; }
 		const auto& GetHeap() const { return m_DescriptorHeap; }
@@ -37,7 +37,7 @@ namespace Fusion {
 	private:
 		DescriptorHeapInfo m_CreateInfo;
 
-		D3D12ComPtr<ID3D12DescriptorHeap> m_DescriptorHeap;
+		D3DComPtr<ID3D12DescriptorHeap> m_DescriptorHeap;
 		D3D12_CPU_DESCRIPTOR_HANDLE m_CPUStart{};
 		D3D12_GPU_DESCRIPTOR_HANDLE m_GPUStart{};
 		uint32_t m_HeapIncrementSize = 0;

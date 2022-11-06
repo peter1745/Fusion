@@ -10,7 +10,7 @@ namespace Fusion {
 		uint32_t DXGIFactoryFlags = 0;
 
 #ifdef FUSION_DEBUG
-		D3D12ComPtr<ID3D12Debug> DebugInterface;
+		D3DComPtr<ID3D12Debug> DebugInterface;
 		if (SUCCEEDED(D3D12GetDebugInterface(DebugInterface, DebugInterface)))
 		{
 			DebugInterface->EnableDebugLayer();
@@ -20,7 +20,7 @@ namespace Fusion {
 
 		CreateDXGIFactory2(DXGIFactoryFlags, m_Factory, m_Factory);
 
-		D3D12ComPtr<IDXGIAdapter1> DXGIAdapter;
+		D3DComPtr<IDXGIAdapter1> DXGIAdapter;
 		for (UINT AdapterIdx = 0; SUCCEEDED(m_Factory->EnumAdapterByGpuPreference(AdapterIdx, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, DXGIAdapter, DXGIAdapter)); AdapterIdx++)
 		{
 			DXGI_ADAPTER_DESC1 AdapterDesc;

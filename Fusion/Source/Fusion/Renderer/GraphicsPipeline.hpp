@@ -2,6 +2,7 @@
 
 #include "PipelineLayout.hpp"
 #include "Shader.hpp"
+#include "CommandList.hpp"
 
 #include <array>
 
@@ -54,7 +55,7 @@ namespace Fusion {
 	public:
 		virtual ~GraphicsPipeline() = default;
 
-		virtual void Bind() = 0;
+		virtual void Bind(CommandList* InCmdList) = 0;
 
 		virtual const GraphicsPipelineInfo& GetInfo() const = 0;
 

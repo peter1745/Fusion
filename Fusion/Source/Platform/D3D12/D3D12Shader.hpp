@@ -28,14 +28,14 @@ namespace Fusion {
 		auto& GetPixelByteCode() { return m_PixelByteCode; }
 
 	private:
-		bool CompileFromFile(EShaderType InType, D3D12ComPtr<ID3DBlob>& OutByteCode) const;
-		void LogCompilerError(const char* InShaderType, D3D12ComPtr<ID3DBlob> InErrorMessage) const;
+		bool CompileFromFile(EShaderType InType, D3DComPtr<ID3DBlob>& OutByteCode) const;
+		void LogCompilerError(const char* InShaderType, D3DComPtr<ID3DBlob> InErrorMessage) const;
 
 	private:
 		ShaderSpecification m_CreateInfo;
 
-		D3D12ComPtr<ID3DBlob> m_VertexByteCode;
-		D3D12ComPtr<ID3DBlob> m_PixelByteCode;
+		D3DComPtr<ID3DBlob> m_VertexByteCode;
+		D3DComPtr<ID3DBlob> m_PixelByteCode;
 	};
 
 }

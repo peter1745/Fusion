@@ -40,7 +40,7 @@ namespace Fusion {
 		m_HeapIncrementSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 	}
 
-	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateRenderTextureView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
+	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
 	{
 		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
 
@@ -48,7 +48,7 @@ namespace Fusion {
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = ImageFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
+		SRVDesc.Format = EFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		SRVDesc.Texture2D.MipLevels = 1;
@@ -74,10 +74,10 @@ namespace Fusion {
 		m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
 		m_Count++;
 
-		return { this, FreeHeapIdx };
+		return { this, FreeHeapIdx, EAllocationType::ShaderResourceView };
 	}
 
-	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateRenderTextureViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
+	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
 		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
 
@@ -85,7 +85,7 @@ namespace Fusion {
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = ImageFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
+		SRVDesc.Format = EFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
 		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		SRVDesc.Texture2D.MipLevels = 1;
@@ -112,7 +112,7 @@ namespace Fusion {
 			m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
 			m_Count++;
 
-			Allocations[Idx] = { this, FreeHeapIdx };
+			Allocations[Idx] = { this, FreeHeapIdx, EAllocationType::ShaderResourceView };
 		}
 
 		return Allocations;
@@ -142,23 +142,23 @@ namespace Fusion {
 		m_AllocationMap[m_SearchStart] &= ~(1ULL << FreeHeapIdx & 0x3F);
 		m_Count++;
 
-		return { this, FreeHeapIdx };
+		return { this, FreeHeapIdx, EAllocationType::ConstantBufferView };
 	}
 
-	void D3D12DescriptorHeap::Deallocate(uint32_t InAllocIndex)
+	void D3D12DescriptorHeap::Deallocate(const DescriptorHeapAllocation& InAlloc)
 	{
-		m_SearchStart = InAllocIndex >> 6;
-		m_AllocationMap[m_SearchStart] |= 1ULL << (InAllocIndex & 0x3F);
+		m_SearchStart = InAlloc.Index >> 6;
+		m_AllocationMap[m_SearchStart] |= 1ULL << (InAlloc.Index & 0x3F);
 		m_Count--;
 	}
 
 	void D3D12DescriptorHeap::Deallocate(const std::vector<DescriptorHeapAllocation>& InAllocations)
 	{
 		for (const auto& Allocation : InAllocations)
-			Deallocate(Allocation.Index);
+			Deallocate(Allocation);
 	}
 
-	Fusion::DescriptorHeapAllocation D3D12DescriptorHeap::Reserve()
+	DescriptorHeapAllocation D3D12DescriptorHeap::Reserve()
 	{
 		uint32_t FreeHeapIdx = FindFreeIndex();
 		m_SearchStart = FreeHeapIdx >> 6;
@@ -172,18 +172,18 @@ namespace Fusion {
 		return { this, FreeHeapIdx };
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE D3D12DescriptorHeap::GetCPUDescriptorHandle(uint32_t InIndex) const
+	uintptr_t D3D12DescriptorHeap::GetCPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const
 	{
 		D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_CPUStart;
-		Handle.ptr += InIndex * m_HeapIncrementSize;
-		return Handle;
+		Handle.ptr += InAlloc.Index * m_HeapIncrementSize;
+		return Handle.ptr;
 	}
 
-	D3D12_GPU_DESCRIPTOR_HANDLE D3D12DescriptorHeap::GetGPUDescriptorHandle(uint32_t InIndex) const
+	uintptr_t D3D12DescriptorHeap::GetGPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const
 	{
 		D3D12_GPU_DESCRIPTOR_HANDLE Handle = m_GPUStart;
-		Handle.ptr += InIndex * m_HeapIncrementSize;
-		return Handle;
+		Handle.ptr += InAlloc.Index * m_HeapIncrementSize;
+		return Handle.ptr;
 	}
 
 	uint32_t D3D12DescriptorHeap::FindFreeIndex() const

@@ -94,7 +94,7 @@ namespace Fusion {
 
 			InputElement.SemanticName = InputData.Name.c_str();
 			InputElement.SemanticIndex = InputData.Index;
-			InputElement.Format = ImageFormatToDXGIFormat(InputData.Format);
+			InputElement.Format = EFormatToDXGIFormat(InputData.Format);
 			InputElement.InputSlot = InputData.Binding;
 			InputElement.AlignedByteOffset = InputData.Offset;
 			InputElement.InputSlotClass = InputData.InstanceStep == 0 ? D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA : D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
@@ -112,9 +112,9 @@ namespace Fusion {
 
 		PipelineStateDesc.NumRenderTargets = InCreateInfo.RenderTargetCount;
 		for (uint8_t Idx = 0; Idx < InCreateInfo.RenderTargetCount; Idx++)
-			PipelineStateDesc.RTVFormats[Idx] = ImageFormatToDXGIFormat(InCreateInfo.RenderTargetFormats[Idx]);
+			PipelineStateDesc.RTVFormats[Idx] = EFormatToDXGIFormat(InCreateInfo.RenderTargetFormats[Idx]);
 
-		PipelineStateDesc.DSVFormat = ImageFormatToDXGIFormat(InCreateInfo.DepthStencilFormat);
+		PipelineStateDesc.DSVFormat = EFormatToDXGIFormat(InCreateInfo.DepthStencilFormat);
 
 		PipelineStateDesc.SampleDesc.Count = 1;
 		PipelineStateDesc.SampleDesc.Quality = 0;
@@ -129,11 +129,9 @@ namespace Fusion {
 
 	}
 
-	void D3D12GraphicsPipeline::Bind()
+	void D3D12GraphicsPipeline::Bind(CommandList* InCmdList)
 	{
-		auto* CmdList = GraphicsContext::Get<D3D12Context>()->GetCurrentCommandList();
-		auto& NativeList = static_cast<D3D12CommandList*>(CmdList)->GetNativeList();
-
+		auto& NativeList = static_cast<D3D12CommandList*>(InCmdList)->GetNativeList();
 		NativeList->SetPipelineState(m_Pipeline);
 		NativeList->SetGraphicsRootSignature(static_cast<D3D12PipelineLayout*>(m_CreateInfo.Layout)->GetRootSignature());
 	}

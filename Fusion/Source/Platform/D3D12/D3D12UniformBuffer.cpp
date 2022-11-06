@@ -22,7 +22,7 @@ namespace Fusion {
 
 	D3D12UniformBuffer::~D3D12UniformBuffer()
 	{
-		m_Heap->Deallocate(m_Allocation.Index);
+		m_Heap->Deallocate(m_Allocation);
 	}
 
 	void D3D12UniformBuffer::SetData(void* InData)

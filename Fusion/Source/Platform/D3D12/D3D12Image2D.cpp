@@ -47,7 +47,7 @@ namespace Fusion {
 		ResourceDesc.Height = m_CreateInfo.Size.Height;
 		ResourceDesc.DepthOrArraySize = 1;
 		ResourceDesc.MipLevels = 1;
-		ResourceDesc.Format = ImageFormatToDXGIFormat(m_CreateInfo.Format);
+		ResourceDesc.Format = EFormatToDXGIFormat(m_CreateInfo.Format);
 		ResourceDesc.SampleDesc.Count = 1;
 		ResourceDesc.SampleDesc.Quality = 0;
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;

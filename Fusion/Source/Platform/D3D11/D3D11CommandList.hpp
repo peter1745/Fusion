@@ -1,16 +1,16 @@
 #pragma once
 
-#include "D3D12Common.hpp"
-
 #include "Fusion/Renderer/CommandList.hpp"
+
+#include "D3D11Common.hpp"
 
 namespace Fusion {
 
-	class D3D12CommandAllocator;
-	class D3D12CommandList : public CommandList
+	class D3D11CommandAllocator;
+	class D3D11CommandList : public CommandList
 	{
 	public:
-		D3D12CommandList(const Shared<D3D12CommandAllocator>& InAllocator, const D3DComPtr<ID3D12GraphicsCommandList6>& InCommandList);
+		D3D11CommandList(const Shared<D3D11CommandAllocator>& InAllocator, const D3DComPtr<ID3D11DeviceContext>& InCommandList);
 
 		virtual void Reset() override;
 
@@ -23,15 +23,13 @@ namespace Fusion {
 		virtual void DrawIndexed(const Shared<IndexBuffer>& InIndexBuffer) override;
 
 		virtual void EndRecording() override;
-				
-		auto& GetNativeList() { return m_CommandList; }
+
+		auto& GetNativeList() { return m_DeviceContext; }
+		const auto& GetNativeList() const { return m_DeviceContext; }
 
 	private:
-		Shared<D3D12CommandAllocator> m_Allocator = nullptr;
-		D3DComPtr<ID3D12GraphicsCommandList6> m_CommandList;
-
-	private:
-		friend class D3D12CommandAllocator;
+		Shared<D3D11CommandAllocator> m_Allocator = nullptr;
+		D3DComPtr<ID3D11DeviceContext> m_DeviceContext;
 	};
 
 }

@@ -20,6 +20,7 @@ namespace Fusion {
 		virtual void NextFrame() = 0;
 		virtual void WaitForGPU() = 0;
 
+		virtual uint32_t GetFramesInFlight() const = 0;
 		virtual uint32_t GetCurrentFrameIndex() const = 0;
 
 	public:

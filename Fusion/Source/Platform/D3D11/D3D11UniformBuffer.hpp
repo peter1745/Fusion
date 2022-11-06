@@ -2,6 +2,8 @@
 
 #include "Fusion/Renderer/UniformBuffer.hpp"
 
+#include "D3D11Common.hpp"
+
 namespace Fusion {
 
 	class D3D11UniformBuffer : public UniformBuffer
@@ -16,10 +18,11 @@ namespace Fusion {
 		virtual uint32_t GetSize() const override { return m_Size; }
 		virtual EShaderBindPoint GetBindPoint() const override { return m_BindPoint; }
 
-		ID3D11Buffer* GetBuffer() const { return m_Buffer; }
+		auto& GetBuffer() { return m_Buffer; }
+		const auto& GetBuffer() const { return m_Buffer; }
 
 	private:
-		ID3D11Buffer* m_Buffer = nullptr;
+		D3DComPtr<ID3D11Buffer> m_Buffer;
 		uint32_t m_Size = 0;
 		EShaderBindPoint m_BindPoint;
 	};

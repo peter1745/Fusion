@@ -87,7 +87,7 @@ namespace Fusion {
 	void WorldRenderer::Render()
 	{
 		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
-		Pipeline->Bind();
+		Pipeline->Bind(CmdList);
 
 		const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
 
@@ -108,7 +108,7 @@ namespace Fusion {
 			m_TransformBuffer->SetData(&m_TransformData);
 			//MeshComp->Texture->Bind(0);
 
-			CmdList->SetConstantBuffer(0, m_TransformBuffer);
+			CmdList->SetConstantBuffer(Pipeline.get(), 0, m_TransformBuffer);
 
 			ActorMesh->GetMesh()->GetVertexBuffer()->Bind();
 

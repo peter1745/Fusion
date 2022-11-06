@@ -12,13 +12,13 @@ namespace Fusion {
 		D3D12GraphicsPipeline(const GraphicsPipelineInfo& InCreateInfo);
 		~D3D12GraphicsPipeline();
 
-		virtual void Bind() override;
+		virtual void Bind(CommandList* InCmdLists) override;
 
 		virtual const GraphicsPipelineInfo& GetInfo() const override { return m_CreateInfo; }
 
 	private:
 		GraphicsPipelineInfo m_CreateInfo;
-		D3D12ComPtr<ID3D12PipelineState> m_Pipeline;
+		D3DComPtr<ID3D12PipelineState> m_Pipeline;
 	};
 
 }

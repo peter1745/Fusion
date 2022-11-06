@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Fusion/Renderer/CommonTypes.hpp"
+#include "Platform/D3DCommon/D3DCommon.hpp"
+
+#include <d3d11.h>
 
 namespace Fusion {
 

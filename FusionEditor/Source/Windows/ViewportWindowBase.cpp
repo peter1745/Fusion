@@ -32,8 +32,8 @@ namespace FusionEditor {
 		RenderTextureCreateInfo.DepthAttachment = { Fusion::EFormat::D24UnormS8UInt, Fusion::ImageFlags::AllowDepthStencil, Fusion::ImageStates::DepthWrite };
 		m_RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 
-		m_RTVAllocations = InDescriptorHeap->AllocateRenderTextureViews(m_RenderTexture, 0);
-		m_ColorPickingRTVAllocations = InDescriptorHeap->AllocateRenderTextureViews(m_RenderTexture, 1);
+		m_RTVAllocations = InDescriptorHeap->AllocateShaderResourceViews(m_RenderTexture, 0);
+		m_ColorPickingRTVAllocations = InDescriptorHeap->AllocateShaderResourceViews(m_RenderTexture, 1);
 	}
 
 	void ViewportWindowBase::OnRender()
@@ -69,14 +69,14 @@ namespace FusionEditor {
 		const auto& ImageSize = m_RenderTexture->GetImage(0, FrameIndex)->GetSize();
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		{
-			m_DescriptorHeap->Deallocate(m_RTVAllocations[FrameIndex].Index);
-			m_DescriptorHeap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex].Index);
+			m_DescriptorHeap->Deallocate(m_RTVAllocations[FrameIndex]);
+			m_DescriptorHeap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex]);
 
 			m_RenderTexture->Resize(0, FrameIndex, { ViewportWidth, ViewportHeight });
 			m_RenderTexture->Resize(1, FrameIndex, { ViewportWidth, ViewportHeight });
 			
-			m_RTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateRenderTextureView(m_RenderTexture, 0, FrameIndex);
-			m_ColorPickingRTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateRenderTextureView(m_RenderTexture, 1, FrameIndex);
+			m_RTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateShaderResourceView(m_RenderTexture, 0, FrameIndex);
+			m_ColorPickingRTVAllocations[FrameIndex] = m_DescriptorHeap->AllocateShaderResourceView(m_RenderTexture, 1, FrameIndex);
 
 			OnResize(ViewportWidth, ViewportHeight);
 		}
@@ -88,8 +88,7 @@ namespace FusionEditor {
 		ImVec2 MaxBound = GetMaxBound();
 
 		uint32_t FrameIdx = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentFrameIndex();
-		auto Handle = static_cast<Fusion::D3D12DescriptorHeap*>(m_DescriptorHeap)->GetGPUDescriptorHandle(m_RTVAllocations[FrameIdx].Index);
-		ImTextureID TexID = reinterpret_cast<ImTextureID>(Handle.ptr);
+		ImTextureID TexID = reinterpret_cast<ImTextureID>(m_DescriptorHeap->GetGPUDescriptorHandle(m_RTVAllocations[FrameIdx]));
 		ImGui::Image(TexID, ImVec2(MaxBound.x - MinBound.x, MaxBound.y - MinBound.y));
 	}
 

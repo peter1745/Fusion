@@ -15,7 +15,8 @@ namespace Fusion {
 		BufferDesc.Usage = BufferUsageToD3D11Usage(InCreateInfo.Usage);
 		BufferDesc.ByteWidth = InCreateInfo.BufferSize;
 		BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		BufferDesc.CPUAccessFlags = InCreateInfo.Usage != EBufferUsage::Immutable ? D3D11_CPU_ACCESS_WRITE : 0;
+		//BufferDesc.CPUAccessFlags = InCreateInfo.Usage != EBufferUsage::Immutable ? D3D11_CPU_ACCESS_WRITE : 0;
+		BufferDesc.CPUAccessFlags = 0;
 
 		D3D11_SUBRESOURCE_DATA InitialData;
 		ZeroMemory(&InitialData, sizeof(D3D11_SUBRESOURCE_DATA));
@@ -23,19 +24,18 @@ namespace Fusion {
 		InitialData.SysMemPitch = 0;
 		InitialData.SysMemSlicePitch = 0;
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, &m_Buffer);
+		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, m_Buffer);
 	}
 
 	D3D11VertexBuffer::~D3D11VertexBuffer()
 	{
-		FUSION_RELEASE_COM(m_Buffer);
 	}
 
-	void D3D11VertexBuffer::Bind() const
+	void D3D11VertexBuffer::Bind()
 	{
-		uint32_t Stride = m_CreateInfo.Layout.GetStride();
+		uint32_t Stride = m_CreateInfo.Stride;
 		uint32_t Offset = 0;
-		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_Buffer, &Stride, &Offset);
+		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->IASetVertexBuffers(0, 1, m_Buffer, &Stride, &Offset);
 	}
 
 	void D3D11VertexBuffer::Resize(uint32_t InNewSize)
@@ -43,7 +43,7 @@ namespace Fusion {
 		if (m_CreateInfo.Usage == EBufferUsage::Immutable)
 			return;
 
-		FUSION_RELEASE_COM(m_Buffer);
+		m_Buffer.Release();
 
 		m_CreateInfo.BufferSize = InNewSize;
 
@@ -54,7 +54,7 @@ namespace Fusion {
 		BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateBuffer(&BufferDesc, nullptr, &m_Buffer);
+		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateBuffer(&BufferDesc, nullptr, m_Buffer);
 	}
 
 	void D3D11VertexBuffer::SetData(void* InData, uint32_t InSize)

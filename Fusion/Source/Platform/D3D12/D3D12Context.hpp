@@ -31,11 +31,11 @@ namespace Fusion {
 		static void MessageCallback(D3D12_MESSAGE_CATEGORY InCategory, D3D12_MESSAGE_SEVERITY InSeverity, D3D12_MESSAGE_ID InID, LPCSTR InDescription, void* InContext);
 
 	private:
-		D3D12ComPtr<IDXGIFactory7> m_Factory;
-		D3D12ComPtr<ID3D12Device9> m_Device;
-		D3D12ComPtr<ID3D12InfoQueue1> m_InfoQueue;
+		D3DComPtr<IDXGIFactory7> m_Factory;
+		D3DComPtr<ID3D12Device9> m_Device;
+		D3DComPtr<ID3D12InfoQueue1> m_InfoQueue;
 
-		D3D12ComPtr<ID3D12CommandQueue> m_CommandQueue;
+		D3DComPtr<ID3D12CommandQueue> m_CommandQueue;
 
 		std::vector<Shared<D3D12CommandAllocator>> m_CommandAllocators;
 
@@ -43,7 +43,7 @@ namespace Fusion {
 		uint32_t m_FrameIndex = 0;
 		uint32_t m_FrameCount = 3;
 
-		D3D12ComPtr<ID3D12Fence1> m_FrameFence;
+		D3DComPtr<ID3D12Fence1> m_FrameFence;
 		HANDLE m_FrameEvent;
 		std::vector<uint64_t> m_FrameValues;
 

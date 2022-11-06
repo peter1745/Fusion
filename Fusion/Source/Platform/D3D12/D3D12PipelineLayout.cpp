@@ -151,8 +151,8 @@ namespace Fusion {
 		RootSignatureDesc.Desc_1_1.pStaticSamplers = nullptr;
 		RootSignatureDesc.Desc_1_1.Flags = EPipelineLayoutFlagsToD3D12RootSignatureFlags(InCreateInfo.Flags);
 
-		D3D12ComPtr<ID3D10Blob> Blob;
-		D3D12ComPtr<ID3D10Blob> Error;
+		D3DComPtr<ID3D10Blob> Blob;
+		D3DComPtr<ID3D10Blob> Error;
 		if (FAILED(D3D12SerializeVersionedRootSignature(&RootSignatureDesc, Blob, Error)))
 			return;
 

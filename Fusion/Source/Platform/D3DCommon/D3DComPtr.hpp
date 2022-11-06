@@ -22,34 +22,34 @@ namespace Fusion {
 							ComQueryableFrom<T, U>;
 
 	template<ComInterface T>
-	class D3D12ComPtr
+	class D3DComPtr
 	{
 	public:
 		static constexpr GUID UUID = __uuidof(T);
 
 	public:
-		D3D12ComPtr() = default;
+		D3DComPtr() = default;
 
-		D3D12ComPtr(const D3D12ComPtr& InOther)
+		D3DComPtr(const D3DComPtr& InOther)
 			: m_Ptr(InOther.m_Ptr)
 		{
 			AddRef();
 		}
 
-		D3D12ComPtr(D3D12ComPtr&& InOther) noexcept
+		D3DComPtr(D3DComPtr&& InOther) noexcept
 			: m_Ptr(InOther.m_Ptr)
 		{
 			InOther.m_Ptr = nullptr;
 		}
 
 		template<ComCastableTo<T> U>
-		D3D12ComPtr(D3D12ComPtr<U>& InOther)
+		D3DComPtr(D3DComPtr<U>& InOther)
 		{
 			if (InOther.IsValid())
 				InOther->QueryInterface(&m_Ptr);
 		}
 
-		D3D12ComPtr& operator=(const D3D12ComPtr& InOther)
+		D3DComPtr& operator=(const D3DComPtr& InOther)
 		{
 			Release();
 			m_Ptr = InOther.m_Ptr;
@@ -57,7 +57,7 @@ namespace Fusion {
 			return *this;
 		}
 
-		D3D12ComPtr& operator=(D3D12ComPtr&& InOther) noexcept
+		D3DComPtr& operator=(D3DComPtr&& InOther) noexcept
 		{
 			Release();
 			m_Ptr = InOther.m_Ptr;
@@ -66,7 +66,7 @@ namespace Fusion {
 		}
 
 		template<ComCastableTo<T> U>
-		D3D12ComPtr& operator=(D3D12ComPtr<U>& InOther)
+		D3DComPtr& operator=(D3DComPtr<U>& InOther)
 		{
 			Release();
 			if (InOther.IsValid())
@@ -74,7 +74,7 @@ namespace Fusion {
 			return *this;
 		}
 
-		~D3D12ComPtr()
+		~D3DComPtr()
 		{
 			Release();
 		}

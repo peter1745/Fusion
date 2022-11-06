@@ -7,22 +7,6 @@
 
 namespace Fusion {
 
-	static DXGI_FORMAT ShaderDataTypeToDXGIFormat(ShaderDataType InDataType)
-	{
-		switch (InDataType)
-		{
-		case ShaderDataType::Float: return DXGI_FORMAT_R32_FLOAT;
-		case ShaderDataType::Float2: return DXGI_FORMAT_R32G32_FLOAT;
-		case ShaderDataType::Float3: return DXGI_FORMAT_R32G32B32_FLOAT;
-		case ShaderDataType::Float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
-		case ShaderDataType::Mat3x3: return DXGI_FORMAT_UNKNOWN;
-		case ShaderDataType::Mat4x4: return DXGI_FORMAT_UNKNOWN;
-		}
-
-		FUSION_CORE_VERIFY(false, "Unsupported data type!");
-		return DXGI_FORMAT_UNKNOWN;
-	}
-
 	D3D11Shader::D3D11Shader(const ShaderSpecification& InSpecification)
 		: m_Specification(InSpecification)
 	{
@@ -31,9 +15,6 @@ namespace Fusion {
 
 	D3D11Shader::~D3D11Shader()
 	{
-		FUSION_RELEASE_COM(m_InputLayout);
-		FUSION_RELEASE_COM(m_PixelShader);
-		FUSION_RELEASE_COM(m_VertexShader);
 	}
 
 	void D3D11Shader::Bind()
@@ -55,7 +36,7 @@ namespace Fusion {
 
 		Shared<D3D11UniformBuffer> D3DBuffer = InBuffer.As<D3D11UniformBuffer>();
 
-		if (D3DBuffer->GetBuffer() == nullptr)
+		if (!D3DBuffer->GetBuffer().IsValid())
 			return;
 
 		ID3D11DeviceContext* Context = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
@@ -80,43 +61,36 @@ namespace Fusion {
 
 	void D3D11Shader::CompileShader()
 	{
-		ID3DBlob* VertexByteCode;
-		if (!CompileFromFile(EShaderType::Vertex, &VertexByteCode))
+		if (!CompileFromFile(EShaderType::Vertex, m_VertexByteCode))
 			return;
 
-		ID3DBlob* PixelByteCode;
-		if (!CompileFromFile(EShaderType::Pixel, &PixelByteCode))
+		if (!CompileFromFile(EShaderType::Pixel, m_PixelByteCode))
 		{
-			FUSION_RELEASE_COM(VertexByteCode);
+			m_VertexByteCode->Release();
 			return;
 		}
 
 		ID3D11Device* Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
-		HRESULT Result = Device->CreateVertexShader(VertexByteCode->GetBufferPointer(), VertexByteCode->GetBufferSize(), nullptr, &m_VertexShader);
+		HRESULT Result = Device->CreateVertexShader(m_VertexByteCode->GetBufferPointer(), m_VertexByteCode->GetBufferSize(), nullptr, m_VertexShader);
 
 		if (FAILED(Result))
 		{
 			FUSION_CORE_ERROR("Failed to create D3D11 Vertex Shader!");
-			FUSION_RELEASE_COM(VertexByteCode);
-			FUSION_RELEASE_COM(PixelByteCode);
+			m_VertexByteCode->Release();
+			m_PixelByteCode->Release();
 			return;
 		}
 
-		Result = Device->CreatePixelShader(PixelByteCode->GetBufferPointer(), PixelByteCode->GetBufferSize(), nullptr, &m_PixelShader);
+		Result = Device->CreatePixelShader(m_PixelByteCode->GetBufferPointer(), m_PixelByteCode->GetBufferSize(), nullptr, m_PixelShader);
 
 		if (FAILED(Result))
 		{
 			FUSION_CORE_ERROR("Failed to create D3D11 Pixel Shader!");
-			FUSION_RELEASE_COM(m_VertexShader);
-			FUSION_RELEASE_COM(VertexByteCode);
-			FUSION_RELEASE_COM(PixelByteCode);
+			m_VertexShader.Release();
+			m_VertexByteCode->Release();
+			m_PixelByteCode->Release();
 			return;
 		}
-
-		CreateInputLayout(VertexByteCode);
-
-		FUSION_RELEASE_COM(VertexByteCode);
-		FUSION_RELEASE_COM(PixelByteCode);
 	}
 
 	bool D3D11Shader::CompileFromFile(EShaderType InType, ID3DBlob** OutByteCode)
@@ -141,32 +115,6 @@ namespace Fusion {
 		return true;
 	}
 
-	void D3D11Shader::CreateInputLayout(ID3DBlob* InVertexByteCode)
-	{
-		const auto& InputAttributes = m_Specification.InputLayout.GetAttributes();
-		std::vector<D3D11_INPUT_ELEMENT_DESC> InputElements(InputAttributes.size());
-
-		for (size_t Idx = 0; Idx < InputAttributes.size(); Idx++)
-		{
-			const auto& Attrib = InputAttributes[Idx];
-			auto& Elem = InputElements[Idx];
-
-			Elem.SemanticName = Attrib.Name;
-			Elem.SemanticIndex = 0;
-			Elem.Format = ShaderDataTypeToDXGIFormat(Attrib.Type);
-			Elem.InputSlot = 0;
-			Elem.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-			Elem.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-			Elem.InstanceDataStepRate = 0;
-		}
-
-		ID3D11Device* Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
-		Device->CreateInputLayout(
-			InputElements.data(), UINT(InputElements.size()),
-			InVertexByteCode->GetBufferPointer(), InVertexByteCode->GetBufferSize(),
-			&m_InputLayout);
-	}
-
 	void D3D11Shader::LogCompilerError(const char* InShaderType, ID3DBlob* InErrorMessage) const
 	{
 		FUSION_CORE_ERROR("Failed to compile {} shader in file {}.", InShaderType, m_Specification.FilePath.string());
@@ -175,7 +123,7 @@ namespace Fusion {
 		{
 			char* ErrorString = reinterpret_cast<char*>(InErrorMessage->GetBufferPointer());
 			FUSION_CORE_ERROR("\tError Message: {}", ErrorString);
-			FUSION_RELEASE_COM(InErrorMessage);
+			InErrorMessage->Release();
 		}
 		else
 		{

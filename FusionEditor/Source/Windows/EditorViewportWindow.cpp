@@ -35,9 +35,6 @@ namespace FusionEditor {
 			Fusion::Byte* BufferStart = m_StagingBuffer->Map();
 			memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
 			m_StagingBuffer->Unmap(BufferStart);
-
-			FUSION_CORE_INFO("Clicked: {}", uint64_t(SelectedActorID));
-
 			m_ShouldCopyFromBuffer = false;
 		}
 
@@ -123,7 +120,7 @@ namespace FusionEditor {
 		MousePos.x -= GetMinBound().x;
 		MousePos.y -= GetMinBound().y;
 
-		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left) && m_StagingBuffer)
 		{
 			Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
 			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);

@@ -19,14 +19,17 @@ namespace FusionEditor {
 		m_DescriptorHeap = static_cast<Fusion::D3D12DescriptorHeap*>(InDescriptorHeap);
 		auto HeapRef = m_DescriptorHeap->Reserve();
 
+		D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle = { m_DescriptorHeap->GetCPUDescriptorHandle(HeapRef) };
+		D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle = { m_DescriptorHeap->GetGPUDescriptorHandle(HeapRef) };
+
 		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(InWindow->GetWindowHandle()), true);
 		ImGui_ImplDX12_Init(
 			D3DContext->GetDevice().Get(),
 			D3DContext->GetFramesInFlight(),
 			DXGI_FORMAT_R8G8B8A8_UNORM,
 			m_DescriptorHeap->GetHeap(),
-			m_DescriptorHeap->GetCPUDescriptorHandle(HeapRef.Index),
-			m_DescriptorHeap->GetGPUDescriptorHandle(HeapRef.Index)
+			CPUHandle,
+			GPUHandle
 		);
 	}
 

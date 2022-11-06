@@ -17,12 +17,12 @@ namespace Fusion {
 	{
 	}
 
-	bool D3D12Shader::CompileFromFile(EShaderType InType, D3D12ComPtr<ID3DBlob>& OutByteCode) const
+	bool D3D12Shader::CompileFromFile(EShaderType InType, D3DComPtr<ID3DBlob>& OutByteCode) const
 	{
 		const char* EntryPoint = InType == EShaderType::Vertex ? "VertexMain" : "PixelMain";
 		const char* TargetVersion = InType == EShaderType::Vertex ? "vs_5_1" : "ps_5_1";
 
-		D3D12ComPtr<ID3DBlob> ErrorMessageData;
+		D3DComPtr<ID3DBlob> ErrorMessageData;
 		HRESULT Result = D3DCompileFromFile(
 			m_CreateInfo.FilePath.c_str(),
 			nullptr, nullptr,
@@ -39,7 +39,7 @@ namespace Fusion {
 		return true;
 	}
 
-	void D3D12Shader::LogCompilerError(const char* InShaderType, D3D12ComPtr<ID3DBlob> InErrorMessage) const
+	void D3D12Shader::LogCompilerError(const char* InShaderType, D3DComPtr<ID3DBlob> InErrorMessage) const
 	{
 		FUSION_CORE_ERROR("Failed to compile {} shader in file {}.", InShaderType, m_CreateInfo.FilePath.string());
 

@@ -16,7 +16,7 @@ namespace Fusion {
 		BufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		BufferDesc.CPUAccessFlags = 0;
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, nullptr, &m_Buffer);
+		Context->GetDevice()->CreateBuffer(&BufferDesc, nullptr, m_Buffer);
 	}
 
 	D3D11IndexBuffer::D3D11IndexBuffer(void* InData, uint32_t InSize)
@@ -37,15 +37,14 @@ namespace Fusion {
 		InitialData.SysMemPitch = 0;
 		InitialData.SysMemSlicePitch = 0;
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, &m_Buffer);
+		Context->GetDevice()->CreateBuffer(&BufferDesc, &InitialData, m_Buffer);
 	}
 
 	D3D11IndexBuffer::~D3D11IndexBuffer()
 	{
-		FUSION_RELEASE_COM(m_Buffer);
 	}
 
-	void D3D11IndexBuffer::Bind() const
+	void D3D11IndexBuffer::Bind()
 	{
 		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->IASetIndexBuffer(m_Buffer, DXGI_FORMAT_R32_UINT, 0);
 	}

@@ -13,7 +13,7 @@ namespace Fusion {
 		~D3D12SwapChain();
 
 		virtual void Bind() override;
-		virtual void Clear() const override;
+		virtual void Clear() override;
 		virtual void Present() override;
 		virtual void Unbind() override;
 
@@ -22,10 +22,10 @@ namespace Fusion {
 	private:
 		SwapChainInfo m_CreateInfo;
 
-		D3D12ComPtr<IDXGISwapChain4> m_SwapChain;
-		std::vector<D3D12ComPtr<ID3D12Resource>> m_Images;
+		D3DComPtr<IDXGISwapChain4> m_SwapChain;
+		std::vector<D3DComPtr<ID3D12Resource>> m_Images;
 
-		D3D12ComPtr<ID3D12DescriptorHeap> m_RTVDescriptorHeap;
+		D3DComPtr<ID3D12DescriptorHeap> m_RTVDescriptorHeap;
 		D3D12_CPU_DESCRIPTOR_HANDLE m_RTVHeapStart;
 		uint32_t m_RTVHeapIncrement = 0;
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Texture.hpp"
-#include "VertexBufferLayout.hpp"
 #include "Fusion/Renderer/UniformBuffer.hpp"
 
 #include <filesystem>
@@ -12,9 +11,6 @@ namespace Fusion {
 	struct ShaderSpecification
 	{
 		std::filesystem::path FilePath;
-
-		// TODO(Peter): Rename to ShaderInputLayout
-		VertexBufferLayout InputLayout;
 	};
 
 	enum class EShaderType

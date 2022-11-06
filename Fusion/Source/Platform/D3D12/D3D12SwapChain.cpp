@@ -27,7 +27,7 @@ namespace Fusion {
 		SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
 		HWND WindowHandle = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle()));
-		D3D12ComPtr<IDXGISwapChain1> SwapChain;
+		D3DComPtr<IDXGISwapChain1> SwapChain;
 		Context->GetDXGIFactory()->CreateSwapChainForHwnd(Context->GetCommandQueue(), WindowHandle, &SwapChainDesc, nullptr, nullptr, SwapChain);
 		Context->GetDXGIFactory()->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER);
 
@@ -99,7 +99,7 @@ namespace Fusion {
 		CmdList->OMSetRenderTargets(1, &CurrentImageHandle, false, nullptr);
 	}
 
-	void D3D12SwapChain::Clear() const
+	void D3D12SwapChain::Clear()
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
@@ -146,7 +146,6 @@ namespace Fusion {
 		auto Context = GraphicsContext::Get<D3D12Context>();
 
 		m_Images.clear();
-		//m_RTVDescriptorHeap.Release();
 
 		Context->WaitForGPU();
 
@@ -155,16 +154,6 @@ namespace Fusion {
 		DXGI_SWAP_CHAIN_DESC1 SwapChainDesc = {};
 		m_SwapChain->GetDesc1(&SwapChainDesc);
 		m_Images.resize(SwapChainDesc.BufferCount);
-
-		/*D3D12_DESCRIPTOR_HEAP_DESC RTVDescriptorHeapDesc = {};
-		RTVDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		RTVDescriptorHeapDesc.NumDescriptors = SwapChainDesc.BufferCount;
-		RTVDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		RTVDescriptorHeapDesc.NodeMask = 0;
-		Context->GetDevice()->CreateDescriptorHeap(&RTVDescriptorHeapDesc, m_RTVDescriptorHeap, m_RTVDescriptorHeap);*/
-
-		/*m_RTVHeapStart = m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		m_RTVHeapIncrement = Context->GetDevice()->GetDescriptorHandleIncrementSize(RTVDescriptorHeapDesc.Type);*/
 
 		auto Handle = m_RTVHeapStart;
 		for (uint32_t Idx = 0; Idx < SwapChainDesc.BufferCount; Idx++)

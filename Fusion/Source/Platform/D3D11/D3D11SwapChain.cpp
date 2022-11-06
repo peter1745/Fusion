@@ -37,51 +37,49 @@ namespace Fusion {
 		SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		SwapChainDesc.Windowed = true;
 
-		IDXGIDevice* DXGIDevice = NULL;
-		IDXGIAdapter* DXGIAdapter = NULL;
-		IDXGIFactory* DXGIFactory = NULL;
-		D3DContext->GetDevice()->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&DXGIDevice));
-		DXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&DXGIAdapter));
-		DXGIAdapter->GetParent(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&DXGIFactory));
-		DXGIFactory->CreateSwapChain(D3DContext->GetDevice(), &SwapChainDesc, &m_SwapChain);
+		D3DComPtr<IDXGIDevice> DXGIDevice;
+		D3DComPtr<IDXGIAdapter> DXGIAdapter;
+		D3DComPtr<IDXGIFactory> DXGIFactory;
+		D3DContext->GetDevice()->QueryInterface(DXGIDevice, DXGIDevice);
+		DXGIDevice->GetParent(DXGIAdapter, DXGIAdapter);
+		DXGIAdapter->GetParent(DXGIFactory, DXGIFactory);
+		DXGIFactory->CreateSwapChain(D3DContext->GetDevice(), &SwapChainDesc, m_SwapChain);
 
-		FUSION_RELEASE_COM(DXGIFactory);
-		FUSION_RELEASE_COM(DXGIAdapter);
-		FUSION_RELEASE_COM(DXGIDevice);
+		DXGIFactory.Release();
+		DXGIAdapter.Release();
+		DXGIDevice.Release();
 
 		Invalidate();
 	}
 
 	D3D11SwapChain::~D3D11SwapChain()
 	{
-		m_SwapChain->SetFullscreenState(FALSE, NULL);
-
-		FUSION_RELEASE_COM(m_DepthStencilView);
-		FUSION_RELEASE_COM(m_DepthStencilBuffer);
-		FUSION_RELEASE_COM(m_RenderTargetView);
-		FUSION_RELEASE_COM(m_SwapChain);
+		m_SwapChain->SetFullscreenState(false, nullptr);
 	}
 
 	void D3D11SwapChain::Bind()
 	{
 		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
+		DeviceContext->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
 		DeviceContext->RSSetViewports(1, &m_Viewport);
 	}
 
-	void D3D11SwapChain::Clear() const
+	void D3D11SwapChain::Clear()
 	{
 		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
 
 		DeviceContext->ClearRenderTargetView(m_RenderTargetView, glm::value_ptr(m_CreateInfo.RenderTargetClearColor));
-
-		if (m_DepthStencilView)
-			DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
 	void D3D11SwapChain::Present()
 	{
 		m_SwapChain->Present(1, 0);
+
+		const auto& Window = Application::Get().GetWindow();
+		if (Window->GetWidth() != m_CreateInfo.Width || Window->GetHeight() != m_CreateInfo.Height)
+		{
+			Resize(Window->GetWidth(), Window->GetHeight());
+		}
 	}
 
 	void D3D11SwapChain::Resize(uint32_t InWidth, uint32_t InHeight)
@@ -102,37 +100,16 @@ namespace Fusion {
 		ID3D11RenderTargetView* NullViews[] = { nullptr };
 		D3DContext->GetDeviceContext()->OMSetRenderTargets(1, NullViews, nullptr);
 
-		FUSION_RELEASE_COM(m_DepthStencilView);
-		FUSION_RELEASE_COM(m_DepthStencilBuffer);
-		FUSION_RELEASE_COM(m_RenderTargetView);
+		m_RenderTargetView.Release();
 
 		m_SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
-		ID3D11Texture2D* RenderTargetTexture;
-		m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&RenderTargetTexture));
-		D3DContext->GetDevice()->CreateRenderTargetView(RenderTargetTexture, nullptr, &m_RenderTargetView);
-		FUSION_RELEASE_COM(RenderTargetTexture);
+		D3DComPtr<ID3D11Texture2D> RenderTargetTexture;
+		m_SwapChain->GetBuffer(0, RenderTargetTexture, RenderTargetTexture);
+		D3DContext->GetDevice()->CreateRenderTargetView(RenderTargetTexture, nullptr, m_RenderTargetView);
+		RenderTargetTexture.Release();
 
-		if (m_CreateInfo.HasDepthBuffer)
-		{
-			D3D11_TEXTURE2D_DESC DepthStencilDesc;
-			ZeroMemory(&DepthStencilDesc, sizeof(D3D11_TEXTURE2D_DESC));
-			DepthStencilDesc.Width = m_CreateInfo.Width;
-			DepthStencilDesc.Height = m_CreateInfo.Height;
-			DepthStencilDesc.MipLevels = 1;
-			DepthStencilDesc.ArraySize = 1;
-			DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-			DepthStencilDesc.SampleDesc.Count = 1;
-			DepthStencilDesc.SampleDesc.Quality = 0;
-			DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-			DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			DepthStencilDesc.CPUAccessFlags = 0;
-			DepthStencilDesc.MiscFlags = 0;
-			D3DContext->GetDevice()->CreateTexture2D(&DepthStencilDesc, NULL, &m_DepthStencilBuffer);
-			D3DContext->GetDevice()->CreateDepthStencilView(m_DepthStencilBuffer, NULL, &m_DepthStencilView);
-		}
-
-		D3DContext->GetDeviceContext()->OMSetRenderTargets(1, &m_RenderTargetView, m_DepthStencilView);
+		D3DContext->GetDeviceContext()->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
 
 		// TODO(Peter): Rasterizer State should belong to a pipeline (allow states to be shared by multiple pipelines)
 		D3D11_RASTERIZER_DESC RasterizerDesc;

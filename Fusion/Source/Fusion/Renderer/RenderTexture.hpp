@@ -41,8 +41,6 @@ namespace Fusion {
 
 		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const = 0;
 
-		virtual uint64_t ReadPixel(uint32_t InAttachmentIdx, uint32_t InX, uint32_t InY) = 0;
-
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) = 0;
 
 		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const = 0;

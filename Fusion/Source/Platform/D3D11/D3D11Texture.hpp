@@ -2,6 +2,8 @@
 
 #include "Fusion/Renderer/Texture.hpp"
 
+#include "D3D11Common.hpp"
+
 namespace Fusion {
 
 	class D3D11Texture2D : public Texture2D
@@ -22,12 +24,9 @@ namespace Fusion {
 	private:
 		Texture2DInfo m_CreateInfo;
 
-		ID3D11Texture2D* m_TextureBuffer = nullptr;
-		ID3D11ShaderResourceView* m_ShaderResourceView = nullptr;
-		ID3D11SamplerState* m_SamplerState = nullptr;
-
-		// Only used for render target attachments
-		ID3D11RenderTargetView* m_RenderTargetView = nullptr;
+		D3DComPtr<ID3D11Texture2D> m_TextureBuffer;
+		D3DComPtr<ID3D11ShaderResourceView> m_ShaderResourceView;
+		D3DComPtr<ID3D11SamplerState> m_SamplerState;
 
 		D3D11_MAPPED_SUBRESOURCE m_MappedSubresource;
 	};

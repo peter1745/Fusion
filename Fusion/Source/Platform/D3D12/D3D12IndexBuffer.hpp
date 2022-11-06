@@ -12,7 +12,7 @@ namespace Fusion {
 		D3D12IndexBuffer(void* InData, uint32_t InSize);
 		~D3D12IndexBuffer();
 
-		virtual void Bind() const override;
+		virtual void Bind() override;
 		virtual uint32_t GetCount() const override { return m_Size / sizeof(uint32_t); }
 
 		const auto& GetBuffer() const { return m_Buffer; }

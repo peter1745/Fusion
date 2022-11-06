@@ -61,7 +61,7 @@ namespace Fusion {
 		DstLocation.pResource = m_Buffer;
 		DstLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		DstLocation.PlacedFootprint.Offset = 0;
-		DstLocation.PlacedFootprint.Footprint.Format = ImageFormatToDXGIFormat(ImageInfo.Format);
+		DstLocation.PlacedFootprint.Footprint.Format = EFormatToDXGIFormat(ImageInfo.Format);
 		DstLocation.PlacedFootprint.Footprint.Width = m_CreateInfo.Size / FormatSize;
 		DstLocation.PlacedFootprint.Footprint.Height = 1;
 		DstLocation.PlacedFootprint.Footprint.Depth = 1;

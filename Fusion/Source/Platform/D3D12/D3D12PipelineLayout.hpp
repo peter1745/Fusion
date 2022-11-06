@@ -17,7 +17,7 @@ namespace Fusion {
 
 	private:
 		PipelineLayoutInfo m_CreateInfo;
-		D3D12ComPtr<ID3D12RootSignature> m_RootSignature;
+		D3DComPtr<ID3D12RootSignature> m_RootSignature;
 	};
 
 }

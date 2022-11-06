@@ -8,7 +8,7 @@ namespace Fusion {
 	class D3D12CommandAllocator : public CommandAllocator
 	{
 	public:
-		D3D12CommandAllocator(D3D12ComPtr<ID3D12Device9> InDevice, const CommandAllocatorInfo& InCreateInfo);
+		D3D12CommandAllocator(D3DComPtr<ID3D12Device9> InDevice, const CommandAllocatorInfo& InCreateInfo);
 		D3D12CommandAllocator(const CommandAllocatorInfo& InCreateInfo);
 		~D3D12CommandAllocator();
 
@@ -26,12 +26,12 @@ namespace Fusion {
 		auto& GetNativeAllocator() { return m_Allocator; }
 
 	private:
-		CommandList* AllocateCommandList(D3D12ComPtr<ID3D12Device9> InDevice);
-		std::vector<CommandList*> AllocateCommandLists(D3D12ComPtr<ID3D12Device9> InDevice, size_t InCount);
+		CommandList* AllocateCommandList(D3DComPtr<ID3D12Device9> InDevice);
+		std::vector<CommandList*> AllocateCommandLists(D3DComPtr<ID3D12Device9> InDevice, size_t InCount);
 
 	private:
 		CommandAllocatorInfo m_CreateInfo;
-		D3D12ComPtr<ID3D12CommandAllocator> m_Allocator;
+		D3DComPtr<ID3D12CommandAllocator> m_Allocator;
 		std::vector<Unique<D3D12CommandList>> m_CommandLists;
 	};
 
