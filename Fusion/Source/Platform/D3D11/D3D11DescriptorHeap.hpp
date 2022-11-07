@@ -11,6 +11,7 @@ namespace Fusion {
 	public:
 		D3D11DescriptorHeap(const DescriptorHeapInfo& InCreateInfo);
 
+		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) override;
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
 		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
 

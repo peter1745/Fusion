@@ -10,6 +10,11 @@ namespace Fusion {
 	{
 	}
 
+	DescriptorHeapAllocation D3D11DescriptorHeap::AllocateShaderResourceView(const Shared<Texture2D>& InTexture)
+	{
+		return { this, 0 };
+	}
+
 	DescriptorHeapAllocation D3D11DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
 	{
 		auto& Device = GraphicsContext::Get<Fusion::D3D11Context>()->GetDevice();

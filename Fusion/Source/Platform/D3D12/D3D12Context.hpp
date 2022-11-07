@@ -4,8 +4,26 @@
 
 #include "D3D12Common.hpp"
 #include "D3D12CommandAllocator.hpp"
+#include "D3D12DescriptorHeap.hpp"
 
 namespace Fusion {
+
+	class CommandContextQueue
+	{
+	public:
+		typedef void(*CommandFunc)(void*, CommandList*);
+
+		CommandContextQueue();
+		~CommandContextQueue();
+
+		void* AllocateCommand(CommandFunc InFunc, uint32_t InSize);
+		void Execute(CommandList* InCmdList);
+
+	private:
+		uint8_t* m_CommandBuffer;
+		uint8_t* m_CommandBufferPtr;
+		uint32_t m_CommandCount = 0;
+	};
 
 	class D3D12Context : public GraphicsContext
 	{
@@ -19,6 +37,26 @@ namespace Fusion {
 
 		virtual void NextFrame() override;
 		virtual void WaitForGPU() override;
+
+		virtual Shared<DescriptorHeap> GetDescriptorHeap(EDescriptorHeapType InType) const override
+		{
+			FUSION_CORE_VERIFY(m_DescriptorHeaps.find(InType) != m_DescriptorHeaps.end());
+			return m_DescriptorHeaps.at(InType);
+		}
+
+		template<typename TFunc>
+		void SubmitToCommandContext(TFunc&& InFunc)
+		{
+			auto Command = [](void* InMemory, CommandList* InCmdList)
+			{
+				auto FuncPtr = reinterpret_cast<TFunc*>(InMemory);
+				(*FuncPtr)(InCmdList);
+				FuncPtr->~TFunc();
+			};
+
+			auto Storage = m_CommandContextQueue.AllocateCommand(Command, sizeof(InFunc));
+			new (Storage) TFunc(std::forward<TFunc>(InFunc));
+		}
 
 		auto& GetDXGIFactory() { return m_Factory; }
 		auto& GetDevice() { return m_Device; }
@@ -39,7 +77,8 @@ namespace Fusion {
 
 		std::vector<Shared<D3D12CommandAllocator>> m_CommandAllocators;
 
-		uint32_t m_FramesBeforeWait = 0;
+		std::unordered_map<EDescriptorHeapType, Shared<D3D12DescriptorHeap>> m_DescriptorHeaps{};
+
 		uint32_t m_FrameIndex = 0;
 		uint32_t m_FrameCount = 3;
 
@@ -48,6 +87,8 @@ namespace Fusion {
 		std::vector<uint64_t> m_FrameValues;
 
 		DWORD m_MessageCallbackCookie;
+
+		CommandContextQueue m_CommandContextQueue;
 	};
 
 }

@@ -1,55 +1,63 @@
 #include "FusionPCH.hpp"
 #include "WorldRenderer.hpp"
-#include "Renderer.hpp"
 #include "Fusion/Core/Application.hpp"
 
 #include "Fusion/World/Components/AllComponents.hpp"
-
-#include <Fusion/Renderer/GraphicsPipeline.hpp>
+#include "Fusion/IO/TextureLoader.hpp"
 
 namespace Fusion {
 
-	Unique<PipelineLayout> Layout;
-	Unique<GraphicsPipeline> Pipeline;
-	Shared<VertexBuffer> VertexBuf;
+	Shared<Texture2D> Texture;
 
-	struct Vertex1
-	{
-		glm::vec4 Position;
-		glm::vec3 Normal;
-		glm::vec2 TextureCoordinate;
-	};
-
-	static Vertex1 s_Vertices[] = {
-		{ { 0.0f, 0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-		{ { 0.5f, -0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-		{ { -0.5f, -0.5f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }
-	};
-
-	WorldRenderer::WorldRenderer(DescriptorHeap* InDescriptorHeap, const Shared<World>& InWorld)
+	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
 		: m_World(InWorld)
 	{
 		PipelineLayoutInfo LayoutInfo = {};
 		LayoutInfo.Flags |= PipelineLayoutFlags::AllowInputAssemblerInputLayout;
 
-		PipelineLayoutDescriptorRange ConstantBufferRange = {};
-		ConstantBufferRange.Type = EPipelineLayoutDescriptorRangeType::ConstantBufferView;
-		ConstantBufferRange.NumDescriptors = 1;
-		ConstantBufferRange.Binding = 0;
-		ConstantBufferRange.Space = 0;
-		ConstantBufferRange.Offset = 0;
-		ConstantBufferRange.Flags = DescriptorRangeFlags::StaticData;
+		PipelineLayoutParameter Param = {};
+		Param.Type = EPipelineParameterType::ConstantBufferView;
+		Param.Visibility = EShaderVisibility::All;
+		Param.Value = PipelineLayoutDescriptor{ 0, 0 };
+		LayoutInfo.Parameters.push_back(Param);
 
-		PipelineLayoutParameter ConstantBufferParam = {};
-		ConstantBufferParam.Type = EPipelineParameterType::ConstantBufferView;
-		ConstantBufferParam.Visibility = EShaderVisibility::All;
-		ConstantBufferParam.Value = PipelineLayoutDescriptor{ 0, 0 };
-		LayoutInfo.Parameters.push_back(ConstantBufferParam);
+		PipelineLayoutDescriptorTable Table = {};
+		PipelineLayoutDescriptorRange Descriptor1 = {};
+		Descriptor1.Type = EPipelineLayoutDescriptorRangeType::ShaderResourceView;
+		Descriptor1.NumDescriptors = 1;
+		Descriptor1.Binding = 0;
+		Descriptor1.Space = 0;
+		Descriptor1.Offset = 0;
+		Descriptor1.Flags = DescriptorRangeFlags::StaticData;
+		Table.Ranges.push_back(Descriptor1);
 
-		Layout = PipelineLayout::Create(LayoutInfo);
+		PipelineLayoutParameter T = {};
+		T.Type = EPipelineParameterType::DescriptorTable;
+		T.Visibility = EShaderVisibility::Pixel;
+		T.Value = Table;
+		LayoutInfo.Parameters.push_back(T);
+
+		/*PipelineLayoutParameter Param2 = {};
+		Param2.Type = EPipelineParameterType::ShaderResourceView;
+		Param2.Visibility = EShaderVisibility::Pixel;
+		Param2.Value = PipelineLayoutDescriptor{ 1, 0 };
+		LayoutInfo.Parameters.push_back(Param2);*/
+
+		PipelineStaticSampler Sampler = {};
+		Sampler.MinFilter = EFilterMode::Nearest;
+		Sampler.MagFilter = EFilterMode::Nearest;
+		Sampler.AddressModeU = EImageAddressMode::Clamp;
+		Sampler.AddressModeV = EImageAddressMode::Clamp;
+		Sampler.AddressModeW = EImageAddressMode::Clamp;
+		Sampler.Binding = 0;
+		Sampler.Register = 0;
+		Sampler.Visibility = EShaderVisibility::Pixel;
+		LayoutInfo.StaticSamplers = { Sampler };
+
+		m_PipelineLayout = PipelineLayout::Create(LayoutInfo);
 
 		GraphicsPipelineInfo PipelineInfo = {};
-		PipelineInfo.Layout = Layout.get();
+		PipelineInfo.Layout = m_PipelineLayout.get();
 		PipelineInfo.Inputs = {
 			{ "POSITION", 0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
 			{ "NORMAL",   0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
@@ -63,19 +71,23 @@ namespace Fusion {
 		PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
 		PipelineInfo.RenderTargetFormats[1] = EFormat::RG32UInt;
 		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
-		Pipeline = GraphicsPipeline::Create(PipelineInfo);
+		m_Pipeline = GraphicsPipeline::Create(PipelineInfo);
 
-		VertexBufferInfo VertexBufferCreateInfo = {};
-		VertexBufferCreateInfo.BufferSize = 3 * sizeof(Vertex1);
-		VertexBufferCreateInfo.Data = s_Vertices;
-		VertexBufferCreateInfo.Stride = sizeof(Vertex1);
-		VertexBuf = VertexBuffer::Create(VertexBufferCreateInfo);
+		BufferInfo TransformDataBufferInfo = {};
+		TransformDataBufferInfo.HeapType = EHeapType::Default;
+		TransformDataBufferInfo.State = BufferStates::Constant;
+		TransformDataBufferInfo.Size = sizeof(TransformData);
+		TransformDataBufferInfo.Alignment = 16;
+		m_TransformBuffer = Buffer::Create(TransformDataBufferInfo);
 
-		ConstantBufferInfo TransformBufferInfo = {};
-		TransformBufferInfo.Size = sizeof(TransformData);
-		TransformBufferInfo.Usage = EBufferUsage::Dynamic;
-		TransformBufferInfo.BindPoint = EShaderBindPoint::Both;
-		m_TransformBuffer = UniformBuffer::Create(InDescriptorHeap, TransformBufferInfo);
+		BufferInfo TransformUploadBufferInfo = {};
+		TransformUploadBufferInfo.HeapType = EHeapType::Upload;
+		TransformUploadBufferInfo.State = BufferStates::Constant;
+		TransformUploadBufferInfo.Size = sizeof(TransformData);
+		TransformUploadBufferInfo.Alignment = 16;
+		m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
+
+		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
@@ -87,7 +99,7 @@ namespace Fusion {
 	void WorldRenderer::Render()
 	{
 		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
-		Pipeline->Bind(CmdList);
+		m_Pipeline->Bind(CmdList);
 
 		const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
 
@@ -105,14 +117,20 @@ namespace Fusion {
 				* glm::toMat4(TransformComp->GetRotation())
 				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformData.ActorID = Actor->GetActorID();
-			m_TransformBuffer->SetData(&m_TransformData);
-			//MeshComp->Texture->Bind(0);
+			m_TransformBuffer->SetData(CmdList, &m_TransformData, m_TransformUploadBuffer);
+			CmdList->SetConstantBuffer(m_Pipeline.get(), 0, m_TransformBuffer);
 
-			CmdList->SetConstantBuffer(Pipeline.get(), 0, m_TransformBuffer);
+			VertexBufferView View = {};
+			View.VertexBuffer = ActorMesh->GetMesh()->GetVertexBuffer();
+			View.VertexStride = sizeof(Vertex);
+			CmdList->SetVertexBuffer(View);
 
-			ActorMesh->GetMesh()->GetVertexBuffer()->Bind();
+			Texture->Bind(1);
 
-			CmdList->DrawIndexed(ActorMesh->GetMesh()->GetIndexBuffer());
+			IndexBufferView IndexView = {};
+			IndexView.IndexBuffer = ActorMesh->GetMesh()->GetIndexBuffer();
+			IndexView.IndexFormat = EFormat::R32UInt;
+			CmdList->DrawIndexed(IndexView);
 		}
 	}
 

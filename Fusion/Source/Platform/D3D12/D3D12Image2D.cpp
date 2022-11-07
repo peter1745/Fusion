@@ -7,6 +7,7 @@ namespace Fusion {
 	D3D12Image2D::D3D12Image2D(const Image2DInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
+		m_State = InCreateInfo.InitialState;
 		Invalidate();
 	}
 

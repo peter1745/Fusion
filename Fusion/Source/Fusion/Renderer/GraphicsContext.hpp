@@ -3,7 +3,9 @@
 #include "Fusion/Memory/Shared.hpp"
 #include "Fusion/Core/Window.hpp"
 
+#include "DescriptorHeap.hpp"
 #include "CommandAllocator.hpp"
+#include "Buffer.hpp"
 
 namespace Fusion {
 
@@ -14,11 +16,12 @@ namespace Fusion {
 
 		virtual Shared<CommandAllocator> GetCommandAllocator() const = 0;
 		virtual CommandList* GetCurrentCommandList() const = 0;
-
 		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) = 0;
 
 		virtual void NextFrame() = 0;
 		virtual void WaitForGPU() = 0;
+
+		virtual Shared<DescriptorHeap> GetDescriptorHeap(EDescriptorHeapType InType) const = 0;
 
 		virtual uint32_t GetFramesInFlight() const = 0;
 		virtual uint32_t GetCurrentFrameIndex() const = 0;

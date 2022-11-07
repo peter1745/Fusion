@@ -2,15 +2,15 @@
 
 #include "Fusion/Renderer/Buffer.hpp"
 
-#include "D3D12Common.hpp"
+#include "D3D11Common.hpp"
 
 namespace Fusion {
 
-	class D3D12Buffer : public Buffer
+	class D3D11Buffer : public Buffer
 	{
 	public:
-		D3D12Buffer(const BufferInfo& InCreateInfo);
-		~D3D12Buffer();
+		D3D11Buffer(const BufferInfo& InCreateInfo);
+		~D3D11Buffer();
 
 		virtual Byte* Map() override;
 		virtual void Unmap(Byte* InPtr) override;
@@ -20,18 +20,14 @@ namespace Fusion {
 		virtual void SetData(CommandList* InCmdList, const void* InData, const Shared<Buffer>& InUploadBuffer) override;
 
 		virtual const BufferInfo& GetInfo() const override { return m_CreateInfo; }
-
 		virtual uint64_t GetSize() const override { return m_CreateInfo.Size; }
 
-		auto GetGPUBufferLocation() { return m_Buffer->GetGPUVirtualAddress(); }
-
-		auto& GetBuffer() { return m_Buffer; }
-		const auto& GetBuffer() const { return m_Buffer; }
+		auto& GetResource() { return m_Buffer; }
+		const auto& GetResource() const { return m_Buffer; }
 
 	private:
 		BufferInfo m_CreateInfo;
-		D3DComPtr<ID3D12Resource2> m_Buffer;
-		Shared<D3D12Buffer> m_UploadBuffer = nullptr;
+		D3DComPtr<ID3D11Buffer> m_Buffer;
 	};
 
 }

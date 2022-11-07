@@ -11,7 +11,7 @@ namespace FusionEditor {
 	class ViewportWindowBase : public EditorWindow
 	{
 	public:
-		ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap);
+		ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld);
 
 		virtual void OnRender() override;
 		virtual void OnUpdate(float InDeltaTime) override;
@@ -32,7 +32,6 @@ namespace FusionEditor {
 
 		bool m_IsHovered = false;
 
-		Fusion::DescriptorHeap* m_DescriptorHeap = nullptr;
 		std::vector<Fusion::DescriptorHeapAllocation> m_RTVAllocations;
 		std::vector<Fusion::DescriptorHeapAllocation> m_ColorPickingRTVAllocations;
 

@@ -23,10 +23,9 @@ namespace Fusion {
 		CreateInfo.Width = static_cast<uint32_t>(ImageWidth);
 		CreateInfo.Height = static_cast<uint32_t>(ImageHeight);
 		CreateInfo.Channels = static_cast<uint32_t>(ImageChannels);
+		CreateInfo.Format = EFormat::RGBA8Unorm;
 
-		Shared<Texture2D> Result = Texture2D::Create(CreateInfo);
-		stbi_image_free(Data);
-		return Result;
+		return Texture2D::Create(CreateInfo);
 	}
 
 }

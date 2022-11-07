@@ -2,6 +2,7 @@
 
 #include "Fusion/Core/Core.hpp"
 #include "RenderTexture.hpp"
+#include "Texture.hpp"
 
 namespace Fusion {
 
@@ -22,14 +23,15 @@ namespace Fusion {
 	class DescriptorHeap;
 	struct DescriptorHeapAllocation
 	{
-		DescriptorHeap* Heap;
-		uint32_t Index;
+		DescriptorHeap* Heap = nullptr;
+		uint32_t Index = 0;
 		EAllocationType Type;
 	};
 
-	class DescriptorHeap
+	class DescriptorHeap : public SharedObject
 	{
 	public:
+		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) = 0;
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) = 0;
 		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) = 0;
 
@@ -42,7 +44,7 @@ namespace Fusion {
 		virtual DescriptorHeapAllocation Reserve() = 0;
 
 	public:
-		static Unique<DescriptorHeap> Create(const DescriptorHeapInfo& InCreateInfo);
+		static Shared<DescriptorHeap> Create(const DescriptorHeapInfo& InCreateInfo);
 	};
 
 }

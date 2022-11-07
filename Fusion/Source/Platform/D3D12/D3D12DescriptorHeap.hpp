@@ -10,8 +10,10 @@ namespace Fusion {
 	class D3D12DescriptorHeap : public DescriptorHeap
 	{
 	public:
+		D3D12DescriptorHeap(D3DComPtr<ID3D12Device9> InDevice, const DescriptorHeapInfo& InCreateInfo);
 		D3D12DescriptorHeap(const DescriptorHeapInfo& InCreateInfo);
 
+		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) override;
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) override;
 		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) override;
 

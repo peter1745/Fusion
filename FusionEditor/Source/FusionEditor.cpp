@@ -42,18 +42,10 @@ namespace FusionEditor {
 		});
 	}
 
-	Unique<DescriptorHeap> Heap;
-
 	void FusionEditorApp::OnInit()
 	{
-		DescriptorHeapInfo HeapCreateInfo = {};
-		HeapCreateInfo.Type = EDescriptorHeapType::SRV_CBV_UAV;
-		HeapCreateInfo.Capacity = 512;
-		HeapCreateInfo.ShaderVisible = true;
-		Heap = DescriptorHeap::Create(HeapCreateInfo);
-
 		m_ImGuiContext = ImGuiPlatformContext::Create();
-		m_ImGuiContext->Init(GetWindow(), m_Context, Heap.get());
+		m_ImGuiContext->Init(GetWindow(), m_Context);
 	
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 		
@@ -61,12 +53,17 @@ namespace FusionEditor {
 		m_WindowManager = MakeUnique<WindowManager>();
 
 		InitWindows();
+
+		m_Context->GetCurrentCommandList()->EndRecording();
+		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
 		// NextFrame also resets the active command list (should maybe be a separate call?)
 		m_Context->NextFrame();
+
+		m_Context->GetCurrentCommandList()->SetDescriptorHeaps({ m_Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV) });
 
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
@@ -108,7 +105,7 @@ namespace FusionEditor {
 	{
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
-		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, Heap.get());
+		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
 		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 
@@ -405,6 +402,6 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 {
 	Fusion::ApplicationSpecification specification = {};
 	specification.Title = "Fusion Editor";
-	
+
 	return new FusionEditor::FusionEditorApp(specification);
 }

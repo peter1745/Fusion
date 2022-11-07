@@ -6,7 +6,7 @@
 
 namespace Fusion {
 
-	static DXGI_FORMAT TextureFormatToDXGIFormat(ETextureFormat InFormat)
+	/*static DXGI_FORMAT TextureFormatToDXGIFormat(ETextureFormat InFormat)
 	{
 		switch (InFormat)
 		{
@@ -29,7 +29,7 @@ namespace Fusion {
 		}
 
 		return D3D11_USAGE_DEFAULT;
-	}
+	}*/
 
 	D3D11Texture2D::D3D11Texture2D(const Texture2DInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
@@ -42,16 +42,16 @@ namespace Fusion {
 		TextureDesc.Height = InCreateInfo.Height;
 		TextureDesc.MipLevels = 1;
 		TextureDesc.ArraySize = 1;
-		TextureDesc.Format = TextureFormatToDXGIFormat(InCreateInfo.Format);
+		//TextureDesc.Format = TextureFormatToDXGIFormat(InCreateInfo.Format);
 		TextureDesc.SampleDesc.Count = 1;
-		TextureDesc.Usage = TextureUsageToD3D11Usage(InCreateInfo.Usage);
+		//TextureDesc.Usage = TextureUsageToD3D11Usage(InCreateInfo.Usage);
 
-		if (InCreateInfo.Usage == ETextureUsage::Default)
-			TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | (InCreateInfo.IsRenderTextureAttachment ? D3D11_BIND_RENDER_TARGET : 0);
+		//if (InCreateInfo.Usage == ETextureUsage::Default)
+		//	TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | (InCreateInfo.IsRenderTextureAttachment ? D3D11_BIND_RENDER_TARGET : 0);
 
 
 
-		switch (InCreateInfo.Usage)
+		/*switch (InCreateInfo.Usage)
 		{
 		case ETextureUsage::Default:
 		{
@@ -76,7 +76,7 @@ namespace Fusion {
 			D3DContext->GetDevice()->CreateTexture2D(&TextureDesc, nullptr, m_TextureBuffer);
 			break;
 		}
-		}
+		}*/
 
 		if (TextureDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE)
 		{
@@ -115,50 +115,6 @@ namespace Fusion {
 		/*ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
 		DeviceContext->PSSetShaderResources(InSlot, 1, m_ShaderResourceView);
 		DeviceContext->PSSetSamplers(InSlot, 1, m_SamplerState);*/
-	}
-
-	void D3D11Texture2D::CopyFrom(const Shared<Texture2D>& InOther)
-	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		Shared<D3D11Texture2D> D3DTexture = InOther.As<D3D11Texture2D>();
-		DeviceContext->CopyResource(m_TextureBuffer, D3DTexture->m_TextureBuffer);
-	}
-
-	void D3D11Texture2D::CopyRegion(const Shared<Texture2D>& InOther, const RegionCopyData& InRegion)
-	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		Shared<D3D11Texture2D> D3DTexture = InOther.As<D3D11Texture2D>();
-
-		D3D11_BOX SourceRegion;
-		SourceRegion.left = InRegion.SourceX;
-		SourceRegion.right = InRegion.SourceX + InRegion.SourceWidth;
-		SourceRegion.top = InRegion.SourceY;
-		SourceRegion.bottom = InRegion.SourceY + InRegion.SourceHeight;
-
-		DeviceContext->CopySubresourceRegion(m_TextureBuffer, 0, InRegion.DestinationX, InRegion.DestinationY, 0, D3DTexture->m_TextureBuffer, 0, &SourceRegion);
-	}
-
-	void D3D11Texture2D::MapRead()
-	{
-		FUSION_CORE_VERIFY(m_MappedSubresource.pData == nullptr, "Cannot map texture while it's already mapped!");
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->Map(m_TextureBuffer, 0, D3D11_MAP_READ, 0, &m_MappedSubresource);
-	}
-
-	TextureBuffer D3D11Texture2D::Read()
-	{
-		TextureBuffer Result;
-		FUSION_CORE_VERIFY(m_MappedSubresource.pData, "Cannot read from an unmapped texture!");
-		Result.Data = reinterpret_cast<Byte*>(m_MappedSubresource.pData);
-		Result.RowPitch = m_MappedSubresource.RowPitch;
-		return Result;
-	}
-
-	void D3D11Texture2D::Unmap()
-	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->Unmap(m_TextureBuffer, 0);
-		ZeroMemory(&m_MappedSubresource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	}
 
 }

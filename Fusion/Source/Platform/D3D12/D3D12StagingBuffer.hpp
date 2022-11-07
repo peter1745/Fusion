@@ -3,6 +3,7 @@
 #include "Fusion/Renderer/StagingBuffer.hpp"
 
 #include "D3D12Common.hpp"
+#include "D3D12Buffer.hpp"
 
 namespace Fusion {
 
@@ -14,12 +15,12 @@ namespace Fusion {
 
 		virtual void CopyFrom(CommandList* InCmdList, const Shared<Image2D>& InImage, const CopyRegionInfo& InCopyRegion) override;
 
-		virtual Byte* Map() override;
-		virtual void Unmap(Byte* InPtr) override;
+		virtual Byte* Map() override { return m_Buffer->Map(); }
+		virtual void Unmap(Byte* InPtr) override { m_Buffer->Unmap(InPtr); }
 
 	private:
 		StagingBufferInfo m_CreateInfo;
-		D3DComPtr<ID3D12Resource2> m_Buffer;
+		Unique<D3D12Buffer> m_Buffer;
 	};
 
 }

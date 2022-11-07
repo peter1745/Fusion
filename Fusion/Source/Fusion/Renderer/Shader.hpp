@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Texture.hpp"
-#include "Fusion/Renderer/UniformBuffer.hpp"
 
 #include <filesystem>
 #include <glm/glm.hpp>
@@ -25,15 +24,6 @@ namespace Fusion {
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
-
-		virtual void Set(const std::string& InName, float InValue) = 0;
-		virtual void Set(const std::string& InName, const glm::vec2& InValue) = 0;
-		virtual void Set(const std::string& InName, const glm::vec3& InValue) = 0;
-		virtual void Set(const std::string& InName, const glm::vec4& InValue) = 0;
-		virtual void Set(const std::string& InName, const glm::mat4& InValue, bool InTranspose = false) = 0;
-		virtual void Set(const std::string& InName, const Shared<Texture2D>& InTexture) = 0;
-
-		virtual void Set(uint32_t InSlot, const Shared<UniformBuffer>& InBuffer) = 0;
 
 	public:
 		static Shared<Shader> Create(const ShaderSpecification& InSpecification);

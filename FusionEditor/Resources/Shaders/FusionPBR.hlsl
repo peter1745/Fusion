@@ -31,20 +31,20 @@ PixelInput VertexMain(VertexInput InVertexData)
 	return Output;
 }
 
-Texture2D InTexture;
-SamplerState InSampler;
-
 struct PixelOutput
 {
-	float4 Color : COLOR0;
-	uint2 ActorID : COLOR1;
+	float4 Color;
+	uint2 ActorID;
 };
+
+Texture2D InTexture : register(t0);
+SamplerState InSampler : register(s0);
 
 PixelOutput PixelMain(PixelInput InPixelData) : SV_Target
 {
 	PixelOutput Output;
 	Output.Color = float4(InPixelData.Normal, 1.0f);
 	Output.ActorID = ActorID;
-	//return InTexture.Sample(InSampler, InPixelData.TexCoord);
+	Output.Color = InTexture.Sample(InSampler, InPixelData.TexCoord);
 	return Output;
 }

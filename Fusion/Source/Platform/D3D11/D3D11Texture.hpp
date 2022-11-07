@@ -14,12 +14,8 @@ namespace Fusion {
 
 		virtual void Bind(uint32_t InSlot) const override;
 
-		virtual void CopyFrom(const Shared<Texture2D>& InOther) override;
-		virtual void CopyRegion(const Shared<Texture2D>& InOther, const RegionCopyData& InRegion) override;
-		
-		virtual void MapRead() override;
-		virtual TextureBuffer Read() override;
-		virtual void Unmap() override;
+		virtual Shared<Image2D> GetImage() const override { return nullptr; }
+		virtual const Texture2DInfo& GetInfo() const override { return m_CreateInfo; }
 
 	private:
 		Texture2DInfo m_CreateInfo;

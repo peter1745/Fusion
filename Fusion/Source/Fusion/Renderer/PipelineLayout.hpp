@@ -82,9 +82,29 @@ namespace Fusion {
 		std::variant<PipelineLayoutDescriptor, PipelineLayoutConstants, PipelineLayoutDescriptorTable> Value;
 	};
 
+	enum class EFilterMode
+	{
+		Nearest, Linear
+	};
+
+	enum class EImageAddressMode { Wrap, Mirror, Clamp, Border, MirrorOnce };
+
+	struct PipelineStaticSampler
+	{
+		EFilterMode MinFilter;
+		EFilterMode MagFilter;
+		EImageAddressMode AddressModeU;
+		EImageAddressMode AddressModeV;
+		EImageAddressMode AddressModeW;
+		uint32_t Binding;
+		uint32_t Register;
+		EShaderVisibility Visibility;
+	};
+
 	struct PipelineLayoutInfo
 	{
 		std::vector<PipelineLayoutParameter> Parameters;
+		std::vector<PipelineStaticSampler> StaticSamplers;
 		EPipelineLayoutFlags Flags;
 	};
 

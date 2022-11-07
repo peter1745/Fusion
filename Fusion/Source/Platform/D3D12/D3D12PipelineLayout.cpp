@@ -64,6 +64,47 @@ namespace Fusion {
 		return static_cast<D3D12_ROOT_SIGNATURE_FLAGS>(Result);
 	}
 
+	static constexpr D3D12_FILTER FilterModesToD3D12Filter(EFilterMode MinFilter, EFilterMode MagFilter)
+	{
+		switch (MinFilter)
+		{
+		case EFilterMode::Nearest:
+		{
+			switch (MagFilter)
+			{
+			case EFilterMode::Nearest: return D3D12_FILTER_MIN_MAG_MIP_POINT;
+			case EFilterMode::Linear: return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+			}
+			break;
+		}
+		case EFilterMode::Linear:
+		{
+			switch (MagFilter)
+			{
+			case EFilterMode::Nearest: return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+			case EFilterMode::Linear: return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+			}
+			break;
+		}
+		}
+
+		return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	}
+
+	static constexpr D3D12_TEXTURE_ADDRESS_MODE EImageAddressModeToD3D12AddressMode(EImageAddressMode InMode)
+	{
+		switch (InMode)
+		{
+		case EImageAddressMode::Wrap: return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		case EImageAddressMode::Mirror: return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		case EImageAddressMode::Clamp: return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		case EImageAddressMode::Border: return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		case EImageAddressMode::MirrorOnce: return D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+		}
+
+		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	}
+
 	D3D12PipelineLayout::D3D12PipelineLayout(const PipelineLayoutInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
@@ -141,14 +182,32 @@ namespace Fusion {
 			}
 		}
 
-		// TODO: Samplers
+		std::vector<D3D12_STATIC_SAMPLER_DESC> StaticSamplers(InCreateInfo.StaticSamplers.size());
+		for (size_t Idx = 0; Idx < InCreateInfo.StaticSamplers.size(); Idx++)
+		{
+			const auto& SamplerInfo = InCreateInfo.StaticSamplers[Idx];
+			auto& SamplerDesc = StaticSamplers[Idx];
+			SamplerDesc.Filter = FilterModesToD3D12Filter(SamplerInfo.MinFilter, SamplerInfo.MagFilter);
+			SamplerDesc.AddressU = EImageAddressModeToD3D12AddressMode(SamplerInfo.AddressModeU);
+			SamplerDesc.AddressV = EImageAddressModeToD3D12AddressMode(SamplerInfo.AddressModeV);
+			SamplerDesc.AddressW = EImageAddressModeToD3D12AddressMode(SamplerInfo.AddressModeW);
+			SamplerDesc.MipLODBias = 0;
+			SamplerDesc.MaxAnisotropy = 0;
+			SamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			SamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+			SamplerDesc.MinLOD = 0.0f;
+			SamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+			SamplerDesc.ShaderRegister = SamplerInfo.Binding;
+			SamplerDesc.RegisterSpace = SamplerInfo.Register;
+			SamplerDesc.ShaderVisibility = EShaderVisibilityToD3D12ShaderVisibility(SamplerInfo.Visibility);
+		}
 
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC RootSignatureDesc = {};
 		RootSignatureDesc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
 		RootSignatureDesc.Desc_1_1.NumParameters = static_cast<UINT>(Parameters.size());
 		RootSignatureDesc.Desc_1_1.pParameters = Parameters.data();
-		RootSignatureDesc.Desc_1_1.NumStaticSamplers = 0;
-		RootSignatureDesc.Desc_1_1.pStaticSamplers = nullptr;
+		RootSignatureDesc.Desc_1_1.NumStaticSamplers = StaticSamplers.size();
+		RootSignatureDesc.Desc_1_1.pStaticSamplers = StaticSamplers.data();
 		RootSignatureDesc.Desc_1_1.Flags = EPipelineLayoutFlagsToD3D12RootSignatureFlags(InCreateInfo.Flags);
 
 		D3DComPtr<ID3D10Blob> Blob;
@@ -156,7 +215,7 @@ namespace Fusion {
 		if (FAILED(D3D12SerializeVersionedRootSignature(&RootSignatureDesc, Blob, Error)))
 			return;
 
-		Device->CreateRootSignature(0, Blob->GetBufferPointer(), Blob->GetBufferSize(), m_RootSignature, m_RootSignature);
+		HRESULT hr = Device->CreateRootSignature(0, Blob->GetBufferPointer(), Blob->GetBufferSize(), m_RootSignature, m_RootSignature);
 	}
 
 	D3D12PipelineLayout::~D3D12PipelineLayout()

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Window.hpp"
-#include "Fusion/Renderer/Renderer.hpp"
 #include "Fusion/Renderer/GraphicsContext.hpp"
 #include "Fusion/Renderer/SwapChain.hpp"
 
@@ -42,7 +41,6 @@ namespace Fusion {
 			m_MainThreadQueue.push_back(InFunction);
 		}
 
-		const Shared<Renderer>& GetRenderer() const { return m_Renderer; }
 		const Unique<Window>& GetWindow() const { return m_Window; }
 
 		Shared<AssetStorage> GetAssetStorage() { return m_AssetStorage; }
@@ -78,7 +76,6 @@ namespace Fusion {
 	protected:
 		Shared<GraphicsContext> m_Context = nullptr;
 		Shared<SwapChain> m_SwapChain = nullptr;
-		Shared<Renderer> m_Renderer = nullptr;
 
 	};
 

@@ -6,13 +6,19 @@ namespace Fusion {
 	Mesh::Mesh(const std::vector<Vertex>& InVertices, const std::vector<Index>& InIndices)
 		: m_Vertices(InVertices), m_Indices(InIndices)
 	{
-		VertexBufferInfo CreateInfo;
-		CreateInfo.BufferSize = uint32_t(m_Vertices.size()) * sizeof(Vertex);
-		CreateInfo.Stride = sizeof(Vertex);
-		CreateInfo.Data = static_cast<void*>(m_Vertices.data());
-		CreateInfo.Usage = EBufferUsage::Immutable;
-		m_VertexBuffer = VertexBuffer::Create(CreateInfo);
-		m_IndexBuffer = IndexBuffer::Create(uint32_t(m_Indices.size()) * 3 * sizeof(uint32_t), m_Indices.data());
+		BufferInfo VertexBufferInfo = {};
+		VertexBufferInfo.HeapType = EHeapType::Default;
+		VertexBufferInfo.State = BufferStates::Vertex;
+		VertexBufferInfo.Size = InVertices.size() * sizeof(Vertex);
+		VertexBufferInfo.InitialData = m_Vertices.data();
+		m_VertexBuffer = Buffer::Create(VertexBufferInfo);
+
+		BufferInfo IndexBufferInfo = {};
+		IndexBufferInfo.HeapType = EHeapType::Default;
+		IndexBufferInfo.State = BufferStates::Index;
+		IndexBufferInfo.Size = InIndices.size() * sizeof(Index);
+		IndexBufferInfo.InitialData = m_Indices.data();
+		m_IndexBuffer = Buffer::Create(IndexBufferInfo);
 	}
 
 	Mesh::~Mesh()

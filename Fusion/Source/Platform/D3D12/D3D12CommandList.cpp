@@ -1,8 +1,8 @@
 #include "FusionPCH.hpp"
 #include "D3D12CommandList.hpp"
 #include "D3D12CommandAllocator.hpp"
-#include "D3D12UniformBuffer.hpp"
-#include "D3D12IndexBuffer.hpp"
+#include "D3D12Buffer.hpp"
+#include "D3D12DescriptorHeap.hpp"
 
 namespace Fusion {
 
@@ -35,9 +35,29 @@ namespace Fusion {
 		m_CommandList->RSSetScissorRects(uint32_t(D3DScissorRects.size()), D3DScissorRects.data());
 	}
 
-	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<UniformBuffer>& InConstantBuffer)
+	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<Buffer>& InConstantBuffer)
 	{
-		m_CommandList->SetGraphicsRootConstantBufferView(InIndex, InConstantBuffer.As<D3D12UniformBuffer>()->GetBuffer()->GetGPUBufferLocation());
+		auto ConstantBuffer = InConstantBuffer.As<D3D12Buffer>();
+		m_CommandList->SetGraphicsRootConstantBufferView(InIndex, ConstantBuffer->GetGPUBufferLocation());
+	}
+
+	void D3D12CommandList::SetVertexBuffer(const VertexBufferView& InBufferView)
+	{
+		auto Buffer = InBufferView.VertexBuffer.As<D3D12Buffer>();
+		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = {};
+		VertexBufferView.BufferLocation = Buffer->GetGPUBufferLocation();
+		VertexBufferView.SizeInBytes = Buffer->GetSize();
+		VertexBufferView.StrideInBytes = InBufferView.VertexStride;
+		m_CommandList->IASetVertexBuffers(0, 1, &VertexBufferView);
+	}
+
+	void D3D12CommandList::SetDescriptorHeaps(const std::vector<Shared<DescriptorHeap>>& InHeaps)
+	{
+		std::vector<ID3D12DescriptorHeap*> D3DHeaps(InHeaps.size());
+		for (size_t Idx = 0; Idx < InHeaps.size(); Idx++)
+			D3DHeaps[Idx] = InHeaps[Idx].As<D3D12DescriptorHeap>()->GetHeap();
+
+		m_CommandList->SetDescriptorHeaps(D3DHeaps.size(), D3DHeaps.data());
 	}
 
 	void D3D12CommandList::DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation)
@@ -46,16 +66,20 @@ namespace Fusion {
 		m_CommandList->DrawInstanced(InInstanceVertexCount, InInstanceCount, InStartVertexLocation, InStartInstanceLocation);
 	}
 
-	void D3D12CommandList::DrawIndexed(const Shared<IndexBuffer>& InIndexBuffer)
+	void D3D12CommandList::DrawIndexed(const IndexBufferView& InBufferView)
 	{
-		D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
-		IndexBufferView.BufferLocation = InIndexBuffer.As<D3D12IndexBuffer>()->GetBuffer()->GetGPUBufferLocation();
-		IndexBufferView.SizeInBytes = InIndexBuffer->GetCount() * sizeof(uint32_t);
-		IndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+		auto Buffer = InBufferView.IndexBuffer.As<D3D12Buffer>();
 
+		// TODO(Peter): This should be part of the pipeline binding
 		m_CommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
+		IndexBufferView.BufferLocation = Buffer->GetGPUBufferLocation();
+		IndexBufferView.SizeInBytes = Buffer->GetSize();
+		IndexBufferView.Format = EFormatToDXGIFormat(InBufferView.IndexFormat);
 		m_CommandList->IASetIndexBuffer(&IndexBufferView);
-		m_CommandList->DrawIndexedInstanced(InIndexBuffer->GetCount(), 1, 0, 0, 0);
+
+		m_CommandList->DrawIndexedInstanced(Buffer->GetSize() / GetFormatSize(InBufferView.IndexFormat), 1, 0, 0, 0);
 	}
 
 	void D3D12CommandList::EndRecording()

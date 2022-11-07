@@ -17,10 +17,13 @@ namespace Fusion {
 		virtual void BeginRecording() override;
 		virtual void SetViewports(const std::vector<Viewport>& InViewports) override;
 
-		virtual void SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<UniformBuffer>& InConstantBuffer) override;
+		virtual void SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<Buffer>& InConstantBuffer) override;
+		virtual void SetVertexBuffer(const VertexBufferView& InBufferView) override;
+
+		virtual void SetDescriptorHeaps(const std::vector<Shared<DescriptorHeap>>& InHeaps) override;
 
 		virtual void DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation) override;
-		virtual void DrawIndexed(const Shared<IndexBuffer>& InIndexBuffer) override;
+		virtual void DrawIndexed(const IndexBufferView& InBufferView) override;
 
 		virtual void EndRecording() override;
 

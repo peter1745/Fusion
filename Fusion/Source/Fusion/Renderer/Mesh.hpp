@@ -1,7 +1,9 @@
 #pragma once
 
-#include "VertexBuffer.hpp"
-#include "IndexBuffer.hpp"
+//#include "VertexBuffer.hpp"
+//#include "IndexBuffer.hpp"
+
+#include "Buffer.hpp"
 
 #include <filesystem>
 #include <glm/glm.hpp>
@@ -28,15 +30,15 @@ namespace Fusion {
 		Mesh(const std::vector<Vertex>& InVertices, const std::vector<Index>& InIndices);
 		~Mesh();
 
-		Shared<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
-		Shared<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
+		Shared<Buffer> GetVertexBuffer() const { return m_VertexBuffer; }
+		Shared<Buffer> GetIndexBuffer() const { return m_IndexBuffer; }
 
 	private:
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 
-		Shared<VertexBuffer> m_VertexBuffer = nullptr;
-		Shared<IndexBuffer> m_IndexBuffer = nullptr;
+		Shared<Buffer> m_VertexBuffer = nullptr;
+		Shared<Buffer> m_IndexBuffer = nullptr;
 	};
 
 }

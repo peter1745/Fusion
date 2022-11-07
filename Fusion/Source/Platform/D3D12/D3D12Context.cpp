@@ -72,8 +72,25 @@ namespace Fusion {
 			m_CommandAllocators.push_back(Shared<D3D12CommandAllocator>::Create(m_Device, AllocatorInfo));
 		}
 
+		m_CommandAllocators[0]->Reset();
+
 		m_Device->CreateFence(m_FrameValues[m_FrameIndex], D3D12_FENCE_FLAG_NONE, m_FrameFence, m_FrameFence);
 		m_FrameEvent = CreateEventW(nullptr, false, false, nullptr);
+
+		// Create Descriptor Heaps
+		{
+			DescriptorHeapInfo RTVHeapInfo = {};
+			RTVHeapInfo.Type = EDescriptorHeapType::RenderTargetView;
+			RTVHeapInfo.Capacity = 512;
+			RTVHeapInfo.ShaderVisible = false;
+			m_DescriptorHeaps[EDescriptorHeapType::RenderTargetView] = Shared<D3D12DescriptorHeap>::Create(m_Device, RTVHeapInfo);
+
+			DescriptorHeapInfo SRV_CBV_UAV_HeapInfo = {};
+			SRV_CBV_UAV_HeapInfo.Type = EDescriptorHeapType::SRV_CBV_UAV;
+			SRV_CBV_UAV_HeapInfo.Capacity = 1024;
+			SRV_CBV_UAV_HeapInfo.ShaderVisible = true;
+			m_DescriptorHeaps[EDescriptorHeapType::SRV_CBV_UAV] = Shared<D3D12DescriptorHeap>::Create(m_Device, SRV_CBV_UAV_HeapInfo);
+		}
 	}
 
 	D3D12Context::~D3D12Context() {}
@@ -88,7 +105,6 @@ namespace Fusion {
 
 	void D3D12Context::NextFrame()
 	{
-		m_FramesBeforeWait++;
 		m_FrameIndex = (m_FrameIndex + 1) % m_FrameCount;
 
 		uint64_t CurrentValue = m_FrameValues[m_FrameIndex];
@@ -96,14 +112,13 @@ namespace Fusion {
 
 		if (m_FrameFence->GetCompletedValue() < m_FrameValues[m_FrameIndex])
 		{
-			//FUSION_CORE_INFO("Rendered {} frames before waiting", m_FramesBeforeWait);
-			m_FramesBeforeWait = 0;
 			m_FrameFence->SetEventOnCompletion(m_FrameValues[m_FrameIndex], m_FrameEvent);
 			WaitForSingleObjectEx(m_FrameEvent, INFINITE, false);
 		}
 
 		m_FrameValues[m_FrameIndex] = CurrentValue + 1;
 		m_CommandAllocators[m_FrameIndex]->Reset();
+		m_CommandContextQueue.Execute(m_CommandAllocators[m_FrameIndex]->GetCommandList(0));
 	}
 
 	void D3D12Context::WaitForGPU()
@@ -134,6 +149,53 @@ namespace Fusion {
 			FUSION_CORE_FATAL("{}", InDescription);
 			break;
 		}
+	}
+	
+	CommandContextQueue::CommandContextQueue()
+	{
+		m_CommandBuffer = new uint8_t[10 * 1024 * 1024];
+		m_CommandBufferPtr = m_CommandBuffer;
+		memset(m_CommandBuffer, 0, 10 * 1024 * 1024);
+	}
+
+	CommandContextQueue::~CommandContextQueue()
+	{
+		delete[] m_CommandBuffer;
+	}
+
+	void* CommandContextQueue::AllocateCommand(CommandFunc InFunc, uint32_t InSize)
+	{
+		*reinterpret_cast<CommandFunc*>(m_CommandBufferPtr) = InFunc;
+		m_CommandBufferPtr += sizeof(CommandFunc);
+
+		*reinterpret_cast<uint32_t*>(m_CommandBufferPtr) = InSize;
+		m_CommandBufferPtr += sizeof(uint32_t);
+
+		void* Memory = m_CommandBufferPtr;
+		m_CommandBufferPtr += InSize;
+
+		m_CommandCount++;
+		return Memory;
+	}
+
+	void CommandContextQueue::Execute(CommandList* InCmdList)
+	{
+		uint8_t* Buffer = m_CommandBuffer;
+
+		for (uint32_t Idx = 0; Idx < m_CommandCount; Idx++)
+		{
+			CommandFunc Func = *reinterpret_cast<CommandFunc*>(Buffer);
+			Buffer += sizeof(CommandFunc);
+
+			uint32_t Size = *reinterpret_cast<uint32_t*>(Buffer);
+			Buffer += sizeof(uint32_t);
+
+			Func(Buffer, InCmdList);
+			Buffer += Size;
+		}
+
+		m_CommandBufferPtr = m_CommandBuffer;
+		m_CommandCount = 0;
 	}
 
 }

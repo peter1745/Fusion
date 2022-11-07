@@ -2,9 +2,9 @@
 #include "D3D11CommandList.hpp"
 #include "D3D11CommandAllocator.hpp"
 
-#include "D3D11IndexBuffer.hpp"
 #include "D3D11GraphicsPipeline.hpp"
-#include "D3D11UniformBuffer.hpp"
+#include "D3D11Buffer.hpp"
+#include "D3D11DescriptorHeap.hpp"
 
 namespace Fusion {
 
@@ -32,27 +32,39 @@ namespace Fusion {
 		m_DeviceContext->RSSetScissorRects(uint32_t(D3DScissorRects.size()), D3DScissorRects.data());
 	}
 
-	void D3D11CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<UniformBuffer>& InConstantBuffer)
+	void D3D11CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<Buffer>& InConstantBuffer)
 	{
+		auto Buffer = InConstantBuffer.As<D3D11Buffer>();
+
 		const auto& LayoutInfo = InPipeline->GetInfo().Layout->GetInfo();
 		const auto& Param = LayoutInfo.Parameters[InIndex];
 		const auto& ConstantBufferDescriptor = std::get<PipelineLayoutDescriptor>(Param.Value);
 
-		auto& Buffer = InConstantBuffer.As<D3D11UniformBuffer>()->GetBuffer();
-
 		switch (Param.Visibility)
 		{
 		case EShaderVisibility::All:
-			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer);
-			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer);
+			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
+			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
 			break;
 		case EShaderVisibility::Vertex:
-			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer);
+			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
 			break;
 		case EShaderVisibility::Pixel:
-			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer);
+			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
 			break;
 		}
+	}
+
+	void D3D11CommandList::SetVertexBuffer(const VertexBufferView& InBufferView)
+	{
+		auto Buffer = InBufferView.VertexBuffer.As<D3D11Buffer>();
+		UINT Offsets[] = { 0 };
+		m_DeviceContext->IASetVertexBuffers(0, 1, Buffer->GetResource(), &InBufferView.VertexStride, Offsets);
+	}
+
+	void D3D11CommandList::SetDescriptorHeaps(const std::vector<Shared<DescriptorHeap>>& InHeaps)
+	{
+
 	}
 
 	void D3D11CommandList::DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation)
@@ -61,13 +73,12 @@ namespace Fusion {
 		m_DeviceContext->DrawInstanced(InInstanceVertexCount, InInstanceCount, InStartVertexLocation, InStartInstanceLocation);
 	}
 
-	void D3D11CommandList::DrawIndexed(const Shared<IndexBuffer>& InIndexBuffer)
+	void D3D11CommandList::DrawIndexed(const IndexBufferView& InBufferView)
 	{
-		auto D3DIndexBuffer = InIndexBuffer.As<D3D11IndexBuffer>();
-
+		auto Buffer = InBufferView.IndexBuffer.As<D3D11Buffer>();
 		m_DeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_DeviceContext->IASetIndexBuffer(D3DIndexBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
-		m_DeviceContext->DrawIndexedInstanced(InIndexBuffer->GetCount(), 1, 0, 0, 0);
+		m_DeviceContext->IASetIndexBuffer(Buffer->GetResource(), EFormatToDXGIFormat(InBufferView.IndexFormat), 0);
+		m_DeviceContext->DrawIndexedInstanced(Buffer->GetSize() / GetFormatSize(InBufferView.IndexFormat), 1, 0, 0, 0);
 	}
 
 	void D3D11CommandList::EndRecording()

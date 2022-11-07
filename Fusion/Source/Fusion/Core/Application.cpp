@@ -3,7 +3,6 @@
 
 #include "Fusion/IO/Keyboard.hpp"
 #include "Fusion/IO/Mouse.hpp"
-#include "Fusion/Renderer/Renderer.hpp"
 #include "Fusion/Events/WindowEvents.hpp"
 
 #include "Fusion/AssetSystem/AssetLoader.hpp"
@@ -31,8 +30,6 @@ namespace Fusion {
 
 		m_Context = GraphicsContext::Create();
 
-		m_Renderer = Renderer::Create(ERendererAPI::D3D11);
-
 		SwapChainInfo SwapChainCreateInfo;
 		SwapChainCreateInfo.Width = m_Window->GetWidth();
 		SwapChainCreateInfo.Height = m_Window->GetHeight();
@@ -49,7 +46,6 @@ namespace Fusion {
 
 	Application::~Application()
 	{
-		m_Renderer = nullptr;
 		m_Window = nullptr;
 	}
 

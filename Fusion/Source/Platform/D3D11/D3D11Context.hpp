@@ -4,6 +4,7 @@
 
 #include "D3D11Common.hpp"
 #include "D3D11CommandAllocator.hpp"
+#include "D3D11DescriptorHeap.hpp"
 
 namespace Fusion {
 
@@ -23,6 +24,12 @@ namespace Fusion {
 		virtual uint32_t GetCurrentFrameIndex() const override { return 0; }
 		virtual uint32_t GetFramesInFlight() const override { return 1; }
 
+		virtual Shared<DescriptorHeap> GetDescriptorHeap(EDescriptorHeapType InType) const override
+		{
+			FUSION_CORE_VERIFY(m_DescriptorHeaps.find(InType) != m_DescriptorHeaps.end());
+			return m_DescriptorHeaps.at(InType);
+		}
+
 		auto& GetDevice() { return m_Device; }
 		const auto& GetDevice() const { return m_Device; }
 
@@ -32,6 +39,8 @@ namespace Fusion {
 	private:
 		D3DComPtr<ID3D11Device> m_Device;
 		D3DComPtr<ID3D11DeviceContext> m_DeviceContext;
+
+		std::unordered_map<EDescriptorHeapType, Shared<D3D11DescriptorHeap>> m_DescriptorHeaps;
 
 		Shared<D3D11CommandAllocator> m_Allocator;
 	};

@@ -1,6 +1,6 @@
 #include "FusionPCH.hpp"
 #include "PipelineLayout.hpp"
-#include "Renderer.hpp"
+#include "RenderSettings.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
 	#include <Platform/D3D11/D3D11PipelineLayout.hpp>
@@ -11,7 +11,7 @@ namespace Fusion {
 
 	Unique<PipelineLayout> PipelineLayout::Create(const PipelineLayoutInfo& InCreateInfo)
 	{
-		switch (Renderer::CurrentAPI())
+		switch (RenderSettings::Get().API)
 		{
 		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return MakeUnique<D3D11PipelineLayout>(InCreateInfo);

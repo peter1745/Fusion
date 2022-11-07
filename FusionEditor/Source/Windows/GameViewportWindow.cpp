@@ -5,8 +5,8 @@
 
 namespace FusionEditor {
 
-	GameViewportWindow::GameViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap)
-		: ViewportWindowBase("GameViewport", InWorld, InDescriptorHeap)
+	GameViewportWindow::GameViewportWindow(const Fusion::Shared<Fusion::World>& InWorld)
+		: ViewportWindowBase("GameViewport", InWorld)
 	{
 		SetTitle("Game Viewport");
 	}

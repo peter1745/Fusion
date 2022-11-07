@@ -15,7 +15,7 @@ namespace FusionEditor {
 	class EditorViewportWindow : public ViewportWindowBase
 	{
 	public:
-		EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, Fusion::DescriptorHeap* InDescriptorHeap);
+		EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld);
 
 		virtual void OnUpdate(float InDeltaTime) override;
 		virtual void OnEvent(Fusion::Event& InEvent) override;

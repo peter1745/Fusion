@@ -1,6 +1,6 @@
 #include "FusionPCH.hpp"
 #include "StagingBuffer.hpp"
-#include "Renderer.hpp"
+#include "RenderSettings.hpp"
 
 #include <Platform/D3D11/D3D11StagingBuffer.hpp>
 #include <Platform/D3D12/D3D12StagingBuffer.hpp>
@@ -9,7 +9,7 @@ namespace Fusion {
 
 	Unique<StagingBuffer> StagingBuffer::Create(const StagingBufferInfo& InCreateInfo)
 	{
-		switch (Renderer::CurrentAPI())
+		switch (RenderSettings::Get().API)
 		{
 		case ERendererAPI::None: return nullptr;
 		case ERendererAPI::D3D11: return MakeUnique<D3D11StagingBuffer>(InCreateInfo);

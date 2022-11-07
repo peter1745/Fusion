@@ -1,6 +1,6 @@
 #include "ImGuiPlatformContext.hpp"
 
-#include <Fusion/Renderer/Renderer.hpp>
+#include <Fusion/Renderer/RenderSettings.hpp>
 
 #ifdef FUSION_PLATFORM_WINDOWS
 	#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
@@ -13,7 +13,7 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, Fusion::DescriptorHeap* InDescriptorHeap)
+	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -28,7 +28,7 @@ namespace FusionEditor {
 		IO.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		InitStyle();
-		InitPlatform(InWindow, InContext, InDescriptorHeap);
+		InitPlatform(InWindow, InContext);
 	}
 
 	void ImGuiPlatformContext::BeginFrame()
@@ -51,7 +51,7 @@ namespace FusionEditor {
 
 	std::unique_ptr<ImGuiPlatformContext> ImGuiPlatformContext::Create()
 	{
-		switch (Fusion::Renderer::CurrentAPI())
+		switch (Fusion::RenderSettings::Get().API)
 		{
 		case Fusion::ERendererAPI::None: return nullptr;
 		case Fusion::ERendererAPI::D3D11: return std::make_unique<ImGuiPlatformContextD3D11>();
