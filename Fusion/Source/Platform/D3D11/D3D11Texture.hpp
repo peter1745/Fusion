@@ -3,6 +3,7 @@
 #include "Fusion/Renderer/Texture.hpp"
 
 #include "D3D11Common.hpp"
+#include "D3D11Image.hpp"
 
 namespace Fusion {
 
@@ -12,19 +13,15 @@ namespace Fusion {
 		D3D11Texture2D(const Texture2DInfo& InCreateInfo);
 		~D3D11Texture2D();
 
-		virtual void Bind(uint32_t InSlot) const override;
+		virtual void Bind(uint32_t InSlot) override;
 
 		virtual Shared<Image2D> GetImage() const override { return nullptr; }
 		virtual const Texture2DInfo& GetInfo() const override { return m_CreateInfo; }
 
 	private:
 		Texture2DInfo m_CreateInfo;
-
-		D3DComPtr<ID3D11Texture2D> m_TextureBuffer;
+		Shared<D3D11Image2D> m_Image = nullptr;
 		D3DComPtr<ID3D11ShaderResourceView> m_ShaderResourceView;
-		D3DComPtr<ID3D11SamplerState> m_SamplerState;
-
-		D3D11_MAPPED_SUBRESOURCE m_MappedSubresource;
 	};
 
 }

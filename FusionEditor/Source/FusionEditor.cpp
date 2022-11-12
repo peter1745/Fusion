@@ -1,6 +1,7 @@
 #include "FusionEditor.hpp"
 #include <Fusion/EntryPoint.hpp>
 #include <Fusion/Memory/Shared.hpp>
+#include <Fusion/Renderer/RenderSettings.hpp>
 
 #include <ImGui/imgui.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
@@ -402,6 +403,9 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 {
 	Fusion::ApplicationSpecification specification = {};
 	specification.Title = "Fusion Editor";
+
+	auto& RenderSettings = Fusion::RenderSettings::Get();
+	RenderSettings.API = ERendererAPI::D3D11;
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

@@ -30,6 +30,10 @@ namespace Fusion {
 	public:
 		D3DComPtr() = default;
 
+		D3DComPtr(std::nullptr_t)
+			: m_Ptr(nullptr)
+		{}
+
 		D3DComPtr(const D3DComPtr& InOther)
 			: m_Ptr(InOther.m_Ptr)
 		{
@@ -47,6 +51,13 @@ namespace Fusion {
 		{
 			if (InOther.IsValid())
 				InOther->QueryInterface(&m_Ptr);
+		}
+
+		D3DComPtr& operator=(std::nullptr_t)
+		{
+			Release();
+			m_Ptr = nullptr;
+			return *this;
 		}
 
 		D3DComPtr& operator=(const D3DComPtr& InOther)

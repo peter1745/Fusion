@@ -28,14 +28,14 @@ namespace Fusion {
 
 		auto D3DShader = m_CreateInfo.PipelineShader.As<D3D12Shader>();
 
-		auto& VertexByteCode = D3DShader->GetVertexByteCode();
+		auto VertexByteCode = D3DShader->GetByteCode(EShaderType::Vertex);
 		if (VertexByteCode.IsValid())
 		{
 			PipelineStateDesc.VS.pShaderBytecode = VertexByteCode->GetBufferPointer();
 			PipelineStateDesc.VS.BytecodeLength = VertexByteCode->GetBufferSize();
 		}
 
-		auto& PixelByteCode = D3DShader->GetPixelByteCode();
+		auto PixelByteCode = D3DShader->GetByteCode(EShaderType::Pixel);
 		if (PixelByteCode.IsValid())
 		{
 			PipelineStateDesc.PS.pShaderBytecode = PixelByteCode->GetBufferPointer();

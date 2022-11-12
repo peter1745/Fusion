@@ -9,24 +9,22 @@ namespace Fusion {
 	class D3D12Shader : public Shader
 	{
 	public:
-		D3D12Shader(const ShaderSpecification& InCreateInfo);
+		D3D12Shader(const CompiledShaderData& InCompiledData);
 		~D3D12Shader();
 
 		virtual void Bind() override {}
 		virtual void Unbind() override {}
 
-		auto& GetVertexByteCode() { return m_VertexByteCode; }
-		auto& GetPixelByteCode() { return m_PixelByteCode; }
+		auto GetByteCode(EShaderType InModuleType)
+		{
+			if (m_CompiledShaderData.CompiledByteCodes.find(InModuleType) == m_CompiledShaderData.CompiledByteCodes.end())
+				return D3DComPtr<ID3DBlob>();
+
+			return m_CompiledShaderData.CompiledByteCodes[InModuleType];
+		}
 
 	private:
-		bool CompileFromFile(EShaderType InType, D3DComPtr<ID3DBlob>& OutByteCode) const;
-		void LogCompilerError(const char* InShaderType, D3DComPtr<ID3DBlob> InErrorMessage) const;
-
-	private:
-		ShaderSpecification m_CreateInfo;
-
-		D3DComPtr<ID3DBlob> m_VertexByteCode;
-		D3DComPtr<ID3DBlob> m_PixelByteCode;
+		CompiledShaderData m_CompiledShaderData;
 	};
 
 }

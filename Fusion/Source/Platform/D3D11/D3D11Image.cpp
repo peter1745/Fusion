@@ -47,7 +47,12 @@ namespace Fusion {
 		}
 		}
 
-		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateTexture2D(&ImageDesc, nullptr, m_Image);
+		D3D11_SUBRESOURCE_DATA InitialData = {};
+		InitialData.pSysMem = m_CreateInfo.InitialData;
+		InitialData.SysMemPitch = m_CreateInfo.Size.Width * m_CreateInfo.Channels;
+		InitialData.SysMemSlicePitch = InitialData.SysMemPitch * m_CreateInfo.Size.Height;
+
+		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateTexture2D(&ImageDesc, m_CreateInfo.InitialData != nullptr ? &InitialData : nullptr, m_Image);
 	}
 
 }

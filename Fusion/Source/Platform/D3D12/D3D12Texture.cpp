@@ -60,7 +60,7 @@ namespace Fusion {
 		});
 	}
 
-	void D3D12Texture2D::Bind(uint32_t InSlot) const
+	void D3D12Texture2D::Bind(uint32_t InSlot)
 	{
 		if (m_ShaderResourceViewAllocation.Heap != nullptr && m_Image->GetState() & ImageStates::PixelShaderResource)
 		{

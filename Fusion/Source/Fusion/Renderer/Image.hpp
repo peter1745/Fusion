@@ -24,6 +24,9 @@ namespace Fusion {
 
 		// Only used for render targets and depth stencils
 		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+		uint32_t Channels = 0;
+		Byte* InitialData = nullptr;
 	};
 
 	class Image2D : public SharedObject

@@ -13,7 +13,7 @@ namespace Fusion {
 	public:
 		D3D12Texture2D(const Texture2DInfo& InCreateInfo);
 
-		virtual void Bind(uint32_t InSlot) const override;
+		virtual void Bind(uint32_t InSlot) override;
 
 		virtual Shared<Image2D> GetImage() const override { return m_Image; }
 		virtual const Texture2DInfo& GetInfo() const override { return m_CreateInfo; }

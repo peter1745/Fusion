@@ -6,13 +6,9 @@ namespace Fusion {
 
 	struct RenderSettings
 	{
-		ERendererAPI API = ERendererAPI::D3D12;
+		ERendererAPI API = ERendererAPI::D3D11;
 
-		inline static RenderSettings& Get()
-		{
-			static RenderSettings s_Settings;
-			return s_Settings;
-		}
+		static RenderSettings& Get();
 	};
 
 }

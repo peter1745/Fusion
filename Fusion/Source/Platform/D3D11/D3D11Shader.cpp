@@ -6,10 +6,10 @@
 
 namespace Fusion {
 
-	D3D11Shader::D3D11Shader(const ShaderSpecification& InSpecification)
-		: m_Specification(InSpecification)
+	D3D11Shader::D3D11Shader(const CompiledShaderData& InCompiledData)
+		: m_CompiledShaderData(InCompiledData)
 	{
-		CompileShader();
+		CreateShaders();
 	}
 
 	D3D11Shader::~D3D11Shader()
@@ -28,75 +28,28 @@ namespace Fusion {
 	{
 	}
 
-	void D3D11Shader::CompileShader()
+	void D3D11Shader::CreateShaders()
 	{
-		if (!CompileFromFile(EShaderType::Vertex, m_VertexByteCode))
-			return;
-
-		if (!CompileFromFile(EShaderType::Pixel, m_PixelByteCode))
-		{
-			m_VertexByteCode->Release();
-			return;
-		}
-
 		ID3D11Device* Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
-		HRESULT Result = Device->CreateVertexShader(m_VertexByteCode->GetBufferPointer(), m_VertexByteCode->GetBufferSize(), nullptr, m_VertexShader);
 
-		if (FAILED(Result))
+		if (m_CompiledShaderData.CompiledByteCodes.find(EShaderType::Vertex) != m_CompiledShaderData.CompiledByteCodes.end())
 		{
-			FUSION_CORE_ERROR("Failed to create D3D11 Vertex Shader!");
-			m_VertexByteCode->Release();
-			m_PixelByteCode->Release();
-			return;
+			auto& ByteCode = m_CompiledShaderData.CompiledByteCodes.at(EShaderType::Vertex);
+
+			if (FAILED(Device->CreateVertexShader(ByteCode->GetBufferPointer(), ByteCode->GetBufferSize(), nullptr, m_VertexShader)))
+			{
+				return;
+			}
 		}
 
-		Result = Device->CreatePixelShader(m_PixelByteCode->GetBufferPointer(), m_PixelByteCode->GetBufferSize(), nullptr, m_PixelShader);
-
-		if (FAILED(Result))
+		if (m_CompiledShaderData.CompiledByteCodes.find(EShaderType::Pixel) != m_CompiledShaderData.CompiledByteCodes.end())
 		{
-			FUSION_CORE_ERROR("Failed to create D3D11 Pixel Shader!");
-			m_VertexShader.Release();
-			m_VertexByteCode->Release();
-			m_PixelByteCode->Release();
-			return;
-		}
-	}
+			auto& ByteCode = m_CompiledShaderData.CompiledByteCodes.at(EShaderType::Pixel);
 
-	bool D3D11Shader::CompileFromFile(EShaderType InType, ID3DBlob** OutByteCode)
-	{
-		const char* EntryPoint = InType == EShaderType::Vertex ? "VertexMain" : "PixelMain";
-		const char* TargetVersion = InType == EShaderType::Vertex ? "vs_5_0" : "ps_5_0";
-
-		ID3DBlob* ErrorMessageData;
-		HRESULT Result = D3DCompileFromFile(
-			m_Specification.FilePath.c_str(),
-			nullptr, nullptr,
-			EntryPoint, TargetVersion,
-			D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS, 0, OutByteCode, &ErrorMessageData);
-
-		if (FAILED(Result))
-		{
-			LogCompilerError(InType == EShaderType::Vertex ? "vertex" : "pixel", ErrorMessageData);
-			*OutByteCode = nullptr;
-			return false;
-		}
-
-		return true;
-	}
-
-	void D3D11Shader::LogCompilerError(const char* InShaderType, ID3DBlob* InErrorMessage) const
-	{
-		FUSION_CORE_ERROR("Failed to compile {} shader in file {}.", InShaderType, m_Specification.FilePath.string());
-
-		if (InErrorMessage)
-		{
-			char* ErrorString = reinterpret_cast<char*>(InErrorMessage->GetBufferPointer());
-			FUSION_CORE_ERROR("\tError Message: {}", ErrorString);
-			InErrorMessage->Release();
-		}
-		else
-		{
-			FUSION_CORE_ERROR("\tError Message: Failed to locate shader file!");
+			if (FAILED(Device->CreatePixelShader(ByteCode->GetBufferPointer(), ByteCode->GetBufferSize(), nullptr, m_PixelShader)))
+			{
+				return;
+			}
 		}
 	}
 

@@ -48,8 +48,16 @@ project "FusionEditor"
             "d3d12.lib",
             "d3d11.lib",
             "dxgi.lib",
-            "d3dcompiler.lib"
+            "d3dcompiler.lib",
+
+            "%{wks.location}/ThirdParty/DXC/lib/dxcompiler.lib"
         }
+
+        postbuildcommands 
+	    {
+	    	'{COPY} "../ThirdParty/DXC/bin/dxcompiler.dll" "%{cfg.targetdir}"',
+	    	'{COPY} "../ThirdParty/DXC/bin/dxil.dll" "%{cfg.targetdir}"'
+	    }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

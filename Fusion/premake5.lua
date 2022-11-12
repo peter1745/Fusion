@@ -26,7 +26,8 @@ project "Fusion"
         "%{IncludeDirs.EnTT}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.TinyGLTF}",
-        "%{IncludeDirs.yaml_cpp}"
+        "%{IncludeDirs.yaml_cpp}",
+        "%{IncludeDirs.DXC}"
     }
 
     defines {

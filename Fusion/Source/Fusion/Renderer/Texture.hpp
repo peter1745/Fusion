@@ -23,7 +23,7 @@ namespace Fusion {
 	public:
 		virtual ~Texture2D() = default;
 		
-		virtual void Bind(uint32_t InSlot) const = 0;
+		virtual void Bind(uint32_t InSlot) = 0;
 
 		virtual Shared<Image2D> GetImage() const = 0;
 

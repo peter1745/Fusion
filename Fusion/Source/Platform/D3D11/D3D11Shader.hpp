@@ -9,7 +9,7 @@ namespace Fusion {
 	class D3D11Shader : public Shader
 	{
 	public:
-		D3D11Shader(const ShaderSpecification& InSpecification);
+		D3D11Shader(const CompiledShaderData& InCompiledData);
 		~D3D11Shader();
 
 		virtual void Bind() override;
@@ -21,22 +21,20 @@ namespace Fusion {
 		auto& GetPixelShader() { return m_PixelShader; }
 		const auto& GetPixelShader() const { return m_PixelShader; }
 
-		auto& GetVertexByteCode() { return m_VertexByteCode; }
-		const auto& GetVertexByteCode() const { return m_VertexByteCode; }
+		auto GetByteCode(EShaderType InModuleType)
+		{
+			if (m_CompiledShaderData.CompiledByteCodes.find(InModuleType) == m_CompiledShaderData.CompiledByteCodes.end())
+				return D3DComPtr<ID3DBlob>();
 
-		auto& GetPixelByteCode() { return m_PixelByteCode; }
-		const auto& GetPixelByteCode() const { return m_PixelByteCode; }
+			return m_CompiledShaderData.CompiledByteCodes[InModuleType];
+		}
 
-	private:
-		void CompileShader();
-		bool CompileFromFile(EShaderType InType, ID3DBlob** OutByteCode);
-		void LogCompilerError(const char* InShaderType, ID3DBlob* InErrorMessage) const;
 
 	private:
-		ShaderSpecification m_Specification;
+		void CreateShaders();
 
-		D3DComPtr<ID3DBlob> m_VertexByteCode;
-		D3DComPtr<ID3DBlob> m_PixelByteCode;
+	private:
+		CompiledShaderData m_CompiledShaderData;
 
 		D3DComPtr<ID3D11VertexShader> m_VertexShader;
 		D3DComPtr<ID3D11PixelShader> m_PixelShader;

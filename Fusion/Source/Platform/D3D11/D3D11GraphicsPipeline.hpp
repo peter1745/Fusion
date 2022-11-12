@@ -22,6 +22,8 @@ namespace Fusion {
 		D3DComPtr<ID3D11RasterizerState> m_RasterizerState;
 		D3DComPtr<ID3D11DepthStencilState> m_DepthStencilState;
 		D3DComPtr<ID3D11InputLayout> m_InputLayout;
+
+		std::vector<D3DComPtr<ID3D11SamplerState>> m_SamplerStates;
 	};
 
 }

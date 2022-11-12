@@ -4,44 +4,42 @@
 
 #include "Fusion/World/Components/AllComponents.hpp"
 #include "Fusion/IO/TextureLoader.hpp"
+#include "ShaderCompiler.hpp"
 
 namespace Fusion {
 
 	Shared<Texture2D> Texture;
+	Unique<ShaderCompiler> Compiler;
 
 	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
 		: m_World(InWorld)
 	{
+		Compiler = ShaderCompiler::Create();
+
 		PipelineLayoutInfo LayoutInfo = {};
 		LayoutInfo.Flags |= PipelineLayoutFlags::AllowInputAssemblerInputLayout;
 
-		PipelineLayoutParameter Param = {};
-		Param.Type = EPipelineParameterType::ConstantBufferView;
-		Param.Visibility = EShaderVisibility::All;
-		Param.Value = PipelineLayoutDescriptor{ 0, 0 };
-		LayoutInfo.Parameters.push_back(Param);
+		PipelineLayoutParameter TransformBufferParam = {};
+		TransformBufferParam.Type = EPipelineParameterType::ConstantBufferView;
+		TransformBufferParam.Visibility = EShaderVisibility::All;
+		TransformBufferParam.Value = PipelineLayoutDescriptor{ 0, 0 };
+		LayoutInfo.Parameters.push_back(TransformBufferParam);
 
-		PipelineLayoutDescriptorTable Table = {};
-		PipelineLayoutDescriptorRange Descriptor1 = {};
-		Descriptor1.Type = EPipelineLayoutDescriptorRangeType::ShaderResourceView;
-		Descriptor1.NumDescriptors = 1;
-		Descriptor1.Binding = 0;
-		Descriptor1.Space = 0;
-		Descriptor1.Offset = 0;
-		Descriptor1.Flags = DescriptorRangeFlags::StaticData;
-		Table.Ranges.push_back(Descriptor1);
+		PipelineLayoutDescriptorTable PixelDescriptorTable = {};
+		PipelineLayoutDescriptorRange TextureDescriptor = {};
+		TextureDescriptor.Type = EPipelineLayoutDescriptorRangeType::ShaderResourceView;
+		TextureDescriptor.NumDescriptors = 1;
+		TextureDescriptor.Binding = 0;
+		TextureDescriptor.Space = 0;
+		TextureDescriptor.Offset = 0;
+		TextureDescriptor.Flags = DescriptorRangeFlags::StaticData;
+		PixelDescriptorTable.Ranges.push_back(TextureDescriptor);
 
-		PipelineLayoutParameter T = {};
-		T.Type = EPipelineParameterType::DescriptorTable;
-		T.Visibility = EShaderVisibility::Pixel;
-		T.Value = Table;
-		LayoutInfo.Parameters.push_back(T);
-
-		/*PipelineLayoutParameter Param2 = {};
-		Param2.Type = EPipelineParameterType::ShaderResourceView;
-		Param2.Visibility = EShaderVisibility::Pixel;
-		Param2.Value = PipelineLayoutDescriptor{ 1, 0 };
-		LayoutInfo.Parameters.push_back(Param2);*/
+		PipelineLayoutParameter PixelDescriptorTableParam = {};
+		PixelDescriptorTableParam.Type = EPipelineParameterType::DescriptorTable;
+		PixelDescriptorTableParam.Visibility = EShaderVisibility::Pixel;
+		PixelDescriptorTableParam.Value = PixelDescriptorTable;
+		LayoutInfo.Parameters.push_back(PixelDescriptorTableParam);
 
 		PipelineStaticSampler Sampler = {};
 		Sampler.MinFilter = EFilterMode::Nearest;
@@ -64,7 +62,7 @@ namespace Fusion {
 			{ "TEXCOORD", 0, EFormat::RG32Float,  0, AppendAlignedElement, 0 },
 		};
 
-		PipelineInfo.PipelineShader = Shader::Create({ "Resources/Shaders/FusionPBR.hlsl" });
+		PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.hlsl");
 		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
 		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
 		PipelineInfo.RenderTargetCount = 2;
@@ -124,8 +122,8 @@ namespace Fusion {
 			View.VertexBuffer = ActorMesh->GetMesh()->GetVertexBuffer();
 			View.VertexStride = sizeof(Vertex);
 			CmdList->SetVertexBuffer(View);
-
-			Texture->Bind(1);
+			
+			Texture->Bind(0);
 
 			IndexBufferView IndexView = {};
 			IndexView.IndexBuffer = ActorMesh->GetMesh()->GetIndexBuffer();

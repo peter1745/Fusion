@@ -6,6 +6,7 @@
 #include "D3DComPtr.hpp"
 
 #include <dxgi1_6.h>
+#include <d3dcommon.h>
 
 namespace Fusion {
 
@@ -51,5 +52,81 @@ namespace Fusion {
 		FUSION_CORE_VERIFY(false);
 		return 0;
 	}
+
+	// Compiler Structs + Enums
+
+	enum class EShaderType
+	{
+		Vertex, Pixel
+	};
+
+	enum class EShaderComponentType
+	{
+		Unknown, UInt32, SInt32, Float32
+	};
+
+	enum class EShaderResourceType
+	{
+		ConstantBuffer,
+		TextureBuffer,
+		Texture,
+		Sampler,
+		UnorderedAccessView,
+		StructuredBuffer,
+		UnorderedAccessViewStructured,
+		ByteAddressBuffer,
+		UAVByteAddressBuffer,
+		UAVAppendStructuredBuffer,
+		UAVConsumeStructuredBuffer,
+		UAVStructuredWithCounter,
+		RTAccelerationStructure,
+		UAVFeedbackTexture
+	};
+
+	struct ShaderSignatureParameter
+	{
+		std::string SemanticName;
+		uint32_t SemanticIndex;
+		uint32_t Register;
+		EShaderComponentType ComponentType;
+	};
+
+	struct ShaderBufferVariableInfo
+	{
+		std::string Name;
+		uint32_t Offset;
+		uint32_t Size;
+	};
+
+	struct ShaderConstantBufferInfo
+	{
+		std::string Name;
+		uint32_t BindingPoint;
+		uint32_t BindingCount;
+		uint32_t Size;
+		std::vector<ShaderBufferVariableInfo> Variables;
+	};
+
+	struct ShaderResourceInfo
+	{
+		std::string Name;
+		EShaderResourceType Type;
+		uint32_t BindingPoint;
+		uint32_t BindingCount;
+	};
+
+	struct ModuleReflectionData
+	{
+		std::vector<ShaderSignatureParameter> InputParameters;
+		std::vector<ShaderConstantBufferInfo> ConstantBuffers;
+		std::vector<ShaderResourceInfo> Resources;
+		std::vector<ShaderSignatureParameter> OutputParameters;
+	};
+
+	struct CompiledShaderData
+	{
+		std::unordered_map<EShaderType, D3DComPtr<ID3DBlob>> CompiledByteCodes;
+		std::unordered_map<EShaderType, ModuleReflectionData> ReflectionData;
+	};
 
 }
