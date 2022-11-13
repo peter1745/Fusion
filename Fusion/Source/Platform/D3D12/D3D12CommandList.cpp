@@ -1,8 +1,11 @@
 #include "FusionPCH.hpp"
 #include "D3D12CommandList.hpp"
 #include "D3D12CommandAllocator.hpp"
+#include "D3D12Context.hpp"
 #include "D3D12Buffer.hpp"
 #include "D3D12DescriptorHeap.hpp"
+#include "D3D12GraphicsPipeline.hpp"
+#include "D3D12Texture.hpp"
 
 namespace Fusion {
 
@@ -35,10 +38,26 @@ namespace Fusion {
 		m_CommandList->RSSetScissorRects(uint32_t(D3DScissorRects.size()), D3DScissorRects.data());
 	}
 
-	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<Buffer>& InConstantBuffer)
+	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer)
 	{
 		auto ConstantBuffer = InConstantBuffer.As<D3D12Buffer>();
-		m_CommandList->SetGraphicsRootConstantBufferView(InIndex, ConstantBuffer->GetGPUBufferLocation());
+
+		const auto& ResourceInfo = InPipeline->GetResourceInfo(InName);
+		m_CommandList->SetGraphicsRootConstantBufferView(ResourceInfo.BindingPoint, ConstantBuffer->GetGPUBufferLocation());
+	}
+
+	void D3D12CommandList::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture)
+	{
+		auto Image = InTexture->GetImage();
+		const auto& SRVAllocation = InTexture.As<D3D12Texture2D>()->GetShaderResourceView();
+
+		if (SRVAllocation.Heap == nullptr || !(Image->GetState() & ImageStates::PixelShaderResource))
+			return;
+
+		const auto& ResourceInfo = InPipeline->GetResourceInfo(InName);
+
+		D3D12_GPU_DESCRIPTOR_HANDLE Handle = { static_cast<D3D12DescriptorHeap*>(SRVAllocation.Heap)->GetGPUDescriptorHandle(SRVAllocation)};
+		m_CommandList->SetGraphicsRootDescriptorTable(ResourceInfo.BindingPoint, Handle);
 	}
 
 	void D3D12CommandList::SetVertexBuffer(const VertexBufferView& InBufferView)

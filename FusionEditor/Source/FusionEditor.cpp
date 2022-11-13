@@ -405,7 +405,7 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 	specification.Title = "Fusion Editor";
 
 	auto& RenderSettings = Fusion::RenderSettings::Get();
-	RenderSettings.API = ERendererAPI::D3D11;
+	RenderSettings.API = ERendererAPI::D3D12;
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

@@ -15,9 +15,14 @@ namespace Fusion {
 	{
 		Unknown,
 		RGBA32Float, RGBA32UInt,
-		RGB32Float, RGB32UInt,
-		RG32Float, RG32UInt,
-		R32Float, R32UInt,
+		RGB32Float,  RGB32UInt,
+		RG32Float,   RG32UInt,
+		R32Float,    R32UInt,
+
+		RGBA32SInt,
+		RGB32SInt,
+		RG32SInt,
+		R32SInt,
 
 		RGBA8Unorm, RGBA8UInt,
 
@@ -53,5 +58,19 @@ namespace Fusion {
 		static constexpr EImageFlag AllowRenderTarget = (1 << 0);
 		static constexpr EImageFlag AllowDepthStencil = (1 << 1);
 	}
+
+	enum class EShaderVisibility
+	{
+		All,
+		Vertex,
+		Pixel
+	};
+
+	enum class EFilterMode
+	{
+		Nearest, Linear
+	};
+
+	enum class EImageAddressMode { Wrap, Mirror, Clamp, Border, MirrorOnce };
 
 }

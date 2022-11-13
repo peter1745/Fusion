@@ -18,6 +18,8 @@ namespace Fusion {
 		virtual Shared<Image2D> GetImage() const override { return m_Image; }
 		virtual const Texture2DInfo& GetInfo() const override { return m_CreateInfo; }
 
+		const auto& GetShaderResourceView() const { return m_ShaderResourceViewAllocation; }
+
 	private:
 		Texture2DInfo m_CreateInfo;
 		Shared<D3D12Image2D> m_Image;

@@ -7,6 +7,7 @@
 
 #include <dxgi1_6.h>
 #include <d3dcommon.h>
+#include <dxcapi.h>
 
 namespace Fusion {
 
@@ -60,11 +61,6 @@ namespace Fusion {
 		Vertex, Pixel
 	};
 
-	enum class EShaderComponentType
-	{
-		Unknown, UInt32, SInt32, Float32
-	};
-
 	enum class EShaderResourceType
 	{
 		ConstantBuffer,
@@ -88,7 +84,7 @@ namespace Fusion {
 		std::string SemanticName;
 		uint32_t SemanticIndex;
 		uint32_t Register;
-		EShaderComponentType ComponentType;
+		EFormat Format;
 	};
 
 	struct ShaderBufferVariableInfo
@@ -103,8 +99,10 @@ namespace Fusion {
 		std::string Name;
 		uint32_t BindingPoint;
 		uint32_t BindingCount;
+		uint32_t RegisterSpace;
 		uint32_t Size;
 		std::vector<ShaderBufferVariableInfo> Variables;
+		EShaderVisibility Visibility;
 	};
 
 	struct ShaderResourceInfo
@@ -113,6 +111,9 @@ namespace Fusion {
 		EShaderResourceType Type;
 		uint32_t BindingPoint;
 		uint32_t BindingCount;
+		uint32_t RegisterSpace;
+		EShaderVisibility Visibility;
+
 	};
 
 	struct ModuleReflectionData

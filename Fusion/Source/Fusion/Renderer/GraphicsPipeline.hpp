@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PipelineLayout.hpp"
 #include "CommandList.hpp"
 #include "Shader.hpp"
 
@@ -16,17 +15,7 @@ namespace Fusion {
 	enum class EWindingOrder { Clockwise, CounterClockwise };
 
 	static constexpr uint32_t AppendAlignedElement = 0xFFFFFFFF;
-
-	struct GraphicsPipelineInput
-	{
-		std::string Name;
-		uint32_t Index;
-		EFormat Format;
-		uint32_t Binding;
-		uint32_t Offset;
-		uint32_t InstanceStep;
-	};
-
+	
 	struct RenderTargetBlendStateInfo
 	{
 		bool EnableBlending = false;
@@ -34,12 +23,7 @@ namespace Fusion {
 
 	struct GraphicsPipelineInfo
 	{
-		PipelineLayout* Layout;
-		std::vector<GraphicsPipelineInput> Inputs;
-
 		Shared<Shader> PipelineShader;
-
-		// Blend State
 
 		EPrimitiveTopology PrimitiveTopology;
 		EWindingOrder WindingOrder;
@@ -50,12 +34,21 @@ namespace Fusion {
 		EFormat DepthStencilFormat;
 	};
 
+	struct ResourceInfo
+	{
+		std::string Name;
+		uint32_t BindingPoint;
+		EShaderVisibility Visibility;
+	};
+
 	class GraphicsPipeline : public SharedObject
 	{
 	public:
 		virtual ~GraphicsPipeline() = default;
 
 		virtual void Bind(CommandList* InCmdList) = 0;
+
+		virtual const ResourceInfo& GetResourceInfo(const std::string& InName) const = 0;
 
 		virtual const GraphicsPipelineInfo& GetInfo() const = 0;
 

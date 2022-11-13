@@ -4,7 +4,9 @@
 
 #include "D3D11GraphicsPipeline.hpp"
 #include "D3D11Buffer.hpp"
+#include "D3D11Texture.hpp"
 #include "D3D11DescriptorHeap.hpp"
+#include "D3D11Shader.hpp"
 
 namespace Fusion {
 
@@ -32,26 +34,49 @@ namespace Fusion {
 		m_DeviceContext->RSSetScissorRects(uint32_t(D3DScissorRects.size()), D3DScissorRects.data());
 	}
 
-	void D3D11CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, uint32_t InIndex, const Shared<Buffer>& InConstantBuffer)
+	void D3D11CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer)
 	{
 		auto Buffer = InConstantBuffer.As<D3D11Buffer>();
 
-		const auto& LayoutInfo = InPipeline->GetInfo().Layout->GetInfo();
-		const auto& Param = LayoutInfo.Parameters[InIndex];
-		const auto& ConstantBufferDescriptor = std::get<PipelineLayoutDescriptor>(Param.Value);
+		const auto& ConstantBufferInfo = InPipeline->GetResourceInfo(InName);
 
-		switch (Param.Visibility)
+		switch (ConstantBufferInfo.Visibility)
 		{
 		case EShaderVisibility::All:
-			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
-			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
+			m_DeviceContext->VSSetConstantBuffers(ConstantBufferInfo.BindingPoint, 1, Buffer->GetResource());
+			m_DeviceContext->PSSetConstantBuffers(ConstantBufferInfo.BindingPoint, 1, Buffer->GetResource());
 			break;
 		case EShaderVisibility::Vertex:
-			m_DeviceContext->VSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
+			m_DeviceContext->VSSetConstantBuffers(ConstantBufferInfo.BindingPoint, 1, Buffer->GetResource());
 			break;
 		case EShaderVisibility::Pixel:
-			m_DeviceContext->PSSetConstantBuffers(ConstantBufferDescriptor.Space, 1, Buffer->GetResource());
+			m_DeviceContext->PSSetConstantBuffers(ConstantBufferInfo.BindingPoint, 1, Buffer->GetResource());
 			break;
+		}
+	}
+
+	void D3D11CommandList::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture)
+	{
+		const auto& ResourceInfo = InPipeline->GetResourceInfo(InName);
+
+		switch (ResourceInfo.Visibility)
+		{
+		case EShaderVisibility::All:
+		{
+			m_DeviceContext->VSSetShaderResources(ResourceInfo.BindingPoint, 1, InTexture.As<D3D11Texture2D>()->GetShaderResourceView());
+			m_DeviceContext->PSSetShaderResources(ResourceInfo.BindingPoint, 1, InTexture.As<D3D11Texture2D>()->GetShaderResourceView());
+			break;
+		}
+		case EShaderVisibility::Pixel:
+		{
+			m_DeviceContext->PSSetShaderResources(ResourceInfo.BindingPoint, 1, InTexture.As<D3D11Texture2D>()->GetShaderResourceView());
+			break;
+		}
+		case EShaderVisibility::Vertex:
+		{
+			m_DeviceContext->VSSetShaderResources(ResourceInfo.BindingPoint, 1, InTexture.As<D3D11Texture2D>()->GetShaderResourceView());
+			break;
+		}
 		}
 	}
 

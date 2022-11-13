@@ -48,13 +48,6 @@ namespace Fusion {
 		{ D3D_CT_RESOURCE_BIND_INFO, "Resource Bind Info" }
 	};
 
-	static std::unordered_map<D3D_REGISTER_COMPONENT_TYPE, const char*> s_ComponentTypeNames = {
-		{ D3D_REGISTER_COMPONENT_UNKNOWN, "Unknown" },
-		{ D3D_REGISTER_COMPONENT_UINT32, "UINT32" },
-		{ D3D_REGISTER_COMPONENT_SINT32, "SINT32" },
-		{ D3D_REGISTER_COMPONENT_FLOAT32, "FLOAT32" }
-	};
-
 	static std::unordered_map<D3D_SHADER_INPUT_TYPE, EShaderResourceType> s_ShaderInputTypeToResourceType = {
 		{ D3D_SIT_CBUFFER, EShaderResourceType::ConstantBuffer },
 		{ D3D_SIT_TBUFFER, EShaderResourceType::TextureBuffer },
@@ -72,12 +65,130 @@ namespace Fusion {
 		{ D3D_SIT_UAV_FEEDBACKTEXTURE, EShaderResourceType::UAVFeedbackTexture },
 	};
 
+	static EFormat GetFormatForSignatureElement(const D3D11_SIGNATURE_PARAMETER_DESC& InElementDesc)
+	{
+		uint32_t ComponentCount = 0;
+		// Why can't we just retrieve the component count...?
+		if (InElementDesc.Mask & D3D_COMPONENT_MASK_X) ComponentCount++;
+		if (InElementDesc.Mask & D3D_COMPONENT_MASK_Y) ComponentCount++;
+		if (InElementDesc.Mask & D3D_COMPONENT_MASK_Z) ComponentCount++;
+		if (InElementDesc.Mask & D3D_COMPONENT_MASK_W) ComponentCount++;
+
+		switch (InElementDesc.ComponentType)
+		{
+		case D3D10_REGISTER_COMPONENT_UNKNOWN: return EFormat::Unknown;
+		case D3D10_REGISTER_COMPONENT_UINT32:
+		{
+			switch (ComponentCount)
+			{
+			case 1: return EFormat::R32UInt;
+			case 2: return EFormat::RG32UInt;
+			case 3: return EFormat::RGB32UInt;
+			case 4: return EFormat::RGBA32UInt;
+			}
+			break;
+		}
+		case D3D10_REGISTER_COMPONENT_SINT32:
+		{
+			switch (ComponentCount)
+			{
+			case 1: return EFormat::R32SInt;
+			case 2: return EFormat::RG32SInt;
+			case 3: return EFormat::RGB32SInt;
+			case 4: return EFormat::RGBA32SInt;
+			}
+			break;
+		}
+		case D3D10_REGISTER_COMPONENT_FLOAT32:
+		{
+			switch (ComponentCount)
+			{
+			case 1: return EFormat::R32Float;
+			case 2: return EFormat::RG32Float;
+			case 3: return EFormat::RGB32Float;
+			case 4: return EFormat::RGBA32Float;
+			}
+			break;
+		}
+		}
+
+		return EFormat::Unknown;
+	}
+
 	Shared<Shader> D3D11ShaderCompiler::CreateShader(const std::filesystem::path& InFilePath)
 	{
 		CompiledShaderData CompiledData = {};
 
 		TryCompileAndReflectModule(InFilePath, EShaderType::Vertex, CompiledData);
 		TryCompileAndReflectModule(InFilePath, EShaderType::Pixel, CompiledData);
+
+		// Determine shader visibility of all constant buffers in this shader
+		std::unordered_map<std::string, std::vector<ShaderConstantBufferInfo*>> ProcessedConstantBuffers;
+		for (auto& [ShaderType, ReflectionData] : CompiledData.ReflectionData)
+		{
+			for (auto& ConstantBuffer : ReflectionData.ConstantBuffers)
+			{
+				if (ProcessedConstantBuffers.find(ConstantBuffer.Name) != ProcessedConstantBuffers.end())
+				{
+					ConstantBuffer.Visibility = EShaderVisibility::All;
+
+					for (auto* PrevConstantBuffer : ProcessedConstantBuffers.at(ConstantBuffer.Name))
+						PrevConstantBuffer->Visibility = EShaderVisibility::All;
+				}
+				else
+				{
+					switch (ShaderType)
+					{
+					case EShaderType::Vertex:
+					{
+						ConstantBuffer.Visibility = EShaderVisibility::Vertex;
+						break;
+					}
+					case EShaderType::Pixel:
+					{
+						ConstantBuffer.Visibility = EShaderVisibility::Pixel;
+						break;
+					}
+					}
+
+					ProcessedConstantBuffers[ConstantBuffer.Name].push_back(&ConstantBuffer);
+				}
+			}
+		}
+
+		// Determine shader visibility of all other resources in this shader
+		std::unordered_map<std::string, std::vector<ShaderResourceInfo*>> ProcessedResources;
+		for (auto& [ShaderType, ReflectionData] : CompiledData.ReflectionData)
+		{
+			for (auto& Resource : ReflectionData.Resources)
+			{
+				if (ProcessedResources.find(Resource.Name) != ProcessedResources.end())
+				{
+					Resource.Visibility = EShaderVisibility::All;
+
+					for (auto* PrevResource : ProcessedResources.at(Resource.Name))
+						PrevResource->Visibility = EShaderVisibility::All;
+				}
+				else
+				{
+					switch (ShaderType)
+					{
+					case EShaderType::Vertex:
+					{
+						Resource.Visibility = EShaderVisibility::Vertex;
+						break;
+					}
+					case EShaderType::Pixel:
+					{
+						Resource.Visibility = EShaderVisibility::Pixel;
+						break;
+					}
+					}
+
+					ProcessedResources[Resource.Name].push_back(&Resource);
+				}
+			}
+		}
 
 		return Shared<D3D11Shader>::Create(CompiledData);
 	}
@@ -102,7 +213,6 @@ namespace Fusion {
 				FUSION_CORE_INFO("\tSemantic Name: {}", InputParam.SemanticName);
 				FUSION_CORE_INFO("\tSemantic Index: {}", InputParam.SemanticIndex);
 				FUSION_CORE_INFO("\tRegister: {}", InputParam.Register);
-				FUSION_CORE_INFO("\tComponent Type: {}", s_ComponentTypeNames.at(static_cast<D3D_REGISTER_COMPONENT_TYPE>(InputParam.ComponentType)));
 				FUSION_CORE_INFO("\t--------------------");
 			}
 
@@ -133,6 +243,15 @@ namespace Fusion {
 				FUSION_CORE_INFO("\tType: {}", s_ShaderInputTypeNames.at(static_cast<D3D_SHADER_INPUT_TYPE>(ResourceInfo.Type)));
 				FUSION_CORE_INFO("\tBinding Point: {}", ResourceInfo.BindingPoint);
 				FUSION_CORE_INFO("\tBinding Count: {}", ResourceInfo.BindingCount);
+				FUSION_CORE_INFO("\t--------------------");
+			}
+
+			FUSION_CORE_INFO("Output Parameters:");
+			for (const auto& OutputParam : ModuleReflectionInfo.OutputParameters)
+			{
+				FUSION_CORE_INFO("\tSemantic Name: {}", OutputParam.SemanticName);
+				FUSION_CORE_INFO("\tSemantic Index: {}", OutputParam.SemanticIndex);
+				FUSION_CORE_INFO("\tRegister: {}", OutputParam.Register);
 				FUSION_CORE_INFO("\t--------------------");
 			}
 		}
@@ -188,22 +307,7 @@ namespace Fusion {
 			InputParamInfo.SemanticName = SignatureDesc.SemanticName;
 			InputParamInfo.SemanticIndex = SignatureDesc.SemanticIndex;
 			InputParamInfo.Register = SignatureDesc.Register;
-
-			switch (SignatureDesc.ComponentType)
-			{
-			case D3D10_REGISTER_COMPONENT_UNKNOWN:
-				InputParamInfo.ComponentType = EShaderComponentType::Unknown;
-				break;
-			case D3D10_REGISTER_COMPONENT_UINT32:
-				InputParamInfo.ComponentType = EShaderComponentType::UInt32;
-				break;
-			case D3D10_REGISTER_COMPONENT_SINT32:
-				InputParamInfo.ComponentType = EShaderComponentType::SInt32;
-				break;
-			case D3D10_REGISTER_COMPONENT_FLOAT32:
-				InputParamInfo.ComponentType = EShaderComponentType::Float32;
-				break;
-			}
+			InputParamInfo.Format = GetFormatForSignatureElement(SignatureDesc);
 		}
 
 		std::unordered_map<std::string, ShaderConstantBufferInfo*> ConstantBufferInfos;
@@ -271,22 +375,7 @@ namespace Fusion {
 			OutputParamInfo.SemanticName = SignatureDesc.SemanticName;
 			OutputParamInfo.SemanticIndex = SignatureDesc.SemanticIndex;
 			OutputParamInfo.Register = SignatureDesc.Register;
-
-			switch (SignatureDesc.ComponentType)
-			{
-			case D3D_REGISTER_COMPONENT_UNKNOWN:
-				OutputParamInfo.ComponentType = EShaderComponentType::Unknown;
-				break;
-			case D3D_REGISTER_COMPONENT_UINT32:
-				OutputParamInfo.ComponentType = EShaderComponentType::UInt32;
-				break;
-			case D3D_REGISTER_COMPONENT_SINT32:
-				OutputParamInfo.ComponentType = EShaderComponentType::SInt32;
-				break;
-			case D3D_REGISTER_COMPONENT_FLOAT32:
-				OutputParamInfo.ComponentType = EShaderComponentType::Float32;
-				break;
-			}
+			OutputParamInfo.Format = GetFormatForSignatureElement(SignatureDesc);
 		}
 	}
 

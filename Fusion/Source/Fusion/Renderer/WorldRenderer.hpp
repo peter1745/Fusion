@@ -31,7 +31,6 @@ namespace Fusion {
 
 	private:
 		Shared<World> m_World = nullptr;
-		Unique<PipelineLayout> m_PipelineLayout = nullptr;
 		Unique<GraphicsPipeline> m_Pipeline = nullptr;
 		Shared<Buffer> m_TransformBuffer = nullptr;
 		Shared<Buffer> m_TransformUploadBuffer = nullptr;

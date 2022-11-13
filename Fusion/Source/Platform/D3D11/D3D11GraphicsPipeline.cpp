@@ -53,8 +53,6 @@ namespace Fusion {
 		auto Context = GraphicsContext::Get<D3D11Context>();
 		auto& Device = Context->GetDevice();
 
-		const auto& PipelineLayoutInfo = InCreateInfo.Layout->GetInfo();
-
 		auto D3DShader = m_CreateInfo.PipelineShader.As<D3D11Shader>();
 
 		D3D11_BLEND_DESC BlendDesc = {};
@@ -105,40 +103,66 @@ namespace Fusion {
 		DepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 		Device->CreateDepthStencilState(&DepthStencilDesc, m_DepthStencilState);
 
-		std::vector<D3D11_INPUT_ELEMENT_DESC> InputElements(InCreateInfo.Inputs.size());
-		for (size_t Idx = 0; Idx < InCreateInfo.Inputs.size(); Idx++)
+		const auto& VertexReflectionData = D3DShader->GetReflectedModules().at(EShaderType::Vertex);
+
+		std::vector<D3D11_INPUT_ELEMENT_DESC> InputElements(VertexReflectionData.InputParameters.size());
+		for (size_t Idx = 0; Idx < VertexReflectionData.InputParameters.size(); Idx++)
 		{
-			const auto& InputData = InCreateInfo.Inputs[Idx];
+			const auto& InputData = VertexReflectionData.InputParameters[Idx];
 			auto& InputElement = InputElements[Idx];
-			InputElement.SemanticName = InputData.Name.c_str();
-			InputElement.SemanticIndex = InputData.Index;
+			InputElement.SemanticName = InputData.SemanticName.c_str();
+			InputElement.SemanticIndex = InputData.SemanticIndex;
 			InputElement.Format = EFormatToDXGIFormat(InputData.Format);
-			InputElement.InputSlot = InputData.Binding;
-			InputElement.AlignedByteOffset = InputData.Offset;
-			InputElement.InputSlotClass = InputData.InstanceStep == 0 ? D3D11_INPUT_PER_VERTEX_DATA : D3D11_INPUT_PER_INSTANCE_DATA;
-			InputElement.InstanceDataStepRate = InputData.InstanceStep;
+			InputElement.InputSlot = 0;
+			InputElement.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+			InputElement.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;// InputData.InstanceStep == 0 ? D3D11_INPUT_PER_VERTEX_DATA : D3D11_INPUT_PER_INSTANCE_DATA;
+			InputElement.InstanceDataStepRate = 0;// InputData.InstanceStep;
 		}
 
-		m_SamplerStates.resize(PipelineLayoutInfo.StaticSamplers.size());
-		for (size_t Idx = 0; Idx < PipelineLayoutInfo.StaticSamplers.size(); Idx++)
+		for (const auto& [ShaderType, ReflectionData] : D3DShader->GetReflectedModules())
 		{
-			const auto& SamplerInfo = PipelineLayoutInfo.StaticSamplers[Idx];
+			for (const auto& Resource : ReflectionData.ConstantBuffers)
+			{
+				if (ShaderType != EShaderType::Vertex && Resource.Visibility == EShaderVisibility::All)
+					continue;
 
-			D3D11_SAMPLER_DESC SamplerDesc = {};
-			SamplerDesc.Filter = FilterModesToD3D11Filter(SamplerInfo.MinFilter, SamplerInfo.MagFilter);
-			SamplerDesc.AddressU = EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeU);
-			SamplerDesc.AddressV = EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeV);
-			SamplerDesc.AddressW = EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeW);
-			SamplerDesc.MipLODBias = 0;
-			SamplerDesc.BorderColor[0] = 0.0f;
-			SamplerDesc.BorderColor[1] = 0.0f;
-			SamplerDesc.BorderColor[2] = 0.0f;
-			SamplerDesc.BorderColor[3] = 1.0f;
-			SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			SamplerDesc.MinLOD = 0.0f;
-			SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+				ResourceInfo& Info = m_Resources[Resource.Name];
+				Info.Name = Resource.Name;
+				Info.BindingPoint = Resource.BindingPoint;
+				Info.Visibility = Resource.Visibility;
+			}
 
-			Device->CreateSamplerState(&SamplerDesc, m_SamplerStates[Idx]);
+			for (const auto& Resource : ReflectionData.Resources)
+			{
+				if (ShaderType != EShaderType::Vertex && Resource.Visibility == EShaderVisibility::All)
+					continue;
+
+				ResourceInfo& Info = m_Resources[Resource.Name];
+				Info.Name = Resource.Name;
+				Info.BindingPoint = Resource.BindingPoint;
+				Info.Visibility = Resource.Visibility;
+
+				if (Resource.Type != EShaderResourceType::Sampler)
+					continue;
+
+				D3D11_SAMPLER_DESC SamplerDesc = {};
+				SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;// FilterModesToD3D11Filter(SamplerInfo.MinFilter, SamplerInfo.MagFilter);
+				SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;// EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeU);
+				SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;// EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeV);
+				SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;// EImageAddressModeToD3D11AddressMode(SamplerInfo.AddressModeW);
+				SamplerDesc.MipLODBias = 0;
+				SamplerDesc.BorderColor[0] = 0.0f;
+				SamplerDesc.BorderColor[1] = 0.0f;
+				SamplerDesc.BorderColor[2] = 0.0f;
+				SamplerDesc.BorderColor[3] = 1.0f;
+				SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+				SamplerDesc.MinLOD = 0.0f;
+				SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+				auto& SamplerState = m_SamplerStates.emplace_back();
+				SamplerState.Visibility = Resource.Visibility;
+				Device->CreateSamplerState(&SamplerDesc, SamplerState.State);
+			}
 		}
 
 		auto VertexByteCode = D3DShader->GetByteCode(EShaderType::Vertex);
@@ -165,28 +189,24 @@ namespace Fusion {
 
 		// Bind samplers
 		{
-			const auto& PipelineLayoutInfo = m_CreateInfo.Layout->GetInfo();
-
-			for (size_t Idx = 0; Idx < m_SamplerStates.size(); Idx++)
+			for (auto& SamplerInfo : m_SamplerStates)
 			{
-				const auto& SamplerInfo = PipelineLayoutInfo.StaticSamplers[Idx];
-
-				switch (PipelineLayoutInfo.StaticSamplers[Idx].Visibility)
+				switch (SamplerInfo.Visibility)
 				{
 				case EShaderVisibility::All:
 				{
-					NativeList->VSSetSamplers(SamplerInfo.Binding, 1, m_SamplerStates[Idx]);
-					NativeList->PSSetSamplers(SamplerInfo.Binding, 1, m_SamplerStates[Idx]);
+					NativeList->VSSetSamplers(SamplerInfo.BindingPoint, 1, SamplerInfo.State);
+					NativeList->PSSetSamplers(SamplerInfo.BindingPoint, 1, SamplerInfo.State);
 					break;
 				}
 				case EShaderVisibility::Vertex:
 				{
-					NativeList->VSSetSamplers(SamplerInfo.Binding, 1, m_SamplerStates[Idx]);
+					NativeList->VSSetSamplers(SamplerInfo.BindingPoint, 1, SamplerInfo.State);
 					break;
 				}
 				case EShaderVisibility::Pixel:
 				{
-					NativeList->PSSetSamplers(SamplerInfo.Binding, 1, m_SamplerStates[Idx]);
+					NativeList->PSSetSamplers(SamplerInfo.BindingPoint, 1, SamplerInfo.State);
 					break;
 				}
 				}

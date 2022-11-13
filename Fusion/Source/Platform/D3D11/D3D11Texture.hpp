@@ -18,6 +18,9 @@ namespace Fusion {
 		virtual Shared<Image2D> GetImage() const override { return nullptr; }
 		virtual const Texture2DInfo& GetInfo() const override { return m_CreateInfo; }
 
+		auto& GetShaderResourceView() { return m_ShaderResourceView; }
+		const auto& GetShaderResourceView() const { return m_ShaderResourceView; }
+
 	private:
 		Texture2DInfo m_CreateInfo;
 		Shared<D3D11Image2D> m_Image = nullptr;

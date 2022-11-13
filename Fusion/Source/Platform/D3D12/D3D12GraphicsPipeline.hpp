@@ -14,11 +14,30 @@ namespace Fusion {
 
 		virtual void Bind(CommandList* InCmdLists) override;
 
+		virtual const ResourceInfo& GetResourceInfo(const std::string& InName) const override
+		{
+			return m_Resources.at(InName);
+		}
+
 		virtual const GraphicsPipelineInfo& GetInfo() const override { return m_CreateInfo; }
 
 	private:
+		struct RootSignatureData
+		{
+			std::vector<D3D12_ROOT_PARAMETER1> Parameters;
+			std::vector<D3D12_STATIC_SAMPLER_DESC> StaticSamplers;
+			std::vector<D3D12_DESCRIPTOR_RANGE1> DescriptorRanges;
+		};
+
+		void CreateRootSignature(const Shared<Shader>& InShader);
+		void ProcessShaderModule(EShaderType InModuleType, const ModuleReflectionData& InReflectionData, RootSignatureData& InData);
+
+	private:
 		GraphicsPipelineInfo m_CreateInfo;
+		D3DComPtr<ID3D12RootSignature> m_PipelineRootSignature;
 		D3DComPtr<ID3D12PipelineState> m_Pipeline;
+
+		std::unordered_map<std::string, ResourceInfo> m_Resources;
 	};
 
 }

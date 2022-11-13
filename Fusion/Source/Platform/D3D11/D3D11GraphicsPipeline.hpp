@@ -13,6 +13,10 @@ namespace Fusion {
 		~D3D11GraphicsPipeline();
 
 		virtual void Bind(CommandList* InCmdList) override;
+		virtual const ResourceInfo& GetResourceInfo(const std::string& InName) const override
+		{
+			return m_Resources.at(InName);
+		}
 
 		virtual const GraphicsPipelineInfo& GetInfo() const override { return m_CreateInfo; }
 
@@ -23,7 +27,15 @@ namespace Fusion {
 		D3DComPtr<ID3D11DepthStencilState> m_DepthStencilState;
 		D3DComPtr<ID3D11InputLayout> m_InputLayout;
 
-		std::vector<D3DComPtr<ID3D11SamplerState>> m_SamplerStates;
+		struct SamplerContainer
+		{
+			D3DComPtr<ID3D11SamplerState> State;
+			uint32_t BindingPoint;
+			EShaderVisibility Visibility;
+		};
+		std::vector<SamplerContainer> m_SamplerStates;
+
+		std::unordered_map<std::string, ResourceInfo> m_Resources;
 	};
 
 }

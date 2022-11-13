@@ -16,52 +16,7 @@ namespace Fusion {
 	{
 		Compiler = ShaderCompiler::Create();
 
-		PipelineLayoutInfo LayoutInfo = {};
-		LayoutInfo.Flags |= PipelineLayoutFlags::AllowInputAssemblerInputLayout;
-
-		PipelineLayoutParameter TransformBufferParam = {};
-		TransformBufferParam.Type = EPipelineParameterType::ConstantBufferView;
-		TransformBufferParam.Visibility = EShaderVisibility::All;
-		TransformBufferParam.Value = PipelineLayoutDescriptor{ 0, 0 };
-		LayoutInfo.Parameters.push_back(TransformBufferParam);
-
-		PipelineLayoutDescriptorTable PixelDescriptorTable = {};
-		PipelineLayoutDescriptorRange TextureDescriptor = {};
-		TextureDescriptor.Type = EPipelineLayoutDescriptorRangeType::ShaderResourceView;
-		TextureDescriptor.NumDescriptors = 1;
-		TextureDescriptor.Binding = 0;
-		TextureDescriptor.Space = 0;
-		TextureDescriptor.Offset = 0;
-		TextureDescriptor.Flags = DescriptorRangeFlags::StaticData;
-		PixelDescriptorTable.Ranges.push_back(TextureDescriptor);
-
-		PipelineLayoutParameter PixelDescriptorTableParam = {};
-		PixelDescriptorTableParam.Type = EPipelineParameterType::DescriptorTable;
-		PixelDescriptorTableParam.Visibility = EShaderVisibility::Pixel;
-		PixelDescriptorTableParam.Value = PixelDescriptorTable;
-		LayoutInfo.Parameters.push_back(PixelDescriptorTableParam);
-
-		PipelineStaticSampler Sampler = {};
-		Sampler.MinFilter = EFilterMode::Nearest;
-		Sampler.MagFilter = EFilterMode::Nearest;
-		Sampler.AddressModeU = EImageAddressMode::Clamp;
-		Sampler.AddressModeV = EImageAddressMode::Clamp;
-		Sampler.AddressModeW = EImageAddressMode::Clamp;
-		Sampler.Binding = 0;
-		Sampler.Register = 0;
-		Sampler.Visibility = EShaderVisibility::Pixel;
-		LayoutInfo.StaticSamplers = { Sampler };
-
-		m_PipelineLayout = PipelineLayout::Create(LayoutInfo);
-
 		GraphicsPipelineInfo PipelineInfo = {};
-		PipelineInfo.Layout = m_PipelineLayout.get();
-		PipelineInfo.Inputs = {
-			{ "POSITION", 0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
-			{ "NORMAL",   0, EFormat::RGB32Float, 0, AppendAlignedElement, 0 },
-			{ "TEXCOORD", 0, EFormat::RG32Float,  0, AppendAlignedElement, 0 },
-		};
-
 		PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.hlsl");
 		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
 		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
@@ -116,14 +71,13 @@ namespace Fusion {
 				* glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformData.ActorID = Actor->GetActorID();
 			m_TransformBuffer->SetData(CmdList, &m_TransformData, m_TransformUploadBuffer);
-			CmdList->SetConstantBuffer(m_Pipeline.get(), 0, m_TransformBuffer);
+			CmdList->SetConstantBuffer(m_Pipeline.get(), "TransformData", m_TransformBuffer);
 
 			VertexBufferView View = {};
 			View.VertexBuffer = ActorMesh->GetMesh()->GetVertexBuffer();
 			View.VertexStride = sizeof(Vertex);
 			CmdList->SetVertexBuffer(View);
-			
-			Texture->Bind(0);
+			CmdList->SetTexture(m_Pipeline.get(), "InTexture", Texture);
 
 			IndexBufferView IndexView = {};
 			IndexView.IndexBuffer = ActorMesh->GetMesh()->GetIndexBuffer();

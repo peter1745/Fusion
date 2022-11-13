@@ -23,6 +23,8 @@ namespace Fusion {
 			return m_CompiledShaderData.CompiledByteCodes[InModuleType];
 		}
 
+		const auto& GetReflectedModules() const { return m_CompiledShaderData.ReflectionData; }
+
 	private:
 		CompiledShaderData m_CompiledShaderData;
 	};
