@@ -43,4 +43,6 @@ namespace Fusion {
 		friend class World;
 	};
 
+	using SharedActor = Shared<Actor>;
+
 }

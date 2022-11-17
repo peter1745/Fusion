@@ -53,6 +53,8 @@ namespace FusionEditor {
 		m_World = Shared<World>::Create("Empty World");
 		m_WindowManager = MakeUnique<WindowManager>();
 
+		m_ActorSelectionManager = ActorSelectionManager::Create();
+
 		InitWindows();
 
 		m_Context->GetCurrentCommandList()->EndRecording();
@@ -104,9 +106,9 @@ namespace FusionEditor {
 
 	void FusionEditorApp::InitWindows()
 	{
-		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World);
-		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true);
-		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World);
+		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World, m_ActorSelectionManager);
+		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true, m_ActorSelectionManager);
+		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
 		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 
@@ -405,7 +407,7 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 	specification.Title = "Fusion Editor";
 
 	auto& RenderSettings = Fusion::RenderSettings::Get();
-	RenderSettings.API = ERendererAPI::D3D12;
+	RenderSettings.API = ERendererAPI::D3D11;
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

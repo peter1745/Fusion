@@ -13,13 +13,13 @@
 
 namespace FusionEditor {
 
-	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld)
-		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720)
+	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, const ActorSelectionManager& InSelectionCtx)
+		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720), m_SelectionManager(InSelectionCtx)
 	{
 		SetTitle("Viewport");
 
-		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
-		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(EditorViewportWindow::OnSelectionChanged));
+		m_SelectionManager->AddSelectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorSelected));
+		m_SelectionManager->AddDeselectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorDeselected));
 
 		Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
 		StagingBufferCreateInfo.Format = Fusion::EFormat::RG32UInt;
@@ -39,7 +39,12 @@ namespace FusionEditor {
 			m_StagingBuffer->Unmap(BufferStart);
 			m_ShouldCopyFromBuffer = false;
 
-			FUSION_CORE_INFO("Actor ID: {}", uint64_t(SelectedActorID));
+			auto Actor = m_World->FindActorWithID(SelectedActorID);
+
+			m_SelectionManager->DeselectAll();
+
+			if (Actor)
+				m_SelectionManager->Select(SelectedActorID, Actor);
 		}
 
 		m_Camera.SetActive(IsMouseInside() && IsTabActive());
@@ -59,7 +64,9 @@ namespace FusionEditor {
 	{
 		ViewportWindowBase::RenderContents();
 
-		if (m_ActiveGizmoType == EGizmoType::None || m_SelectedActor == nullptr)
+		const auto& SelectedActors = m_SelectionManager->All();
+
+		if (m_ActiveGizmoType == EGizmoType::None || SelectedActors.empty())
 			return;
 
 		ImGuizmo::OPERATION CurrentOperation = (ImGuizmo::OPERATION)-1;
@@ -84,29 +91,35 @@ namespace FusionEditor {
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-		Fusion::TransformComponent* ActorTransformComp = m_SelectedActor->FindComponent<Fusion::TransformComponent>();
-
 		const glm::mat4& ViewMatrix = m_Camera.GetViewMatrix();
 		const glm::mat4& ProjectionMatrix = m_Camera.GetProjectionMatrix();
-		glm::mat4 ActorTransformMatrix =
-			  glm::translate(glm::mat4(1.0f), ActorTransformComp->Location)
-			* glm::toMat4(ActorTransformComp->GetRotation())
-			* glm::scale(glm::mat4(1.0f), ActorTransformComp->Scale);
+
+		glm::mat4 GizmoTransform = CalculateGizmoTransform();
+		glm::mat4 DeltaTransform = glm::mat4(1.0f);
 
 		bool TransformChanged = ImGuizmo::Manipulate(
 			glm::value_ptr(ViewMatrix),
 			glm::value_ptr(ProjectionMatrix),
 			CurrentOperation,
 			CurrentMode,
-			glm::value_ptr(ActorTransformMatrix));
+			glm::value_ptr(GizmoTransform),
+			glm::value_ptr(DeltaTransform));
 
 		if (TransformChanged)
 		{
-			glm::quat Rotation;
-			glm::vec3 Skew;
-			glm::vec4 Perspective;
-			glm::decompose(ActorTransformMatrix, ActorTransformComp->Scale, Rotation, ActorTransformComp->Location, Skew, Perspective);
-			ActorTransformComp->SetRotation(Rotation);
+			glm::vec3 DeltaTranslation, DeltaScale;
+			glm::quat DeltaRotation;
+			glm::vec3 DeltaSkew;
+			glm::vec4 DeltaPerspective;
+			glm::decompose(DeltaTransform, DeltaScale, DeltaRotation, DeltaTranslation, DeltaSkew, DeltaPerspective);
+			
+			for (auto [ActorID, Actor] : SelectedActors)
+			{
+				Fusion::TransformComponent* ActorTransformComp = Actor->FindComponent<Fusion::TransformComponent>();
+				ActorTransformComp->Location += DeltaTranslation;
+				ActorTransformComp->Scale *= DeltaScale;
+				ActorTransformComp->SetRotation(DeltaRotation * ActorTransformComp->GetRotation());
+			}
 		}
 	}
 
@@ -147,6 +160,25 @@ namespace FusionEditor {
 			return;
 
 		m_Camera.SetViewportSize(InWidth, InHeight);
+	}
+
+	glm::mat4 EditorViewportWindow::CalculateGizmoTransform() const
+	{
+		const auto& SelectedActors = m_SelectionManager->All();
+
+		glm::vec3 MedianLocation(0.0f), MedianScale(0.0f);
+
+		for (const auto& [ActorID, Actor] : SelectedActors)
+		{
+			const Fusion::TransformComponent* ActorTransform = Actor->FindComponent<Fusion::TransformComponent>();
+			MedianLocation += ActorTransform->Location;
+			MedianScale += ActorTransform->Scale;
+		}
+
+		MedianLocation /= SelectedActors.size();
+		MedianScale /= SelectedActors.size();
+
+		return glm::translate(glm::mat4(1.0f), MedianLocation) * glm::scale(glm::mat4(1.0f), MedianScale);
 	}
 
 	bool EditorViewportWindow::OnKeyPressed(Fusion::KeyPressedEvent& InEvent)
@@ -198,9 +230,13 @@ namespace FusionEditor {
 		return ConsumeKeyPress;
 	}
 
-	void EditorViewportWindow::OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor)
+	void EditorViewportWindow::OnActorSelected(Fusion::Shared<Fusion::Actor> InActor)
 	{
-		m_SelectedActor = InActor;
+	}
+
+	void EditorViewportWindow::OnActorDeselected(Fusion::Shared<Fusion::Actor> InActor)
+	{
+
 	}
 
 }

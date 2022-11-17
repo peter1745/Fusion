@@ -18,6 +18,7 @@ namespace Fusion {
 		virtual void SetViewports(const std::vector<Viewport>& InViewports) override;
 
 		virtual void SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer) override;
+
 		virtual void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture) override;
 		virtual void SetVertexBuffer(const VertexBufferView& InBufferView) override;
 

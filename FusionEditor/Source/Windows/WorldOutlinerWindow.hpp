@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EditorWindow.hpp"
+#include "IO/Selection/SelectionManager.hpp"
 
 #include "Fusion/World/World.hpp"
 #include "Fusion/STL/FunctionList.hpp"
@@ -10,12 +11,8 @@ namespace FusionEditor {
 	class WorldOutlinerWindow : public EditorWindow
 	{
 	public:
-		using SelectionCallbackList = Fusion::FunctionList<void(Fusion::Shared<Fusion::Actor>)>;
-	public:
-		WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld);
+		WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld, const ActorSelectionManager& InSelectionCtx);
 		virtual ~WorldOutlinerWindow();
-
-		SelectionCallbackList& GetSelectionCallbackList() { return m_SelectionCallbacks; }
 
 		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
 
@@ -27,8 +24,9 @@ namespace FusionEditor {
 
 	private:
 		Fusion::Shared<Fusion::World> m_World = nullptr;
-		Fusion::Shared<Fusion::Actor> m_DeletedActor = nullptr;
-		SelectionCallbackList m_SelectionCallbacks;
+		ActorSelectionManager m_SelectionManager;
+
+		Fusion::SharedActor m_DeletedActor = nullptr;
 	};
 
 }

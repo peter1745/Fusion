@@ -13,13 +13,13 @@ namespace FusionEditor {
 
 	using namespace Fusion;
 
-	ActorDetailsWindow::ActorDetailsWindow()
-		: EditorWindow("ActorDetailsWindowID")
+	ActorDetailsWindow::ActorDetailsWindow(const ActorSelectionManager& InSelectionManager)
+		: EditorWindow("ActorDetailsWindowID"), m_SelectionManager(InSelectionManager)
 	{
 		SetTitle("Actor Details");
 
-		auto WorldOutliner = WindowManager::Get()->GetWindowOfType<WorldOutlinerWindow>();
-		WorldOutliner->GetSelectionCallbackList().AddFunction(FUSION_BIND_FUNC(ActorDetailsWindow::OnSelectionChanged));
+		m_SelectionManager->AddSelectionCallback(FUSION_BIND_FUNC(ActorDetailsWindow::OnActorSelected));
+		m_SelectionManager->AddDeselectionCallback(FUSION_BIND_FUNC(ActorDetailsWindow::OnActorDeselected));
 	}
 
 	ActorDetailsWindow::~ActorDetailsWindow()
@@ -89,9 +89,20 @@ namespace FusionEditor {
 		ImGui::EndPopup();
 	}
 
-	void ActorDetailsWindow::OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor)
+	void ActorDetailsWindow::OnActorSelected(Fusion::Shared<Fusion::Actor> InActor)
 	{
 		m_CurrentActor = InActor;
+	}
+
+	void ActorDetailsWindow::OnActorDeselected(Fusion::Shared<Fusion::Actor> InActor)
+	{
+		if (m_CurrentActor == nullptr)
+			return;
+
+		if (m_CurrentActor != InActor)
+			return;
+
+		m_CurrentActor = nullptr;
 	}
 
 }

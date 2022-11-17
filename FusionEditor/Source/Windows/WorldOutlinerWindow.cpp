@@ -8,8 +8,8 @@
 
 namespace FusionEditor {
 
-	WorldOutlinerWindow::WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld)
-		: EditorWindow("WorldOutlinerWindow"), m_World(InWorld)
+	WorldOutlinerWindow::WorldOutlinerWindow(const Fusion::Shared<Fusion::World>& InWorld, const ActorSelectionManager& InSelectionCtx)
+		: EditorWindow("WorldOutlinerWindow"), m_World(InWorld), m_SelectionManager(InSelectionCtx)
 	{
 		SetTitle("World Outliner");
 	}
@@ -45,7 +45,7 @@ namespace FusionEditor {
 
 		if (m_DeletedActor)
 		{
-			m_SelectionCallbacks.Invoke(nullptr);
+			m_SelectionManager->Deselect(m_DeletedActor->GetActorID());
 			m_World->DestroyActor(m_DeletedActor->GetActorID());
 			m_DeletedActor = nullptr;
 		}
@@ -73,7 +73,10 @@ namespace FusionEditor {
 		}
 
 		if (IsOpen != WasOpen)
-			m_SelectionCallbacks.Invoke(InActor);
+		{
+			m_SelectionManager->DeselectAll();
+			m_SelectionManager->Select(InActor->GetActorID(), InActor);
+		}
 
 		if (!IsOpen)
 			return;

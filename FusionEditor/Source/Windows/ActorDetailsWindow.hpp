@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EditorWindow.hpp"
+#include "IO/Selection/SelectionManager.hpp"
 
 #include "Fusion/World/Actor.hpp"
 
@@ -9,7 +10,7 @@ namespace FusionEditor {
 	class ActorDetailsWindow : public EditorWindow
 	{
 	public:
-		ActorDetailsWindow();
+		ActorDetailsWindow(const ActorSelectionManager& InSelectionManager);
 		~ActorDetailsWindow();
 
 		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
@@ -43,9 +44,11 @@ namespace FusionEditor {
 			}
 		}
 
-		void OnSelectionChanged(Fusion::Shared<Fusion::Actor> InActor);
+		void OnActorSelected(Fusion::Shared<Fusion::Actor> InActor);
+		void OnActorDeselected(Fusion::Shared<Fusion::Actor> InActor);
 
 	private:
+		ActorSelectionManager m_SelectionManager = nullptr;
 		Fusion::Shared<Fusion::Actor> m_CurrentActor = nullptr;
 	};
 

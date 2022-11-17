@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xhash>
+
 namespace Fusion {
 
 	class UUID
@@ -27,7 +29,7 @@ namespace std {
 	{
 		size_t operator()(const Fusion::UUID& InUUID) const noexcept
 		{
-			return (uint64_t)InUUID;
+			return static_cast<size_t>(static_cast<uint64_t>(InUUID));
 		}
 	};
 

@@ -41,7 +41,6 @@ namespace Fusion {
 	void D3D12CommandList::SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer)
 	{
 		auto ConstantBuffer = InConstantBuffer.As<D3D12Buffer>();
-
 		const auto& ResourceInfo = InPipeline->GetResourceInfo(InName);
 		m_CommandList->SetGraphicsRootConstantBufferView(ResourceInfo.BindingPoint, ConstantBuffer->GetGPUBufferLocation());
 	}

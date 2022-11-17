@@ -46,6 +46,8 @@ namespace FusionEditor {
 		void DrawNewProjectPopup();
 
 	private:
+		ActorSelectionManager m_ActorSelectionManager = nullptr;
+
 		Shared<Mesh> m_CubeMesh = nullptr;
 		Shared<Texture2D> m_Texture = nullptr;
 
