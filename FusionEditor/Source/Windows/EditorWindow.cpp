@@ -13,7 +13,7 @@ namespace FusionEditor {
 		if (GImGui->CurrentWindow == nullptr)
 			return;
 
-		ImVec2 WindowPos = ImGui::GetCursorPos();
+		ImVec2 WindowPos = ImGui::GetWindowPos();
 		m_MinBound = ImGui::GetWindowContentRegionMin();
 		m_MinBound.x -= WindowPos.x;
 		m_MinBound.y += WindowPos.y;

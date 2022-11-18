@@ -18,6 +18,7 @@ project "FusionEditor"
     {
         "ImGui",
         "Fusion",
+        "Fission",
         "GLFW",
         "yaml-cpp",
         "NFD-Extended"
@@ -27,6 +28,7 @@ project "FusionEditor"
     {
         "%{wks.location}/FusionEditor/Source",
         "%{wks.location}/Fusion/Source",
+        "%{wks.location}/Fission/Source",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",

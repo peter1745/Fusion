@@ -34,7 +34,7 @@ namespace FusionEditor {
 
 		RenderComponentMenu();
 
-		ComponentUtils::All(m_CurrentActor, [InActor = m_CurrentActor]<typename TComponent>(TComponent* InComp) mutable
+		ComponentUtils::Each(m_CurrentActor, UI::UIEditableComponents{}, [InActor = m_CurrentActor]<typename TComponent>(TComponent * InComp) mutable
 		{
 			bool ShouldRender = true;
 			bool OpenContextMenu = false;
@@ -49,10 +49,10 @@ namespace FusionEditor {
 			if (OpenContextMenu)
 				ImGui::OpenPopup("ComponentContextMenu");
 
+			bool Removed = false;
+
 			if (ShouldRender)
 			{
-				bool Removed = false;
-
 				ComponentUI<TComponent>::Render(InActor, InComp);
 
 				if (UI::BeginPopup("ComponentContextMenu", 150.0f))
@@ -66,11 +66,12 @@ namespace FusionEditor {
 				}
 
 				UI::EndHeader();
-				ImGui::PopID();
-
-				if (Removed)
-					InActor->RemoveComponent<TComponent>();
 			}
+
+			ImGui::PopID();
+
+			if (Removed)
+				InActor->RemoveComponent<TComponent>();
 		});
 	}
 
@@ -85,6 +86,8 @@ namespace FusionEditor {
 		RenderComponentMenuItem<SpriteComponent>("Sprite");
 		RenderComponentMenuItem<CameraComponent>("Camera");
 		RenderComponentMenuItem<MeshComponent>("Mesh");
+		RenderComponentMenuItem<PhysicsBodyComponent>("Physics Body");
+		RenderComponentMenuItem<SphereShapeComponent>("Sphere Shape");
 
 		ImGui::EndPopup();
 	}

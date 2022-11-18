@@ -57,4 +57,14 @@ namespace FusionEditor {
 		}
 	}
 
+	void ComponentUI<Fusion::PhysicsBodyComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::PhysicsBodyComponent* InComp)
+	{
+		ImGui::DragFloat("Mass", &InComp->Mass);
+	}
+
+	void ComponentUI<Fusion::SphereShapeComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::SphereShapeComponent* InComp)
+	{
+		ImGui::DragFloat("Radius", &InComp->Radius);
+	}
+
 }

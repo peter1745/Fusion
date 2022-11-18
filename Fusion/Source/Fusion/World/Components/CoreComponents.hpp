@@ -72,4 +72,14 @@ namespace Fusion {
 		Shared<Texture2D> Texture = nullptr;
 	};
 
+	struct PhysicsBodyComponent : public BaseComponent
+	{
+		float Mass = 1.0f;
+	};
+
+	struct SphereShapeComponent : public BaseComponent
+	{
+		float Radius = 0.5f;
+	};
+
 }

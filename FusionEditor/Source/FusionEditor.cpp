@@ -63,6 +63,8 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
 	{
+		m_World->Simulate(DeltaTime);
+
 		// NextFrame also resets the active command list (should maybe be a separate call?)
 		m_Context->NextFrame();
 

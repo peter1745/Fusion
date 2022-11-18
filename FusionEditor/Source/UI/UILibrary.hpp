@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Fusion/STL/InitializerList.hpp"
+#include "Fusion/World/Components/AllComponents.hpp"
 
 #include <string_view>
 #include <format>
@@ -58,5 +59,14 @@ namespace FusionEditor::UI {
 
 		return ValueChanged;
 	}
+
+	using UIEditableComponents = Fusion::ComponentGroup<
+		Fusion::TransformComponent,
+		Fusion::SpriteComponent,
+		Fusion::CameraComponent,
+		Fusion::MeshComponent,
+		Fusion::PhysicsBodyComponent,
+		Fusion::SphereShapeComponent
+	>;
 
 }

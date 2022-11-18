@@ -45,4 +45,22 @@ namespace FusionEditor {
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp);
 	};
 
+	template<>
+	class ComponentUI<Fusion::PhysicsBodyComponent>
+	{
+	public:
+		static constexpr std::string_view DisplayName = "Physics Body";
+
+		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::PhysicsBodyComponent* InComp);
+	};
+
+	template<>
+	class ComponentUI<Fusion::SphereShapeComponent>
+	{
+	public:
+		static constexpr std::string_view DisplayName = "Sphere Shape";
+
+		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::SphereShapeComponent* InComp);
+	};
+
 }

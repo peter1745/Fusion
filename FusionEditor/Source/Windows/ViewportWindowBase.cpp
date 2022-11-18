@@ -42,8 +42,8 @@ namespace FusionEditor {
 		Fusion::Viewport WindowViewport = {};
 		WindowViewport.TopLeftX = 0.0f;
 		WindowViewport.TopLeftY = 0.0f;
-		WindowViewport.Width = GetWindowWidth();
-		WindowViewport.Height = GetWindowHeight();
+		WindowViewport.Width = m_RenderWidth;
+		WindowViewport.Height = m_RenderHeight;
 		WindowViewport.MinDepth = 0.0f;
 		WindowViewport.MaxDepth = 1.0f;
 
@@ -65,8 +65,8 @@ namespace FusionEditor {
 		auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		uint32_t FrameIndex = Context->GetCurrentFrameIndex();
 
-		uint32_t ViewportWidth = GetWindowWidth();
-		uint32_t ViewportHeight = GetWindowHeight();
+		uint32_t ViewportWidth = m_RenderWidth;// GetWindowWidth();
+		uint32_t ViewportHeight = m_RenderHeight;// GetWindowHeight();
 
 		const auto& ImageSize = m_RenderTexture->GetImage(0, FrameIndex)->GetSize();
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
@@ -87,8 +87,13 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::RenderContents()
 	{
-		ImVec2 MinBound = GetMinBound();
-		ImVec2 MaxBound = GetMaxBound();
+		ImVec2 MinBound = ImGui::GetCursorPos();
+		ImVec2 MaxBound = ImGui::GetContentRegionMax();
+
+		m_MinRenderBoundX = MinBound.x;
+		m_MinRenderBoundY = MinBound.y;
+		m_RenderWidth = MaxBound.x - MinBound.x;
+		m_RenderHeight = MaxBound.y - MinBound.y;
 
 		auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		uint32_t FrameIdx = Context->GetCurrentFrameIndex();

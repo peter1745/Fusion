@@ -11,6 +11,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <spdlog/fmt/fmt.h>
+
 namespace FusionEditor {
 
 	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, const ActorSelectionManager& InSelectionCtx)
@@ -62,6 +64,48 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderContents()
 	{
+		if (ImGui::Button("Create Physics Actors"))
+		{
+			for (int32_t X = -25; X < 25; X++)
+			{
+				for (int32_t Z = -25; Z < 25; Z++)
+				{
+					auto NewActor = m_World->CreateActor(fmt::format("Actor-{}-{}", X * 2, Z * 2));
+					auto* ActorTransform = NewActor->FindComponent<Fusion::TransformComponent>();
+					ActorTransform->Location = { X * 3, 20, Z * 3 };
+					NewActor->AddComponent<Fusion::PhysicsBodyComponent>();
+					NewActor->AddComponent<Fusion::SphereShapeComponent>();
+					NewActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(68537410238160412);
+				}
+			}
+
+			auto GroundActor = m_World->CreateActor("Ground");
+			auto* ActorTransform = GroundActor->FindComponent<Fusion::TransformComponent>();
+			ActorTransform->Location = { 0, -150, 0 };
+			ActorTransform->Scale = { 100, 100, 100 };
+			GroundActor->AddComponent<Fusion::PhysicsBodyComponent>()->Mass = 0.0f;
+			GroundActor->AddComponent<Fusion::SphereShapeComponent>()->Radius = 1.0f;
+			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(68537410238160412);
+		}
+
+		if (m_World->GetState() & Fusion::WorldStates::None)
+		{
+			if (ImGui::Button("Play"))
+			{
+				m_BackupWorld = Fusion::World::Copy(m_World);
+				m_World->StartSimulation();
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Stop"))
+			{
+				m_World->StopSimulation();
+				m_World->Restore(m_BackupWorld);
+				m_BackupWorld = nullptr;
+			}
+		}
+
 		ViewportWindowBase::RenderContents();
 
 		const auto& SelectedActors = m_SelectionManager->All();
@@ -134,10 +178,13 @@ namespace FusionEditor {
 		m_WorldRenderer->End();
 
 		auto MousePos = Fusion::Mouse::Get().GetPosition();
-		MousePos.x -= GetMinBound().x;
-		MousePos.y -= GetMinBound().y;
+		MousePos.x -= m_MinRenderBoundX;
+		MousePos.y -= m_MinRenderBoundY;
 
-		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
+		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
+
+		if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
 		{
 			Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
 			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);

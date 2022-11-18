@@ -44,6 +44,8 @@ namespace FusionEditor {
 
 		Fusion::Unique<Fusion::StagingBuffer> m_StagingBuffer;
 		bool m_ShouldCopyFromBuffer = false;
+
+		Fusion::Shared<Fusion::World> m_BackupWorld = nullptr;
 	};
 
 }

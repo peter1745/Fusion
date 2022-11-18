@@ -52,6 +52,7 @@ namespace FusionEditor {
 		Shared<Texture2D> m_Texture = nullptr;
 
 		Shared<World> m_World = nullptr;
+		Shared<World> m_BackupWorld = nullptr;
 		Unique<WindowManager> m_WindowManager = nullptr;
 
 		std::unordered_map<EAssetType, Shared<AssetImporterWindow>> m_AssetImporterWindows;

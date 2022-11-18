@@ -22,4 +22,5 @@ include "ThirdParty/NFD-Extended"
 group ""
 
 include "Fusion"
+include "Fission"
 include "FusionEditor"

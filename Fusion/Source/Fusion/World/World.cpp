@@ -1,13 +1,100 @@
 #include "FusionPCH.hpp"
 #include "World.hpp"
+#include "Components/AllComponents.hpp"
+
+#include <Fission/Body/Body.hpp>
+#include <Fission/Collision/SphereShape.hpp>
 
 namespace Fusion {
+
+	template<typename... TComponents>
+	static void CopyComponent(entt::registry& InDestination, entt::registry& InSource, const std::unordered_map<ActorID, entt::entity>& InActorMap)
+	{
+		([&]()
+		{
+			auto CompView = InSource.view<TComponents>();
+			for (const auto SourceEnttID : CompView)
+			{
+				const auto& SourceComp = CompView.get<TComponents>(SourceEnttID);
+				auto DestinationEnttID = InActorMap.at(InSource.get<ActorComponent>(SourceEnttID).ID);
+				InDestination.emplace_or_replace<TComponents>(DestinationEnttID, SourceComp);
+			}
+		}(), ...);
+	}
+
+	template<typename... TComponents>
+	static void CopyComponent(entt::registry& InDestination, entt::registry& InSource, const std::unordered_map<ActorID, entt::entity>& InActorMap, [[maybe_unused]] ComponentGroup<TComponents...> InCompGroup)
+	{
+		CopyComponent<TComponents...>(InDestination, InSource, InActorMap);
+	}
+
+	static void CopyComponents(entt::registry& InDestination, entt::registry& InSource, const std::unordered_map<ActorID, entt::entity>& InActorMap)
+	{
+		CopyComponent(InDestination, InSource, InActorMap, AllComponents{});
+	}
 
 	World::World(const std::string& InName)
 		: m_Name(InName)
 	{
 	}
 
+	World::~World()
+	{
+	}
+
+	void World::StartSimulation()
+	{
+		m_State = WorldStates::Simulating;
+
+		m_PhysicsWorld.Initialize(5000);
+
+		auto PhysicsActors = FindAllActorsWith<PhysicsBodyComponent>();
+		for (auto Actor : PhysicsActors)
+		{
+			const auto* ActorTransform = FindActorComponent<TransformComponent>(Actor->GetActorID());
+			const auto* PhysicsBodyComp = FindActorComponent<PhysicsBodyComponent>(Actor->GetActorID());
+
+			Fission::BodySettings Settings = {};
+			Settings.InitialLocation = ActorTransform->Location;
+			Settings.InitialOrientation = ActorTransform->GetRotation();
+			Settings.Mass = PhysicsBodyComp->Mass;
+			
+			const auto* SphereShape = FindActorComponent<SphereShapeComponent>(Actor->GetActorID());
+			if (SphereShape)
+			{
+				float LargestComponent = glm::max(ActorTransform->Scale.x, glm::max(ActorTransform->Scale.y, ActorTransform->Scale.z));
+				Settings.Shape = new Fission::SphereShape(LargestComponent * SphereShape->Radius);
+				Settings.Shape->SetRestitution(1.0f);
+				Settings.Shape->SetFriction(0.1f);
+			}
+
+			m_ActorIDToPhysicsBodyIDMap[Actor->GetActorID()] = m_PhysicsWorld.CreateBody(Settings);
+		}
+	}
+
+	void World::Simulate(float InDeltaTime)
+	{
+		if (!(m_State & WorldStates::Simulating))
+			return;
+
+		m_PhysicsWorld.Simulate(InDeltaTime);
+
+		// Update Actor Locations
+		for (const auto& [ActorID, BodyID] : m_ActorIDToPhysicsBodyIDMap)
+		{
+			auto* ActorTransform = FindActorComponent<TransformComponent>(ActorID);
+			Fission::Body* Body = m_PhysicsWorld.GetBody(BodyID);
+			ActorTransform->Location = Body->Location;
+		}
+	}
+
+	void World::StopSimulation()
+	{
+		for (const auto& [ActorID, BodyID] : m_ActorIDToPhysicsBodyIDMap)
+			m_PhysicsWorld.RemoveBody(BodyID);
+		m_ActorIDToPhysicsBodyIDMap.clear();
+		m_PhysicsWorld.Shutdown();
+	}
 
 	Shared<Actor> World::CreateActorWithID(ActorID InActorID, const std::string& InName, const Shared<Actor>& InParent /*= nullptr*/)
 	{
@@ -71,6 +158,32 @@ namespace Fusion {
 		m_ActorIDMap.find(InActorID);
 	}
 
+	void World::Restore(Shared<World> InOther)
+	{
+		// Clear the existing world
+		m_ActorIDMap.clear();
+		m_Actors.clear();
+		m_Registry.clear();
+
+		// Copy InOther
+		m_Registry.reserve(InOther->m_Registry.size());
+
+		std::unordered_map<ActorID, entt::entity> EnttIDMap;
+		EnttIDMap.reserve(InOther->m_Registry.size());
+		auto View = InOther->m_Registry.view<ActorComponent>();
+		for (auto EnttID : View)
+		{
+			ActorID ID = View.get<ActorComponent>(EnttID).ID;
+			const auto& Actor = InOther->m_Actors.at(ID);
+			SharedActor NewActor = CreateActorWithID(ID, Actor->Name);
+			EnttIDMap[ID] = m_ActorIDMap.at(ID);
+		}
+
+		CopyComponents(m_Registry, InOther->m_Registry, EnttIDMap);
+
+		m_State = InOther->m_State;
+	}
+
 	Shared<Actor> World::GetMainCameraActor() const
 	{
 		auto EnttView = m_Registry.view<ActorComponent, CameraComponent>();
@@ -94,6 +207,13 @@ namespace Fusion {
 		m_ActorIDMap.clear();
 		m_Actors.clear();
 		m_Registry.clear();
+	}
+
+	Shared<World> World::Copy(Shared<World> InOther)
+	{
+		Shared<World> NewWorld = Shared<World>::Create(InOther->m_Name);
+		NewWorld->Restore(InOther);
+		return NewWorld;
 	}
 
 }
