@@ -7,6 +7,8 @@
 
 #include "Fusion/AssetSystem/AssetLoader.hpp"
 
+#include <tracy/Tracy.hpp>
+
 #include <glm/glm.hpp>
 
 namespace Fusion {
@@ -55,6 +57,8 @@ namespace Fusion {
 		OnInit();
 		while (m_Running)
 		{
+			FrameMarkStart("MainThread");
+
 			Keyboard::Get().TransitionHeldKeys();
 			Mouse::Get().TransitionHeldButtons();
 			m_Window->ProcessEvents();
@@ -74,6 +78,9 @@ namespace Fusion {
 
 			Mouse::Get().ResetReleasedButtons();
 			Keyboard::Get().ResetReleasedKeys();
+
+			// End of frame
+			FrameMarkEnd("MainThread");
 
 			// TODO(Peter): Handle with event
 			m_Running = !m_Window->ShouldClose();

@@ -4,11 +4,13 @@
 
 namespace Fission {
 
-	enum class EShapeType { Sphere };
+	enum class EShapeType { Sphere, Box };
 
 	class ShapeBase
 	{
 	public:
+		virtual ~ShapeBase() = default;
+
 		EShapeType GetType() const { return m_Type; }
 		
 		const glm::vec3& GetCenterOfMass() const { return m_CenterOfMass; }
@@ -25,10 +27,13 @@ namespace Fission {
 			m_Friction = glm::clamp(m_Friction, 0.0f, 1.0f);
 		}
 
+		virtual float GetFastestLinearSpeed(const glm::vec3& InAngularVelocity, const glm::vec3& InDirection) const = 0;
+		virtual glm::vec3 GetFurthestPoint(const glm::vec3& InLocation, const glm::vec3& InDirection, const glm::quat& InOrientation, float InBias) const = 0;
+
 		virtual void CalculateInertiaTensor() = 0;
 
 		const AABB& GetBoundingBox() const { return m_BoundingBox; }
-		AABB GetBoundingBox(const glm::vec3& InLocation, const glm::quat& InOrientation);
+		virtual AABB GetBoundingBox(const glm::vec3& InLocation, const glm::quat& InOrientation) const;
 
 		const glm::mat3& GetInertiaTensor() const { return m_InertiaTensor; }
 

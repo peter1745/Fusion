@@ -3,6 +3,7 @@
 #include "Fission/Body/BodyAllocator.hpp"
 #include "Fission/Body/Body.hpp"
 #include "Fission/Collision/SphereShape.hpp"
+#include "Fission/Collision/BroadPhase/BroadPhase.hpp"
 
 #include <unordered_map>
 
@@ -38,7 +39,7 @@ namespace Fission {
 	public:
 		void SetSettings(const WorldSettings& InSettings) { m_Settings = InSettings; }
 
-		void Initialize(uint32_t InMaxBodies = 100);
+		void Initialize(uint32_t InMaxBodies = 100, EBroadPhaseAlgorithm InBroadPhase = EBroadPhaseAlgorithm::SAP);
 		void Shutdown();
 
 		BodyID CreateBody(const BodySettings& InSettings);
@@ -71,10 +72,25 @@ namespace Fission {
 
 		void IntegrateVelocities(Body* InBody, float InDeltaTime) const;
 
+		struct SupportPoint
+		{
+			glm::vec3 MinkowskiPoint;
+			glm::vec3 PointA;
+			glm::vec3 PointB;
+
+			bool operator==(const SupportPoint& InOther) const
+			{
+				return PointA == InOther.PointA && PointB == InOther.PointB && MinkowskiPoint == InOther.MinkowskiPoint;
+			}
+		};
+		SupportPoint GetSupportPoint(const Body* InBody0, const Body* InBody1, const glm::vec3& InDirection, float InBias) const;
+
 	private:
 		WorldSettings m_Settings;
 
 		BodyAllocator* m_BodyAllocator = nullptr;
+		BroadPhase* m_BroadPhase = nullptr;
+
 		std::vector<BodyID> m_ActiveBodies;
 	};
 

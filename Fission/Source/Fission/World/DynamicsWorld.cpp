@@ -1,114 +1,25 @@
 #include "DynamicsWorld.hpp"
+#include "Fission/Collision/BroadPhase/SweepAndPruneBroadPhase.hpp"
+
+#include <iostream>
+
+#include <tracy/Tracy.hpp>
 
 namespace Fission {
 
-	struct PsuedoBody
-	{
-		int32_t ID;
-		float Value;
-		bool IsMin;
-	};
-
-	int CompareSAP(const void* InBody0, const void* InBody1)
-	{
-		const PsuedoBody* Body0 = static_cast<const PsuedoBody*>(InBody0);
-		const PsuedoBody* Body1 = static_cast<const PsuedoBody*>(InBody1);
-		return Body0->Value < Body1->Value ? -1 : 1;
-	}
-
-	void SortBodiesBounds(const BodyID* InBodyIDs, uint32_t InBodyCount, BodyAllocator* InBodyAllocator, PsuedoBody* SortedArray, float InDeltaTime)
-	{
-		glm::vec3 Axis = { 1.0f, 1.0f, 1.0f };
-
-		for (uint32_t Idx = 0; Idx < InBodyCount; Idx++)
-		{
-			const Body* Body = InBodyAllocator->GetBody(InBodyIDs[Idx]);
-			AABB BoundingVolume = Body->Shape->GetBoundingBox(Body->Location, Body->Orientation);
-
-			BoundingVolume.Expand(BoundingVolume.GetMinBound() + Body->LinearVelocity * InDeltaTime);
-			BoundingVolume.Expand(BoundingVolume.GetMaxBound() + Body->LinearVelocity * InDeltaTime);
-
-			const float Epsilon = 0.01f;
-			BoundingVolume.Expand(BoundingVolume.GetMinBound() + glm::vec3(-1.0f) * Epsilon);
-			BoundingVolume.Expand(BoundingVolume.GetMaxBound() + glm::vec3(1.0f) * Epsilon);
-
-			SortedArray[Idx * 2 + 0].ID = Idx;
-			SortedArray[Idx * 2 + 0].Value = glm::dot(Axis, BoundingVolume.GetMinBound());
-			SortedArray[Idx * 2 + 0].IsMin = true;
-
-			SortedArray[Idx * 2 + 1].ID = Idx;
-			SortedArray[Idx * 2 + 1].Value = glm::dot(Axis, BoundingVolume.GetMaxBound());
-			SortedArray[Idx * 2 + 1].IsMin = false;
-		}
-
-		std::qsort(SortedArray, InBodyCount * 2, sizeof(PsuedoBody), CompareSAP);
-	}
-
-	struct CollisionPair
-	{
-		int32_t A;
-		int32_t B;
-
-		bool operator==(const CollisionPair& InOther)
-		{
-			return (A == InOther.A && B == InOther.B) || (A == InOther.B && B == InOther.A);
-		}
-
-		bool operator!=(const CollisionPair& InOther)
-		{
-			return *this != InOther;
-		}
-	};
-
-	void BuildCollisionPairs(std::vector<CollisionPair>& InCollisionPairs, const PsuedoBody* InSortedBodies, uint32_t InBodyCount)
-	{
-		InCollisionPairs.clear();
-
-		for (uint32_t Idx = 0; Idx < InBodyCount * 2; Idx++)
-		{
-			const PsuedoBody& Body0 = InSortedBodies[Idx];
-
-			if (!Body0.IsMin)
-				continue;
-
-			CollisionPair Pair = {};
-			Pair.A = Body0.ID;
-
-			for (uint32_t J = Idx + 1; J < InBodyCount * 2; J++)
-			{
-				const PsuedoBody& Body1 = InSortedBodies[J];
-
-				if (Body1.ID == Body0.ID)
-					break;
-
-				if (!Body1.IsMin)
-					continue;
-
-				Pair.B = Body1.ID;
-				InCollisionPairs.push_back(Pair);
-			}
-		}
-	}
-
-	void SweepAndPrune1D(const BodyID* InBodyIDs, uint32_t InBodyCount, BodyAllocator* InBodyAllocator, std::vector<CollisionPair>& InCollisionPairs, float InDeltaTime)
-	{
-		std::vector<PsuedoBody> SortedBodies;
-		SortedBodies.resize(InBodyCount * 2);
-
-		SortBodiesBounds(InBodyIDs, InBodyCount, InBodyAllocator, SortedBodies.data(), InDeltaTime);
-		BuildCollisionPairs(InCollisionPairs, SortedBodies.data(), InBodyCount);
-	}
-
-	void BroadPhase(const BodyID* InBodyIDs, uint32_t InBodyCount, BodyAllocator* InBodyAllocator, std::vector<CollisionPair>& InCollisionPairs, float InDeltaTime)
-	{
-		InCollisionPairs.clear();
-		SweepAndPrune1D(InBodyIDs, InBodyCount, InBodyAllocator, InCollisionPairs, InDeltaTime);
-	}
-
-	void DynamicsWorld::Initialize(uint32_t InMaxBodies)
+	void DynamicsWorld::Initialize(uint32_t InMaxBodies, EBroadPhaseAlgorithm InBroadPhase)
 	{
 		m_BodyAllocator = new BodyAllocator(InMaxBodies);
 		m_ActiveBodies.reserve(InMaxBodies);
+
+		switch (InBroadPhase)
+		{
+		case EBroadPhaseAlgorithm::SAP:
+			m_BroadPhase = new SweepAndPruneBroadPhase();
+			break;
+		}
+
+		m_BroadPhase->Initialize(m_BodyAllocator);
 	}
 
 	void DynamicsWorld::Shutdown()
@@ -136,6 +47,9 @@ namespace Fission {
 		NewBody->Shape = InSettings.Shape;
 
 		m_ActiveBodies.push_back(NewBody->ID);
+
+		m_BroadPhase->AddBodies(&NewBody->ID, 1);
+
 		return NewBody->ID;
 	}
 
@@ -172,67 +86,79 @@ namespace Fission {
 
 	void DynamicsWorld::Simulate(float InDeltaTime)
 	{
-		for (const auto& ActiveBodyID : m_ActiveBodies)
+		ZoneScoped;
+
 		{
-			Body* ActiveBody = m_BodyAllocator->GetBody(ActiveBodyID);
+			ZoneScopedN("Apply Gravity");
 
-			// NOTE(Peter): This would most likely not be necessary once static bodies are apart of the statics world
-			if (ActiveBody->InverseMass == 0.0f)
-				continue;
+			for (const auto& ActiveBodyID : m_ActiveBodies)
+			{
+				Body* ActiveBody = m_BodyAllocator->GetBody(ActiveBodyID);
 
-			// Don't compute gravity as a force or impulse (it already is one, although should take a look at PhysX and Jolt to see how they handle it)
-			ActiveBody->LinearVelocity += m_Settings.Gravity * InDeltaTime;
+				// NOTE(Peter): This would most likely not be necessary once static bodies are apart of the statics world
+				if (ActiveBody->InverseMass == 0.0f)
+					continue;
+
+				// Don't compute gravity as a force or impulse (it already is one, although should take a look at PhysX and Jolt to see how they handle it)
+				ActiveBody->LinearVelocity += m_Settings.Gravity * InDeltaTime;
+			}
 		}
 
-		std::vector<CollisionPair> CollisionPairs;
-		BroadPhase(m_ActiveBodies.data(), m_ActiveBodies.size(), m_BodyAllocator, CollisionPairs, InDeltaTime);
+		m_BroadPhase->Execute(InDeltaTime);
 
 		const int32_t MaxContacts = m_ActiveBodies.size() * m_ActiveBodies.size();
 		std::vector<BodyContact> Contacts;
 		Contacts.reserve(MaxContacts);
 
-		for (const auto& Pair : CollisionPairs)
 		{
-			const BodyID& BodyID0 = m_ActiveBodies[Pair.A];
-			const BodyID& BodyID1 = m_ActiveBodies[Pair.B];
+			ZoneScopedN("Narrow Phase");
 
-			Body* Body0 = m_BodyAllocator->GetBody(BodyID0);
-			Body* Body1 = m_BodyAllocator->GetBody(BodyID1);
-
-			if (Body0->InverseMass == 0.0f && Body1->InverseMass == 0.0f)
-				continue;
-
-			BodyContact Contact = {};
-			if (Intersects(Body0, Body1, InDeltaTime, Contact))
-				Contacts.push_back(Contact);
-		}
-
-		if (Contacts.size() > 1)
-			std::qsort(Contacts.data(), Contacts.size(), sizeof(BodyContact), CompareContacts);
-
-		float AccumulatedTime = 0.0f;
-		for (const auto& Contact : Contacts)
-		{
-			float DeltaTime = Contact.TimeOfImpact - AccumulatedTime;
-
-			Body* Body0 = m_BodyAllocator->GetBody(Contact.BodyA);
-			Body* Body1 = m_BodyAllocator->GetBody(Contact.BodyB);
-
-			if (Body0->InverseMass == 0.0f && Body1->InverseMass == 0.0f)
-				continue;
-
-			for (const auto& ActiveBodyID : m_ActiveBodies)
+			for (const auto& Pair : m_BroadPhase->GetCollisionPairs())
 			{
-				Body* ActiveBody = m_BodyAllocator->GetBody(ActiveBodyID);
-				IntegrateVelocities(ActiveBody, DeltaTime);
+				const BodyID& BodyID0 = m_ActiveBodies[Pair.IDIndex0];
+				const BodyID& BodyID1 = m_ActiveBodies[Pair.IDIndex1];
+
+				Body* Body0 = m_BodyAllocator->GetBody(BodyID0);
+				Body* Body1 = m_BodyAllocator->GetBody(BodyID1);
+
+				if (Body0->InverseMass == 0.0f && Body1->InverseMass == 0.0f)
+					continue;
+
+				BodyContact Contact = {};
+				if (Intersects(Body0, Body1, InDeltaTime, Contact))
+					Contacts.push_back(Contact);
 			}
 
-			ResolveContact(Contact);
-			AccumulatedTime += DeltaTime;
+			if (Contacts.size() > 1)
+				std::qsort(Contacts.data(), Contacts.size(), sizeof(BodyContact), CompareContacts);
+		}
+
+		float AccumulatedTime = 0.0f;
+		{
+			ZoneScopedN("Contact Resolution");
+
+			for (const auto& Contact : Contacts)
+			{
+				float DeltaTime = Contact.TimeOfImpact - AccumulatedTime;
+
+				Body* Body0 = m_BodyAllocator->GetBody(Contact.BodyA);
+				Body* Body1 = m_BodyAllocator->GetBody(Contact.BodyB);
+
+				if (Body0->InverseMass == 0.0f && Body1->InverseMass == 0.0f)
+					continue;
+
+				for (const auto& ActiveBodyID : m_ActiveBodies)
+				{
+					Body* ActiveBody = m_BodyAllocator->GetBody(ActiveBodyID);
+					IntegrateVelocities(ActiveBody, DeltaTime);
+				}
+
+				ResolveContact(Contact);
+				AccumulatedTime += DeltaTime;
+			}
 		}
 
 		float TimeRemaining = InDeltaTime - AccumulatedTime;
-
 		if (TimeRemaining > 0.0f)
 		{
 			for (const auto& ActiveBodyID : m_ActiveBodies)
@@ -518,6 +444,17 @@ namespace Fission {
 		// Calculate new location
 		InBody->Location = CenterOfMass + (DeltaOrientation * CenterOfMassToLocation);
 		InBody->Location += m_Settings.Gravity * 0.5f * InDeltaTime * InDeltaTime;
+	}
+
+	DynamicsWorld::SupportPoint DynamicsWorld::GetSupportPoint(const Body* InBody0, const Body* InBody1, const glm::vec3& InDirection, float InBias) const
+	{
+		DynamicsWorld::SupportPoint Point = {};
+
+		Point.PointA = InBody0->Shape->GetFurthestPoint(InBody0->Location, InDirection, InBody0->Orientation, InBias);
+		Point.PointB = InBody1->Shape->GetFurthestPoint(InBody1->Location, InDirection * -1.0f, InBody1->Orientation, InBias);
+		Point.MinkowskiPoint = Point.PointA - Point.PointB;
+
+		return Point;
 	}
 
 }

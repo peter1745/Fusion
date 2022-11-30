@@ -4,6 +4,7 @@
 
 #include <Fission/Body/Body.hpp>
 #include <Fission/Collision/SphereShape.hpp>
+#include <Fission/Collision/BoxShape.hpp>
 
 namespace Fusion {
 
@@ -59,8 +60,15 @@ namespace Fusion {
 			Settings.InitialOrientation = ActorTransform->GetRotation();
 			Settings.Mass = PhysicsBodyComp->Mass;
 			
+			const auto* BoxShape = FindActorComponent<BoxShapeComponent>(Actor->GetActorID());
 			const auto* SphereShape = FindActorComponent<SphereShapeComponent>(Actor->GetActorID());
-			if (SphereShape)
+			if (BoxShape)
+			{
+				Settings.Shape = new Fission::BoxShape(BoxShape->HalfSize);
+				Settings.Shape->SetRestitution(1.0f);
+				Settings.Shape->SetFriction(0.1f);
+			}
+			else if (SphereShape)
 			{
 				float LargestComponent = glm::max(ActorTransform->Scale.x, glm::max(ActorTransform->Scale.y, ActorTransform->Scale.z));
 				Settings.Shape = new Fission::SphereShape(LargestComponent * SphereShape->Radius);

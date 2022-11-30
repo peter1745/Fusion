@@ -16,7 +16,9 @@ project "Fission"
     includedirs {
         "Source/",
         "%{IncludeDirs.glm}",
-        "%{IncludeDirs.spdlog}"
+        "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.cpp_sort}",
+        "%{IncludeDirs.Tracy}"
     }
 
     defines {
@@ -39,8 +41,18 @@ project "Fission"
         optimize "On"
         conformancemode "On"
 
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }
+
     filter "configurations:Distribution"
         defines "FISSION_DIST"
         runtime "Release"
         optimize "Full"
         conformancemode "On"
+
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }

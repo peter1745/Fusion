@@ -21,7 +21,8 @@ project "FusionEditor"
         "Fission",
         "GLFW",
         "yaml-cpp",
-        "NFD-Extended"
+        "NFD-Extended",
+        "Tracy"
     }
 
     includedirs
@@ -37,10 +38,15 @@ project "FusionEditor"
         "%{IncludeDirs.EnTT}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.yaml_cpp}",
-        "%{IncludeDirs.NFD_Extended}"
+        "%{IncludeDirs.NFD_Extended}",
+        "%{IncludeDirs.Tracy}"
     }
 
-    defines { "GLM_FORCE_DEPTH_ZERO_TO_ONE", "GLM_ENABLE_EXPERIMENTAL", "YAML_CPP_STATIC_DEFINE" }
+    defines {
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+        "GLM_ENABLE_EXPERIMENTAL",
+        "YAML_CPP_STATIC_DEFINE"
+    }
 
     filter "system:windows"
         systemversion "latest"
@@ -73,8 +79,18 @@ project "FusionEditor"
         optimize "On"
         conformancemode "On"
 
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }
+
     filter "configurations:Distribution"
         defines "FUSION_DIST"
         runtime "Release"
         optimize "Full"
         conformancemode "On"
+
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }

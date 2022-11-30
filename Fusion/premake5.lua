@@ -28,7 +28,8 @@ project "Fusion"
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.TinyGLTF}",
         "%{IncludeDirs.yaml_cpp}",
-        "%{IncludeDirs.DXC}"
+        "%{IncludeDirs.DXC}",
+        "%{IncludeDirs.Tracy}"
     }
 
     defines {
@@ -53,8 +54,18 @@ project "Fusion"
         optimize "On"
         conformancemode "On"
 
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }
+
     filter "configurations:Distribution"
         defines "FUSION_DIST"
         runtime "Release"
         optimize "Full"
         conformancemode "On"
+
+        defines {
+            "TRACY_ENABLE",
+            "TRACY_ON_DEMAND"
+        }

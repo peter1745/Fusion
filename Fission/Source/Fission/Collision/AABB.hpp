@@ -26,6 +26,8 @@ namespace Fission {
 		void Offset(const glm::vec3& InOffset);
 
 		void Expand(std::span<AABB> InBounds);
+		//void Expand(std::span<glm::vec3> InPoints);
+		void Expand(std::span<const glm::vec3> InPoints);
 		void Expand(const glm::vec3& InTarget);
 		void Expand(const AABB& InOther);
 
