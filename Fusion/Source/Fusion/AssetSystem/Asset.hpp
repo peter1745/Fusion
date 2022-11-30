@@ -2,6 +2,7 @@
 
 #include "SharedAsset.hpp"
 
+#include "Fusion/Core/Assert.hpp"
 #include "Fusion/Core/UUID.hpp"
 
 #include "Fusion/Renderer/Mesh.hpp"

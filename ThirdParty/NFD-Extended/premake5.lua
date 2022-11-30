@@ -11,18 +11,20 @@ project "NFD-Extended"
     includedirs { "include/" }
 
     filter "system:windows"
-		systemversion "latest"
+	systemversion "latest"
 
         files { "src/nfd_win.cpp" }
 
     filter "system:linux"
-		pic "On"
-		systemversion "latest"
+	pic "On"
+	systemversion "latest"
 
         files { "src/nfd_gtk.cpp" }
 
+	buildoptions { "`pkg-config --cflags gtk+-3.0`" }
+
     filter "system:macosx"
-		pic "On"
+	pic "On"
 
         files { "src/nfd_cocoa.m" }
 

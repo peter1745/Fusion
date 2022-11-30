@@ -4,7 +4,7 @@
 #include "Fusion/World/Components/AllComponents.hpp"
 
 #include <string_view>
-#include <format>
+#include <spdlog/fmt/fmt.h>
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_internal.h>

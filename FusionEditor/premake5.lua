@@ -16,6 +16,7 @@ project "FusionEditor"
 
     links
     {
+		"glad",
         "ImGui",
         "Fusion",
         "Fission",
@@ -60,6 +61,18 @@ project "FusionEditor"
 	    	'{COPY} "../ThirdParty/DXC/bin/dxcompiler.dll" "%{cfg.targetdir}"',
 	    	'{COPY} "../ThirdParty/DXC/bin/dxil.dll" "%{cfg.targetdir}"'
 	    }
+
+    filter "system:linux"
+        pic "On"
+
+        removefiles {
+            "%{prj.location}/Source/Platform/D3D11/**",
+            "%{prj.location}/Source/Platform/D3D12/**"
+        }
+
+        linkoptions {
+			"`pkg-config --libs gtk+-3.0`"
+        }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

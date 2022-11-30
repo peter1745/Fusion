@@ -14,8 +14,10 @@ namespace Fusion {
 		switch (RenderSettings::Get().API)
 		{
 		case ERendererAPI::None: return nullptr;
+#ifdef FUSION_PLATFORM_WINDOWS
 		case ERendererAPI::D3D11: return MakeUnique<D3D11GraphicsPipeline>(InCreateInfo);
 		case ERendererAPI::D3D12: return MakeUnique<D3D12GraphicsPipeline>(InCreateInfo);
+#endif
 		}
 
 		return nullptr;

@@ -15,7 +15,7 @@ namespace Fusion {
 			auto CompView = InSource.view<TComponents>();
 			for (const auto SourceEnttID : CompView)
 			{
-				const auto& SourceComp = CompView.get<TComponents>(SourceEnttID);
+				const auto& SourceComp = CompView.template get<TComponents>(SourceEnttID);
 				auto DestinationEnttID = InActorMap.at(InSource.get<ActorComponent>(SourceEnttID).ID);
 				InDestination.emplace_or_replace<TComponents>(DestinationEnttID, SourceComp);
 			}

@@ -21,14 +21,14 @@ project "Fusion"
     includedirs {
         "Source/",
         "%{wks.location}/Fission/Source",
+		"%{wks.location}/ThirdParty/glad/include",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.EnTT}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.TinyGLTF}",
-        "%{IncludeDirs.yaml_cpp}",
-        "%{IncludeDirs.DXC}"
+        "%{IncludeDirs.yaml_cpp}"
     }
 
     defines {
@@ -40,6 +40,19 @@ project "Fusion"
 
     filter "system:windows"
         systemversion "latest"
+
+        includedirs {
+            "%{IncludeDirs.DXC}"
+        }
+
+    filter "system:linux"
+        pic "On"
+
+        removefiles {
+            "%{prj.location}/Source/Platform/D3D11/**",
+            "%{prj.location}/Source/Platform/D3D12/**",
+            "%{prj.location}/Source/Platform/D3DCommon/**"
+        }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

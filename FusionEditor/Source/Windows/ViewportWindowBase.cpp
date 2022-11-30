@@ -1,7 +1,6 @@
 #include "ViewportWindowBase.hpp"
 
 #include "Fusion/Core/Application.hpp"
-#include "Platform/D3D12/D3D12DescriptorHeap.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>

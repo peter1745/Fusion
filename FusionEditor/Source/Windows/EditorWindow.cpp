@@ -28,7 +28,7 @@ namespace FusionEditor {
 
 	void EditorWindow::RenderUI(bool& InOpen)
 	{
-		std::string WindowTitle = std::format("{0}##{1}", m_Title, m_WindowID);
+		std::string WindowTitle = fmt::format("{0}##{1}", m_Title, m_WindowID);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		const bool IsActive = ImGui::Begin(WindowTitle.c_str(), &InOpen);
 

@@ -46,7 +46,7 @@ namespace Fusion {
 	template<>
 	struct ComponentAttributes<TransformComponent>
 	{
-		using ComponentType = typename TransformComponent;
+		using ComponentType = TransformComponent;
 
 		static constexpr bool CanDisable = false;
 		static constexpr bool Removable = false;

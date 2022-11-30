@@ -45,8 +45,8 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnInit()
 	{
-		m_ImGuiContext = ImGuiPlatformContext::Create();
-		m_ImGuiContext->Init(GetWindow(), m_Context);
+		//m_ImGuiContext = ImGuiPlatformContext::Create();
+		//m_ImGuiContext->Init(GetWindow(), m_Context);
 	
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 		
@@ -55,7 +55,7 @@ namespace FusionEditor {
 
 		m_ActorSelectionManager = ActorSelectionManager::Create();
 
-		InitWindows();
+		//InitWindows();
 
 		m_Context->GetCurrentCommandList()->EndRecording();
 		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
@@ -73,7 +73,7 @@ namespace FusionEditor {
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
 
-		DrawUI();
+		//DrawUI();
 	}
 
 	void FusionEditorApp::OnShutdown()
@@ -296,7 +296,7 @@ namespace FusionEditor {
 
 		ProjectSerializer::Serialize(NewProject);
 
-		SetTitle(std::format("Fusion Editor - {}", InName));
+		SetTitle(fmt::format("Fusion Editor - {}", InName));
 
 		m_CurrentProject = NewProject;
 
@@ -308,7 +308,7 @@ namespace FusionEditor {
 		// TODO: Unload current project
 		m_CurrentProject = ProjectSerializer::Deserialize(InProjectPath);
 
-		SetTitle(std::format("Fusion Editor - {}", m_CurrentProject->Name));
+		SetTitle(fmt::format("Fusion Editor - {}", m_CurrentProject->Name));
 
 		m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->SetCurrentProject(m_CurrentProject);
 

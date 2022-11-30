@@ -5,7 +5,7 @@
 #include "Fusion/Renderer/Shader.hpp"
 #include "Fusion/Renderer/Buffer.hpp"
 
-#include <Fusion/Renderer/GraphicsPipeline.hpp>
+#include "Fusion/Renderer/GraphicsPipeline.hpp"
 
 namespace Fusion {
 

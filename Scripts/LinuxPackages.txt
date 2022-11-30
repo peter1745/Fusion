@@ -1,0 +1,11 @@
+libgtk-3-dev
+libxi-dev
+libxinerama-dev
+libxrandr-dev
+libxcursor-dev
+libx11-dev
+build-essential
+libvulkan-dev
+vulkan-tools
+vulkan-validationlayers
+glslang-tools

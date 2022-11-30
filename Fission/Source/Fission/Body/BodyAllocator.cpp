@@ -1,5 +1,7 @@
 #include "BodyAllocator.hpp"
 
+#include <string.h>
+
 namespace Fission {
 
 	BodyAllocator::BodyAllocator(uint32_t InMaxBodies)

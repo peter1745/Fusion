@@ -41,7 +41,7 @@ namespace Fission {
 			SortedArray[Idx * 2 + 1].IsMin = false;
 		}
 
-		std::qsort(SortedArray, InBodyCount * 2, sizeof(PsuedoBody), CompareSAP);
+		qsort(SortedArray, InBodyCount * 2, sizeof(PsuedoBody), CompareSAP);
 	}
 
 	struct CollisionPair
@@ -143,7 +143,7 @@ namespace Fission {
 	{
 		if (InBodyID.IsInvalid())
 		{
-			__debugbreak();
+			//__debugbreak();
 			return;
 		}
 
@@ -208,7 +208,7 @@ namespace Fission {
 		}
 
 		if (Contacts.size() > 1)
-			std::qsort(Contacts.data(), Contacts.size(), sizeof(BodyContact), CompareContacts);
+			qsort(Contacts.data(), Contacts.size(), sizeof(BodyContact), CompareContacts);
 
 		float AccumulatedTime = 0.0f;
 		for (const auto& Contact : Contacts)

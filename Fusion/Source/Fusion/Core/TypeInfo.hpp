@@ -24,19 +24,19 @@ namespace Fusion {
 	struct TypeInfoBase
 	{
 	protected:
-		TypeNameString DemangleTypeName(const char* typeName) const
+		TypeNameString DemangleTypeName(const std::string& typeName) const
 		{
 			size_t bufferLength = 0;
 			int status = 0;
-			char* buffer = abi::__cxa_demangle(typeName, NULL, &bufferLength, &status);
+			char* buffer = abi::__cxa_demangle(typeName.c_str(), NULL, &bufferLength, &status);
 			TypeNameString result = TypeNameString(buffer, bufferLength);
 			free(buffer);
 
 			if constexpr (ExcludeNamespace)
 			{
-				size_t namespacePos = typeName.find("::");
+				size_t namespacePos = result.find("::");
 				if (namespacePos != TypeNameString::npos)
-					typeName = typeName.substr(namespacePos + 2);
+					result = result.substr(namespacePos + 2);
 			}
 
 			return result;

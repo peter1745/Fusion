@@ -53,7 +53,7 @@ namespace FusionEditor {
 
 	void WorldOutlinerWindow::RenderActorNode(const Fusion::Shared<Fusion::Actor>& InActor)
 	{
-		const std::string Label = std::format("{}##{}", InActor->Name, uint64_t(InActor->GetActorID()));
+		const std::string Label = fmt::format("{}##{}", InActor->Name, uint64_t(InActor->GetActorID()));
 
 		const bool WasOpen = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(Label.c_str()));
 		const bool IsOpen = ImGui::TreeNode(Label.c_str());

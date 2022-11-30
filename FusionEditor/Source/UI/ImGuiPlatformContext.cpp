@@ -54,8 +54,10 @@ namespace FusionEditor {
 		switch (Fusion::RenderSettings::Get().API)
 		{
 		case Fusion::ERendererAPI::None: return nullptr;
+#ifdef FUSION_PLATFORM_WINDOWS
 		case Fusion::ERendererAPI::D3D11: return std::make_unique<ImGuiPlatformContextD3D11>();
 		case Fusion::ERendererAPI::D3D12: return std::make_unique<ImGuiPlatformContextD3D12>();
+#endif
 		}
 
 		return nullptr;

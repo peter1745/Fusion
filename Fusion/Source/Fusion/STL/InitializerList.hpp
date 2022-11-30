@@ -1,6 +1,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <stdlib.h>
 
 namespace Fusion {
 
