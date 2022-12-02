@@ -68,6 +68,18 @@ namespace Fission {
 		Expand(InOther.m_MaxBound);
 	}
 
+	/*void AABB::Expand(std::span<glm::vec3> InPoints)
+	{
+		for (const auto& Point : InPoints)
+			Expand(Point);
+	}*/
+
+	void AABB::Expand(std::span<const glm::vec3> InPoints)
+	{
+		for (const auto& Point : InPoints)
+			Expand(Point);
+	}
+
 	void AABB::Reset()
 	{
 		m_MinBound = glm::vec3(InvalidMinBound);

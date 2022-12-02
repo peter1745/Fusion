@@ -82,10 +82,10 @@ namespace FusionEditor {
 			auto GroundActor = m_World->CreateActor("Ground");
 			auto* ActorTransform = GroundActor->FindComponent<Fusion::TransformComponent>();
 			ActorTransform->Location = { 0, -150, 0 };
-			ActorTransform->Scale = { 100, 100, 100 };
+			ActorTransform->Scale = { 100, 10, 100 };
 			GroundActor->AddComponent<Fusion::PhysicsBodyComponent>()->Mass = 0.0f;
-			GroundActor->AddComponent<Fusion::SphereShapeComponent>()->Radius = 1.0f;
-			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(68537410238160412);
+			GroundActor->AddComponent<Fusion::BoxShapeComponent>()->HalfSize = { 50.0f, 5.0f, 50.0f };
+			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(23188905328565712);
 		}
 
 		if (m_World->GetState() & Fusion::WorldStates::None)

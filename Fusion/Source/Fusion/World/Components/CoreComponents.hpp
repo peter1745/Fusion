@@ -77,6 +77,11 @@ namespace Fusion {
 		float Mass = 1.0f;
 	};
 
+	struct BoxShapeComponent : public BaseComponent
+	{
+		glm::vec3 HalfSize = { 0.5f, 0.5f, 0.5f };
+	};
+
 	struct SphereShapeComponent : public BaseComponent
 	{
 		float Radius = 0.5f;
