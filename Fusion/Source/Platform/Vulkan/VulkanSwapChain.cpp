@@ -39,7 +39,7 @@ namespace Fusion {
 		vkCmdSetScissor(CmdList, 0, 1, &Scissor);
 
 		VkClearValue ClearValue = {};
-		ClearValue.color.float32[0] = 1.0f;
+		ClearValue.color.float32[0] = 0.25f;
 		ClearValue.color.float32[1] = 0.0f;
 		ClearValue.color.float32[2] = 0.0f;
 		ClearValue.color.float32[3] = 1.0f;

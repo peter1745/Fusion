@@ -64,7 +64,7 @@ namespace Fusion {
 		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 
 		uint32_t m_CurrentFrame = 0;
-		uint32_t m_FrameCount = 1;
+		uint32_t m_FrameCount = 3;
 
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores;

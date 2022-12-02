@@ -3,8 +3,13 @@
 *.user
 *.filters
 *.sln
+*.cmake
+Makefile
+CMakeLists.txt
 
 # Directories
 .vs/
+.vscode/
+.idea/
 Build/
 **/Logs

@@ -28,8 +28,6 @@ namespace Fusion {
 		m_Window->Init();
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::EventCallback));
 
-		//m_Window->Maximize();
-
 		m_Context = GraphicsContext::Create();
 
 		SwapChainInfo SwapChainCreateInfo;
@@ -39,6 +37,8 @@ namespace Fusion {
 		SwapChainCreateInfo.RenderTargetClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		m_SwapChain = SwapChain::Create(SwapChainCreateInfo);
 		m_Context->Init(m_SwapChain);
+
+		m_Window->Maximize();
 
 		AssetLoader::RegisterDefaultLoaders();
 
