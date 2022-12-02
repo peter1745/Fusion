@@ -3,6 +3,7 @@
 #include "Fusion/Memory/Shared.hpp"
 #include "Fusion/Core/Window.hpp"
 
+#include "SwapChain.hpp"
 #include "DescriptorHeap.hpp"
 #include "CommandAllocator.hpp"
 #include "Buffer.hpp"
@@ -13,6 +14,8 @@ namespace Fusion {
 	{
 	public:
 		virtual ~GraphicsContext() = default;
+
+		virtual void Init(const Shared<SwapChain>& InSwapChain) = 0;
 
 		virtual Shared<CommandAllocator> GetCommandAllocator() const = 0;
 		virtual CommandList* GetCurrentCommandList() const = 0;

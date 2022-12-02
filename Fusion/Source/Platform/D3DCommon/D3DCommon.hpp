@@ -32,28 +32,6 @@ namespace Fusion {
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
-	static constexpr size_t GetFormatSize(EFormat InFormat)
-	{
-		switch (InFormat)
-		{
-		case EFormat::Unknown: return 0;
-		case EFormat::RGBA32Float: return 4 * sizeof(float);
-		case EFormat::RGBA32UInt: return 4 * sizeof(uint32_t);
-		case EFormat::RGB32Float: return 3 * sizeof(float);
-		case EFormat::RGB32UInt: return 3 * sizeof(uint32_t);
-		case EFormat::RG32Float: return 2 * sizeof(float);
-		case EFormat::RG32UInt: return 2 * sizeof(uint32_t);
-		case EFormat::R32Float: return 1 * sizeof(float);
-		case EFormat::R32UInt: return 1 * sizeof(uint32_t);
-		case EFormat::RGBA8Unorm: return 4 * sizeof(uint8_t);
-		case EFormat::RGBA8UInt: return 4 * sizeof(uint8_t);
-		case EFormat::D24UnormS8UInt:  return 4 * sizeof(uint8_t);
-		}
-
-		FUSION_CORE_VERIFY(false);
-		return 0;
-	}
-
 	// Compiler Structs + Enums
 
 	enum class EShaderType

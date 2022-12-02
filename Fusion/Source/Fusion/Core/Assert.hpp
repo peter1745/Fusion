@@ -3,7 +3,8 @@
 #if defined(FUSION_PLATFORM_WINDOWS)
 #define FUSION_DEBUG_BREAK __debugbreak()
 #else
-#define FUSION_DEBUG_BREAK abort()
+#include <signal.h>
+#define FUSION_DEBUG_BREAK raise(SIGABRT)
 #endif
 
 #define FUSION_ENABLE_VERIFY 1

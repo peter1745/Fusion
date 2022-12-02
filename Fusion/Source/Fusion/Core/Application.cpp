@@ -14,7 +14,7 @@ namespace Fusion {
 	static Application* s_Application = nullptr;
 
 	Application::Application(const ApplicationSpecification& InSpecification, void* InUserData)
-		: m_Specification(InSpecification)
+	    : m_Specification(InSpecification)
 	{
 		FUSION_CORE_VERIFY(s_Application == nullptr);
 		s_Application = this;
@@ -28,6 +28,8 @@ namespace Fusion {
 		m_Window->Init();
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::EventCallback));
 
+		//m_Window->Maximize();
+
 		m_Context = GraphicsContext::Create();
 
 		SwapChainInfo SwapChainCreateInfo;
@@ -36,8 +38,7 @@ namespace Fusion {
 		SwapChainCreateInfo.HasDepthBuffer = false;
 		SwapChainCreateInfo.RenderTargetClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		m_SwapChain = SwapChain::Create(SwapChainCreateInfo);
-
-		m_Window->Maximize();
+		m_Context->Init(m_SwapChain);
 
 		AssetLoader::RegisterDefaultLoaders();
 
@@ -69,7 +70,7 @@ namespace Fusion {
 			m_FrameTime = std::chrono::duration_cast<std::chrono::duration<float>>(time - m_LastFrameTime).count();
 			m_TimeStep = glm::min<float>(m_FrameTime, 0.0333f);
 			m_LastFrameTime = time;
-			
+
 			m_AssetStorage->ProcessDestructionQueue();
 
 			Mouse::Get().ResetReleasedButtons();
@@ -88,14 +89,12 @@ namespace Fusion {
 	void Application::EventCallback(Event& InEvent)
 	{
 		EventDispatcher Dispatcher(InEvent);
-		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent)
-		{
+		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent) {
 			m_Running = false;
 			return true;
 		});
 
-		Dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& InResizeEvent)
-		{
+		Dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& InResizeEvent) {
 			//m_SwapChain->Resize(InResizeEvent.GetWidth(), InResizeEvent.GetHeight());
 			return false;
 		});

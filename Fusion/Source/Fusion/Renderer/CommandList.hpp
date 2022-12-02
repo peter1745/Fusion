@@ -19,6 +19,8 @@ namespace Fusion {
 	class CommandList
 	{
 	public:
+		virtual ~CommandList() = default;
+
 		virtual void Reset() = 0;
 
 		virtual void BeginRecording() = 0;

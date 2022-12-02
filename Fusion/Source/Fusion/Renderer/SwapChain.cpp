@@ -7,6 +7,8 @@
 	#include "Platform/D3D12/D3D12SwapChain.hpp"
 #endif
 
+#include "Platform/Vulkan/VulkanSwapChain.hpp"
+
 namespace Fusion {
 
 	Shared<SwapChain> SwapChain::Create(const SwapChainInfo& InCreateInfo)
@@ -18,6 +20,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return Shared<D3D11SwapChain>::Create(InCreateInfo);
 		case ERendererAPI::D3D12: return Shared<D3D12SwapChain>::Create(InCreateInfo);
 #endif
+		case ERendererAPI::Vulkan: return Shared<VulkanSwapChain>::Create(InCreateInfo);
 		}
 
 		return nullptr;

@@ -57,8 +57,8 @@ namespace FusionEditor {
 
 		//InitWindows();
 
-		m_Context->GetCurrentCommandList()->EndRecording();
-		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
+		//m_Context->GetCurrentCommandList()->EndRecording();
+		//m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
@@ -68,10 +68,22 @@ namespace FusionEditor {
 		// NextFrame also resets the active command list (should maybe be a separate call?)
 		m_Context->NextFrame();
 
-		m_Context->GetCurrentCommandList()->SetDescriptorHeaps({ m_Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV) });
+		FUSION_CLIENT_INFO("Current Frame: {}", m_Context->GetCurrentFrameIndex());
+
+		//m_Context->GetCurrentCommandList()->SetDescriptorHeaps({ m_Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV) });
 
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
+
+		m_SwapChain->Bind();
+		m_SwapChain->Clear();
+		//m_ImGuiContext->EndFrame();
+		m_SwapChain->Unbind();
+		m_Context->GetCurrentCommandList()->EndRecording();
+
+		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
+
+		m_SwapChain->Present();
 
 		//DrawUI();
 	}
@@ -409,7 +421,7 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 	specification.Title = "Fusion Editor";
 
 	auto& RenderSettings = Fusion::RenderSettings::Get();
-	RenderSettings.API = ERendererAPI::D3D11;
+	RenderSettings.API = ERendererAPI::Vulkan;
 
 	return new FusionEditor::FusionEditorApp(specification);
 }

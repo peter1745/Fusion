@@ -3,6 +3,8 @@ clear
 
 read -p "Do you want to run Fusion Editor after building? Hit Enter if not: " shouldRun
 
+cd ../
+
 premake5 gmake2 --cc=clang
-make -j -k && test -n $shouldRun && ./Run.sh
+make -j -k && [ -n "$shouldRun" ] && cd ./Scripts/ && ./Run.sh
 

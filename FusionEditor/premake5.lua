@@ -16,11 +16,10 @@ project "FusionEditor"
 
     links
     {
-		"glad",
-        "ImGui",
         "Fusion",
         "Fission",
         "GLFW",
+        "ImGui",
         "yaml-cpp",
         "NFD-Extended"
     }
@@ -70,8 +69,11 @@ project "FusionEditor"
             "%{prj.location}/Source/Platform/D3D12/**"
         }
 
+        result, err = os.outputof("pkg-config --libs gtk+-3.0")
+
         linkoptions {
-			"`pkg-config --libs gtk+-3.0`"
+			result,
+			'-lvulkan'
         }
 
     filter "configurations:Debug"

@@ -7,7 +7,7 @@ project "NFD-Extended"
     targetdir (BuildDir .. "/%{prj.name}")
     objdir (IntermediatesDir .. "/%{prj.name}")
 
-    files { "include/NFD-Extended/include/nfd.h", "include/NFD-Extended/include/nfd.hpp" }
+    files { "include/NFD-Extended/nfd.h", "include/NFD-Extended/nfd.hpp" }
     includedirs { "include/" }
 
     filter "system:windows"
@@ -21,7 +21,8 @@ project "NFD-Extended"
 
         files { "src/nfd_gtk.cpp" }
 
-	buildoptions { "`pkg-config --cflags gtk+-3.0`" }
+    result, err = os.outputof("pkg-config --cflags gtk+-3.0")
+	buildoptions { result }
 
     filter "system:macosx"
 	pic "On"
