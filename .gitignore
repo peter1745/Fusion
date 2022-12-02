@@ -6,6 +6,7 @@
 *.cmake
 Makefile
 CMakeLists.txt
+ValgrindResult.xml
 
 # Directories
 .vs/
