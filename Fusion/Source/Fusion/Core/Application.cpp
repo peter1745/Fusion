@@ -37,8 +37,7 @@ namespace Fusion {
 		SwapChainCreateInfo.Height = m_Window->GetHeight();
 		SwapChainCreateInfo.HasDepthBuffer = false;
 		SwapChainCreateInfo.RenderTargetClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		m_SwapChain = SwapChain::Create(SwapChainCreateInfo);
-		m_Context->Init(m_SwapChain);
+		m_SwapChain = SwapChain::Create(m_Context, SwapChainCreateInfo);
 
 		m_Window->Maximize();
 
@@ -87,7 +86,7 @@ namespace Fusion {
 			m_Running = !m_Window->ShouldClose();
 		}
 
-		m_Context->WaitForGPU();
+		m_Context->GetDevice()->Wait();
 		OnShutdown();
 	}
 

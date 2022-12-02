@@ -1,3 +1,4 @@
+include "./Vendor/premake-dwarf.lua"
 include "Dependencies.lua"
 
 workspace "Fusion"

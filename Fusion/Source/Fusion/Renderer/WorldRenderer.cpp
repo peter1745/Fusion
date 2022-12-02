@@ -12,9 +12,9 @@ namespace Fusion {
 	Unique<ShaderCompiler> Compiler;
 
 	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
-		: m_World(InWorld)
+	    : m_World(InWorld)
 	{
-		Compiler = ShaderCompiler::Create();
+		/*Compiler = ShaderCompiler::Create();
 
 		GraphicsPipelineInfo PipelineInfo = {};
 		PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.hlsl");
@@ -40,7 +40,7 @@ namespace Fusion {
 		TransformUploadBufferInfo.Alignment = 16;
 		m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
 
-		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
+		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");*/
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
@@ -51,7 +51,7 @@ namespace Fusion {
 
 	void WorldRenderer::Render()
 	{
-		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
+		/*auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
 		m_Pipeline->Bind(CmdList);
 
 		const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
@@ -83,12 +83,11 @@ namespace Fusion {
 			IndexView.IndexBuffer = ActorMesh->GetMesh()->GetIndexBuffer();
 			IndexView.IndexFormat = EFormat::R32UInt;
 			CmdList->DrawIndexed(IndexView);
-		}
+		}*/
 	}
 
 	void WorldRenderer::End()
 	{
-		
 	}
 
 }

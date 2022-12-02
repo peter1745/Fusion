@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Fusion/Core/Window.hpp"
+#include "GraphicsContext.hpp"
 
 namespace Fusion {
 
@@ -18,15 +19,18 @@ namespace Fusion {
 	public:
 		virtual ~SwapChain() = default;
 
-		virtual void Bind() = 0;
+		virtual void Bind(CommandList* InCommandList) = 0;
 		virtual void Clear() = 0;
-		virtual void Present() = 0;
-		virtual void Unbind() = 0;
+		virtual void Unbind(CommandList* InCommandList) = 0;
 
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;
 
+		virtual uint32_t GetImageCount() const = 0;
+
+		virtual void Release() = 0;
+
 	public:
-		static Shared<SwapChain> Create(const SwapChainInfo& InCreateInfo);
+		static Shared<SwapChain> Create(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
 	};
 
 }

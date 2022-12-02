@@ -19,6 +19,7 @@ namespace Fusion {
 		virtual CommandList* AllocateCommandList() = 0;
 		virtual std::vector<CommandList*> AllocateCommandLists(size_t InCount) = 0;
 		virtual CommandList* GetCommandList(size_t InIndex) const = 0;
+		virtual void DestroyCommandList(CommandList* InCommandList) = 0;
 
 		virtual void Reset() = 0;
 	};

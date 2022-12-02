@@ -29,6 +29,11 @@ project "Tracy"
             "public/libbacktrace/elf.cpp"
         }
 
+    filter "system:linux"
+        systemversion "latest"
+        pic "On"
+        debugformat "Dwarf-4"
+
     filter "configurations:Debug"
         runtime "Debug"
         symbols "On"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Fusion.hpp>
+#include <Fusion/Renderer/Renderer.hpp>
 #include <Fusion/Renderer/Texture.hpp>
 #include <Fusion/World/World.hpp>
 #include <Fusion/Renderer/WorldRenderer.hpp>
@@ -47,6 +48,8 @@ namespace FusionEditor {
 
 	private:
 		ActorSelectionManager m_ActorSelectionManager = nullptr;
+
+		Unique<Renderer> m_Renderer = nullptr;
 
 		Shared<Mesh> m_CubeMesh = nullptr;
 		Shared<Texture2D> m_Texture = nullptr;

@@ -48,6 +48,7 @@ project "Fusion"
 
     filter "system:linux"
         pic "On"
+        debugformat "Dwarf-4"
 
         removefiles {
             "%{prj.location}/Source/Platform/D3D11/**",

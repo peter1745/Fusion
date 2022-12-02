@@ -3,9 +3,11 @@
 #include <Fusion/Renderer/RenderSettings.hpp>
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
-	#include "Platform/D3D12/ImGuiPlatformContextD3D12.hpp"
+#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
+#include "Platform/D3D12/ImGuiPlatformContextD3D12.hpp"
 #endif
+
+#include "Platform/Vulkan/ImGuiPlatformContextVulkan.hpp"
 
 #include <ImGui/imgui.h>
 
@@ -13,7 +15,7 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContext::Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -28,7 +30,7 @@ namespace FusionEditor {
 		IO.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		InitStyle();
-		InitPlatform(InWindow, InContext);
+		InitPlatform(InWindow, InContext, InSwapChain);
 	}
 
 	void ImGuiPlatformContext::BeginFrame()
@@ -38,9 +40,9 @@ namespace FusionEditor {
 		ImGuizmo::BeginFrame();
 	}
 
-	void ImGuiPlatformContext::EndFrame()
+	void ImGuiPlatformContext::EndFrame(Fusion::CommandList* InCommandList)
 	{
-		EndFramePlatform();
+		EndFramePlatform(InCommandList);
 	}
 
 	void ImGuiPlatformContext::Shutdown()
@@ -58,6 +60,7 @@ namespace FusionEditor {
 		case Fusion::ERendererAPI::D3D11: return std::make_unique<ImGuiPlatformContextD3D11>();
 		case Fusion::ERendererAPI::D3D12: return std::make_unique<ImGuiPlatformContextD3D12>();
 #endif
+		case Fusion::ERendererAPI::Vulkan: return std::make_unique<ImGuiPlatformContextVulkan>();
 		}
 
 		return nullptr;
@@ -103,7 +106,7 @@ namespace FusionEditor {
 			UIStyle.WindowRounding = 0.0f;
 			UIStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
-		
+
 		// ImGuizmo Style
 		auto& GizmoStyle = ImGuizmo::GetStyle();
 		GizmoStyle.TranslationLineThickness = 8.0f;

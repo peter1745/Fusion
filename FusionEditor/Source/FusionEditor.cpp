@@ -72,7 +72,7 @@ namespace FusionEditor {
 
 			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
 		}
-		
+
 		{
 			V = glm::vec3(0.0f);
 
@@ -118,11 +118,10 @@ namespace FusionEditor {
 	}
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
-		: Application(specification, this)
+	    : Application(specification, this)
 	{
 		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(GetWindow()->GetWindowHandle());
-		glfwSetDropCallback(NativeWindow, [](GLFWwindow* InNativeWindow, int32_t InPathCount, const char** InFilePaths)
-		{
+		glfwSetDropCallback(NativeWindow, [](GLFWwindow* InNativeWindow, int32_t InPathCount, const char** InFilePaths) {
 			Fusion::WindowData* Data = static_cast<Fusion::WindowData*>(glfwGetWindowUserPointer(InNativeWindow));
 			FusionEditorApp* App = static_cast<FusionEditorApp*>(Data->Specification.UserData);
 			for (int32_t Idx = 0; Idx < InPathCount; Idx++)
@@ -134,18 +133,21 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnInit()
 	{
-		//m_ImGuiContext = ImGuiPlatformContext::Create();
-		//m_ImGuiContext->Init(GetWindow(), m_Context);
-	
+		m_ImGuiContext = ImGuiPlatformContext::Create();
+		m_ImGuiContext->Init(GetWindow(), m_Context, m_SwapChain);
+
+		m_Renderer = Renderer::Create({ m_SwapChain });
+
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
-		
+
 		m_World = Shared<World>::Create("Empty World");
 		m_WindowManager = MakeUnique<WindowManager>();
 
 		m_ActorSelectionManager = ActorSelectionManager::Create();
 
-		//InitWindows();
+		InitWindows();
 
+		// TODO(Peter): We shouldn't do this even for D3D12 (Not sure why we were)
 		//m_Context->GetCurrentCommandList()->EndRecording();
 		//m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
 	}
@@ -154,33 +156,22 @@ namespace FusionEditor {
 	{
 		m_World->Simulate(DeltaTime);
 
-		// NextFrame also resets the active command list (should maybe be a separate call?)
-		m_Context->NextFrame();
-
-		FUSION_CLIENT_INFO("Current Frame: {}", m_Context->GetCurrentFrameIndex());
+		m_Renderer->BeginFrame();
 
 		//m_Context->GetCurrentCommandList()->SetDescriptorHeaps({ m_Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV) });
 
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
 
-		m_SwapChain->Bind();
-		m_SwapChain->Clear();
-		//m_ImGuiContext->EndFrame();
-		m_SwapChain->Unbind();
-		m_Context->GetCurrentCommandList()->EndRecording();
+		DrawUI();
 
-		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
-
-		m_SwapChain->Present();
-
-		//DrawUI();
+		m_Renderer->EndFrame();
 	}
 
 	void FusionEditorApp::OnShutdown()
 	{
 		NFD::Quit();
-		//ShutdownImGui();
+		ShutdownImGui();
 	}
 
 	void FusionEditorApp::OnEvent(Event& InEvent)
@@ -211,7 +202,7 @@ namespace FusionEditor {
 	{
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World, m_ActorSelectionManager);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true, m_ActorSelectionManager);
-		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
+		//m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
 		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 
@@ -231,9 +222,9 @@ namespace FusionEditor {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
 		ImGuiWindowFlags DockspaceWindowFlags =
-			ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+		    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+		    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
 		ImGui::Begin("MainDockspaceWindow", nullptr, DockspaceWindowFlags);
 		ImGui::PopStyleVar(3);
@@ -256,15 +247,12 @@ namespace FusionEditor {
 
 		ImGui::Render();
 
-		m_SwapChain->Bind();
+		auto* CommandList = m_Renderer->GetCurrentCommandList();
+
+		m_SwapChain->Bind(CommandList);
 		m_SwapChain->Clear();
-		m_ImGuiContext->EndFrame();
-		m_SwapChain->Unbind();
-		m_Context->GetCurrentCommandList()->EndRecording();
-
-		m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
-
-		m_SwapChain->Present();
+		m_ImGuiContext->EndFrame(CommandList);
+		m_SwapChain->Unbind(CommandList);
 	}
 
 	void FusionEditorApp::DrawMenuBar()
@@ -306,7 +294,7 @@ namespace FusionEditor {
 				if (ImGui::MenuItem("Save World..."))
 				{
 					NFD::UniquePath WorldPath;
-					nfdfilteritem_t Filters[] = { { "Fusion World", "fworld" }};
+					nfdfilteritem_t Filters[] = { { "Fusion World", "fworld" } };
 					nfdresult_t Result = NFD::SaveDialog(WorldPath, Filters, 1);
 
 					switch (Result)
@@ -390,7 +378,7 @@ namespace FusionEditor {
 
 		std::filesystem::create_directory(ProjectBaseDirectory);
 		std::filesystem::create_directory(ProjectBaseDirectory / "Content");
-		
+
 		std::shared_ptr<Project> NewProject = std::make_shared<Project>();
 		NewProject->Name = InName;
 		NewProject->BaseDirectory = ProjectBaseDirectory;

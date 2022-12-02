@@ -6,8 +6,8 @@
 
 namespace Fusion {
 
-	VulkanCommandList::VulkanCommandList(const Shared<VulkanCommandAllocator>& InAllocator, VkCommandBuffer InCmdBuffer)
-	    : m_Allocator(InAllocator), m_CommandBuffer(InCmdBuffer)
+	VulkanCommandList::VulkanCommandList(VkCommandBuffer InCmdBuffer)
+	    : m_CommandBuffer(InCmdBuffer)
 	{
 	}
 

@@ -16,8 +16,9 @@ project "yaml-cpp"
 		systemversion "latest"
 
     filter "system:linux"
-		pic "On"
 		systemversion "latest"
+		pic "On"
+        debugformat "Dwarf-4"
 
     filter "system:macosx"
 		pic "On"

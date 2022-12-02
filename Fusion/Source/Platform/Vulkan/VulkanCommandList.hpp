@@ -11,7 +11,7 @@ namespace Fusion {
 	class VulkanCommandList : public CommandList
 	{
 	public:
-		VulkanCommandList(const Shared<VulkanCommandAllocator>& InAllocator, VkCommandBuffer InCmdBuffer);
+		VulkanCommandList(VkCommandBuffer InCmdBuffer);
 		~VulkanCommandList() override = default;
 
 		void Reset() override;
@@ -35,7 +35,6 @@ namespace Fusion {
 		auto GetBuffer() const { return m_CommandBuffer; }
 
 	private:
-		Shared<VulkanCommandAllocator> m_Allocator;
 		VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;
 	};
 }

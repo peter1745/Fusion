@@ -11,7 +11,7 @@
 
 namespace Fusion {
 
-	Shared<SwapChain> SwapChain::Create(const SwapChainInfo& InCreateInfo)
+	Shared<SwapChain> SwapChain::Create(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo)
 	{
 		switch (RenderSettings::Get().API)
 		{
@@ -20,7 +20,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return Shared<D3D11SwapChain>::Create(InCreateInfo);
 		case ERendererAPI::D3D12: return Shared<D3D12SwapChain>::Create(InCreateInfo);
 #endif
-		case ERendererAPI::Vulkan: return Shared<VulkanSwapChain>::Create(InCreateInfo);
+		case ERendererAPI::Vulkan: return Shared<VulkanSwapChain>::Create(InContext, InCreateInfo);
 		}
 
 		return nullptr;

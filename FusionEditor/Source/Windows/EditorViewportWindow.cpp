@@ -16,7 +16,7 @@
 namespace FusionEditor {
 
 	EditorViewportWindow::EditorViewportWindow(const Fusion::Shared<Fusion::World>& InWorld, const ActorSelectionManager& InSelectionCtx)
-		: ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720), m_SelectionManager(InSelectionCtx)
+	    : ViewportWindowBase("MainViewport", InWorld), m_Camera(1280, 720), m_SelectionManager(InSelectionCtx)
 	{
 		SetTitle("Viewport");
 
@@ -56,8 +56,7 @@ namespace FusionEditor {
 	void EditorViewportWindow::OnEvent(Fusion::Event& InEvent)
 	{
 		Fusion::EventDispatcher Dispatcher(InEvent);
-		Dispatcher.Dispatch<Fusion::KeyPressedEvent>([this](auto& InKeyEvent)
-		{
+		Dispatcher.Dispatch<Fusion::KeyPressedEvent>([this](auto& InKeyEvent) {
 			return OnKeyPressed(InKeyEvent);
 		});
 	}
@@ -113,7 +112,7 @@ namespace FusionEditor {
 		if (m_ActiveGizmoType == EGizmoType::None || SelectedActors.empty())
 			return;
 
-		ImGuizmo::OPERATION CurrentOperation = (ImGuizmo::OPERATION)-1;
+		ImGuizmo::OPERATION CurrentOperation = (ImGuizmo::OPERATION) -1;
 		switch (m_ActiveGizmoType)
 		{
 		case EGizmoType::None:
@@ -142,12 +141,12 @@ namespace FusionEditor {
 		glm::mat4 DeltaTransform = glm::mat4(1.0f);
 
 		bool TransformChanged = ImGuizmo::Manipulate(
-			glm::value_ptr(ViewMatrix),
-			glm::value_ptr(ProjectionMatrix),
-			CurrentOperation,
-			CurrentMode,
-			glm::value_ptr(GizmoTransform),
-			glm::value_ptr(DeltaTransform));
+		    glm::value_ptr(ViewMatrix),
+		    glm::value_ptr(ProjectionMatrix),
+		    CurrentOperation,
+		    CurrentMode,
+		    glm::value_ptr(GizmoTransform),
+		    glm::value_ptr(DeltaTransform));
 
 		if (TransformChanged)
 		{
@@ -156,7 +155,7 @@ namespace FusionEditor {
 			glm::vec3 DeltaSkew;
 			glm::vec4 DeltaPerspective;
 			glm::decompose(DeltaTransform, DeltaScale, DeltaRotation, DeltaTranslation, DeltaSkew, DeltaPerspective);
-			
+
 			for (auto [ActorID, Actor] : SelectedActors)
 			{
 				Fusion::TransformComponent* ActorTransformComp = Actor->FindComponent<Fusion::TransformComponent>();
@@ -169,36 +168,36 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderWorld()
 	{
-		auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
-
-		uint32_t FrameIndex = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentFrameIndex();
-
-		m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
-		m_WorldRenderer->Render();
-		m_WorldRenderer->End();
-
-		auto MousePos = Fusion::Mouse::Get().GetPosition();
-		MousePos.x -= m_MinRenderBoundX;
-		MousePos.y -= m_MinRenderBoundY;
-
-		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
-		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
-
-		if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
-		{
-			Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
-			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
-
-			Fusion::CopyRegionInfo CopyRegion = {};
-			CopyRegion.Left = MousePos.x;
-			CopyRegion.Top = MousePos.y;
-			CopyRegion.Right = MousePos.x + 1;
-			CopyRegion.Bottom = MousePos.y + 1;
-			m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
-			m_ShouldCopyFromBuffer = true;
-	
-			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);
-		}
+		//auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
+		//
+		//uint32_t FrameIndex = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentFrameIndex();
+		//
+		//m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
+		//m_WorldRenderer->Render();
+		//m_WorldRenderer->End();
+		//
+		//auto MousePos = Fusion::Mouse::Get().GetPosition();
+		//MousePos.x -= m_MinRenderBoundX;
+		//MousePos.y -= m_MinRenderBoundY;
+		//
+		//const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
+		//const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
+		//
+		//if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		//{
+		//	Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
+		//	ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
+		//
+		//	Fusion::CopyRegionInfo CopyRegion = {};
+		//	CopyRegion.Left = MousePos.x;
+		//	CopyRegion.Top = MousePos.y;
+		//	CopyRegion.Right = MousePos.x + 1;
+		//	CopyRegion.Bottom = MousePos.y + 1;
+		//	m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
+		//	m_ShouldCopyFromBuffer = true;
+		//
+		//	ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);
+		//}
 	}
 
 	void EditorViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)
@@ -283,7 +282,6 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::OnActorDeselected(Fusion::Shared<Fusion::Actor> InActor)
 	{
-
 	}
 
 }

@@ -29,6 +29,9 @@ project "Fission"
     filter "system:windows"
         systemversion "latest"
 
+    filter "system:linux"
+        debugformat "Dwarf-4"
+
     filter "configurations:Debug"
         defines "FISSION_DEBUG"
         runtime "Debug"

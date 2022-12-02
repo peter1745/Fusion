@@ -11,22 +11,21 @@ project "NFD-Extended"
     includedirs { "include/" }
 
     filter "system:windows"
-	systemversion "latest"
-
+    	systemversion "latest"
         files { "src/nfd_win.cpp" }
 
     filter "system:linux"
-	pic "On"
-	systemversion "latest"
+        pic "On"
+        systemversion "latest"
+        debugformat "Dwarf-4"
 
         files { "src/nfd_gtk.cpp" }
 
-    result, err = os.outputof("pkg-config --cflags gtk+-3.0")
-	buildoptions { result }
+        result, err = os.outputof("pkg-config --cflags gtk+-3.0")
+        buildoptions { result }
 
     filter "system:macosx"
-	pic "On"
-
+    	pic "On"
         files { "src/nfd_cocoa.m" }
 
     filter "configurations:Debug"

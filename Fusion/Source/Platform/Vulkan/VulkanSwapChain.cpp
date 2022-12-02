@@ -9,9 +9,11 @@
 
 namespace Fusion {
 
-	VulkanSwapChain::VulkanSwapChain(const SwapChainInfo& InCreateInfo)
+	VulkanSwapChain::VulkanSwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo)
 	    : m_CreateInfo(InCreateInfo)
 	{
+		m_Device = InContext.As<VulkanContext>()->GetDevice();
+
 		Create(false);
 	}
 
@@ -19,10 +21,9 @@ namespace Fusion {
 	{
 	}
 
-	void VulkanSwapChain::Bind()
+	void VulkanSwapChain::Bind(CommandList* InCommandList)
 	{
-		auto Ctx = GraphicsContext::Get<VulkanContext>();
-		auto CmdList = static_cast<VulkanCommandList*>(Ctx->GetCurrentCommandList())->GetBuffer();
+		auto CmdList = dynamic_cast<VulkanCommandList*>(InCommandList)->GetBuffer();
 
 		VkViewport Viewport = {};
 		Viewport.x = 0.0f;
@@ -47,7 +48,7 @@ namespace Fusion {
 		VkRenderPassBeginInfo RenderPassBeginInfo = {};
 		RenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		RenderPassBeginInfo.renderPass = m_RenderPass;
-		RenderPassBeginInfo.framebuffer = m_Framebuffers[m_CurrentImage];
+		RenderPassBeginInfo.framebuffer = m_FrameBuffers[m_CurrentImage];
 		RenderPassBeginInfo.renderArea.offset = { 0, 0 };
 		RenderPassBeginInfo.renderArea.extent = m_ImageExtent;
 		RenderPassBeginInfo.clearValueCount = 1;
@@ -58,16 +59,16 @@ namespace Fusion {
 
 	void VulkanSwapChain::Clear() {}
 
-	void VulkanSwapChain::Present()
+	void VulkanSwapChain::Present(VkSemaphore InFinishedSemaphore)
 	{
 		VkPresentInfoKHR PresentInfo = {};
 		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		PresentInfo.waitSemaphoreCount = 1;
-		PresentInfo.pWaitSemaphores = &m_RenderFinishedSemaphores[m_CurrentFrame];
+		PresentInfo.pWaitSemaphores = &InFinishedSemaphore;
 		PresentInfo.swapchainCount = 1;
 		PresentInfo.pSwapchains = &m_SwapChain;
 		PresentInfo.pImageIndices = &m_CurrentImage;
-		VkResult Result = vkQueuePresentKHR(GraphicsContext::Get<VulkanContext>()->GetQueueInfo().Queue, &PresentInfo);
+		VkResult Result = vkQueuePresentKHR(m_Device->GetQueueInfo().Queue, &PresentInfo);
 
 		if (Result == VK_ERROR_OUT_OF_DATE_KHR || Result == VK_SUBOPTIMAL_KHR)
 		{
@@ -77,16 +78,11 @@ namespace Fusion {
 		{
 			FUSION_CORE_VERIFY(false, "Error trying to present to the screen.");
 		}
-
-		m_CurrentFrame = (m_CurrentFrame + 1) % m_FrameCount;
 	}
 
-	void VulkanSwapChain::Unbind()
+	void VulkanSwapChain::Unbind(CommandList* InCommandList)
 	{
-		auto Ctx = GraphicsContext::Get<VulkanContext>();
-		auto CmdList = static_cast<VulkanCommandList*>(Ctx->GetCurrentCommandList())->GetBuffer();
-
-		vkCmdEndRenderPass(CmdList);
+		vkCmdEndRenderPass(dynamic_cast<VulkanCommandList*>(InCommandList)->GetBuffer());
 	}
 
 	void VulkanSwapChain::Resize(uint32_t InWidth, uint32_t InHeight)
@@ -117,14 +113,14 @@ namespace Fusion {
 		SwapchainInfo.clipped = VK_TRUE;
 		SwapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		FUSION_CORE_VERIFY(vkCreateSwapchainKHR(Context->GetDevice(), &SwapchainInfo, nullptr, &m_SwapChain) == VK_SUCCESS);
+		FUSION_CORE_VERIFY(vkCreateSwapchainKHR(m_Device->GetLogicalDevice(), &SwapchainInfo, nullptr, &m_SwapChain) == VK_SUCCESS);
 
 		// Get SwapChain images and create image views
 		{
-			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(Context->GetDevice(), m_SwapChain, &m_ImageCount, nullptr) == VK_SUCCESS);
+			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_SwapChain, &m_ImageCount, nullptr) == VK_SUCCESS);
 			m_Images.resize(m_ImageCount);
 			m_ImageViews.resize(m_ImageCount);
-			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(Context->GetDevice(), m_SwapChain, &m_ImageCount, m_Images.data()) == VK_SUCCESS);
+			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Device->GetLogicalDevice(), m_SwapChain, &m_ImageCount, m_Images.data()) == VK_SUCCESS);
 
 			for (uint32_t Idx = 0; Idx < m_ImageCount; Idx++)
 			{
@@ -140,30 +136,7 @@ namespace Fusion {
 				ImageViewInfo.subresourceRange.layerCount = 1;
 				ImageViewInfo.subresourceRange.baseArrayLayer = 0;
 
-				FUSION_CORE_VERIFY(vkCreateImageView(Context->GetDevice(), &ImageViewInfo, nullptr, &m_ImageViews[Idx]) == VK_SUCCESS);
-			}
-		}
-
-		m_FrameCount = std::min(m_FrameCount, m_SurfaceCapabilities.maxImageCount);
-
-		// Create semaphores and fences
-		{
-			m_ImageAvailableSemaphores.resize(m_ImageCount);
-			m_RenderFinishedSemaphores.resize(m_ImageCount);
-			m_ImageFences.resize(m_ImageCount);
-
-			VkSemaphoreCreateInfo SemaphoreInfo = {};
-			SemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-			VkFenceCreateInfo FenceInfo = {};
-			FenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			FenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-			for (uint32_t Idx = 0; Idx < m_ImageCount; Idx++)
-			{
-				vkCreateSemaphore(Context->GetDevice(), &SemaphoreInfo, nullptr, &m_ImageAvailableSemaphores[Idx]);
-				vkCreateSemaphore(Context->GetDevice(), &SemaphoreInfo, nullptr, &m_RenderFinishedSemaphores[Idx]);
-				vkCreateFence(Context->GetDevice(), &FenceInfo, nullptr, &m_ImageFences[Idx]);
+				FUSION_CORE_VERIFY(vkCreateImageView(m_Device->GetLogicalDevice(), &ImageViewInfo, nullptr, &m_ImageViews[Idx]) == VK_SUCCESS);
 			}
 		}
 
@@ -191,9 +164,9 @@ namespace Fusion {
 		RenderPassInfo.pSubpasses = &SubPassInfo;
 		RenderPassInfo.subpassCount = 1;
 
-		FUSION_CORE_VERIFY(vkCreateRenderPass(Context->GetDevice(), &RenderPassInfo, nullptr, &m_RenderPass) == VK_SUCCESS);
+		FUSION_CORE_VERIFY(vkCreateRenderPass(m_Device->GetLogicalDevice(), &RenderPassInfo, nullptr, &m_RenderPass) == VK_SUCCESS);
 
-		m_Framebuffers.resize(m_ImageCount);
+		m_FrameBuffers.resize(m_ImageCount);
 		for (size_t Idx = 0; Idx < m_ImageCount; Idx++)
 		{
 			VkFramebufferCreateInfo FramebufferInfo = {};
@@ -204,7 +177,7 @@ namespace Fusion {
 			FramebufferInfo.layers = 1;
 			FramebufferInfo.attachmentCount = 1;
 			FramebufferInfo.pAttachments = &m_ImageViews[Idx];
-			FUSION_CORE_VERIFY(vkCreateFramebuffer(Context->GetDevice(), &FramebufferInfo, nullptr, &m_Framebuffers[Idx]) == VK_SUCCESS);
+			FUSION_CORE_VERIFY(vkCreateFramebuffer(m_Device->GetLogicalDevice(), &FramebufferInfo, nullptr, &m_FrameBuffers[Idx]) == VK_SUCCESS);
 		}
 	}
 
@@ -215,9 +188,9 @@ namespace Fusion {
 		// Select a surface format
 		{
 			uint32_t NumFormats = 0;
-			vkGetPhysicalDeviceSurfaceFormatsKHR(Context->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, nullptr);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, nullptr);
 			std::vector<VkSurfaceFormatKHR> SupportedFormats(NumFormats);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(Context->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, SupportedFormats.data());
+			vkGetPhysicalDeviceSurfaceFormatsKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, SupportedFormats.data());
 
 			bool FoundSRGBFormat = false;
 			for (const auto& Format : SupportedFormats)
@@ -235,14 +208,16 @@ namespace Fusion {
 
 			if (!FoundSRGBFormat)
 				m_SurfaceFormat = SupportedFormats[0];
+
+			m_SurfaceFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
 		}
 
 		// Find a present mode
 		{
 			uint32_t NumPresentModes = 0;
-			vkGetPhysicalDeviceSurfacePresentModesKHR(Context->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, nullptr);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, nullptr);
 			std::vector<VkPresentModeKHR> SupportedPresentModes(NumPresentModes);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(Context->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, SupportedPresentModes.data());
+			vkGetPhysicalDeviceSurfacePresentModesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, SupportedPresentModes.data());
 
 			for (const auto& PresentMode : SupportedPresentModes)
 			{
@@ -255,7 +230,7 @@ namespace Fusion {
 			}
 		}
 
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Context->GetPhysicalDevice(), Context->GetSurface(), &m_SurfaceCapabilities);
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &m_SurfaceCapabilities);
 
 		// Create Image Extent
 		{
@@ -265,7 +240,7 @@ namespace Fusion {
 			}
 			else
 			{
-				GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
+				auto* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
 				int32_t ImageWidth = 0, ImageHeight = 0;
 				glfwGetFramebufferSize(NativeWindow, &ImageWidth, &ImageHeight);
 				m_ImageExtent.width = std::clamp(uint32_t(ImageWidth), m_SurfaceCapabilities.minImageExtent.width, m_SurfaceCapabilities.maxImageExtent.width);
@@ -279,39 +254,26 @@ namespace Fusion {
 
 	void VulkanSwapChain::Invalidate()
 	{
-		auto Context = GraphicsContext::Get<VulkanContext>();
+		m_Device->Wait();
 
-		Context->WaitForGPU();
+		for (auto& Framebuffer : m_FrameBuffers)
+			vkDestroyFramebuffer(m_Device->GetLogicalDevice(), Framebuffer, nullptr);
 
-		for (size_t Idx = 0; Idx < m_Framebuffers.size(); Idx++)
-			vkDestroyFramebuffer(Context->GetDevice(), m_Framebuffers[Idx], nullptr);
+		vkDestroyRenderPass(m_Device->GetLogicalDevice(), m_RenderPass, nullptr);
 
-		vkDestroyRenderPass(Context->GetDevice(), m_RenderPass, nullptr);
+		for (auto& View : m_ImageViews)
+			vkDestroyImageView(m_Device->GetLogicalDevice(), View, nullptr);
 
-		for (size_t Idx = 0; Idx < m_ImageViews.size(); Idx++)
-			vkDestroyImageView(Context->GetDevice(), m_ImageViews[Idx], nullptr);
-		vkDestroySwapchainKHR(Context->GetDevice(), m_SwapChain, nullptr);
+		vkDestroySwapchainKHR(m_Device->GetLogicalDevice(), m_SwapChain, nullptr);
 
-		for (size_t Idx = 0; Idx < m_ImageAvailableSemaphores.size(); Idx++)
-			vkDestroySemaphore(Context->GetDevice(), m_ImageAvailableSemaphores[Idx], nullptr);
-
-		for (size_t Idx = 0; Idx < m_RenderFinishedSemaphores.size(); Idx++)
-			vkDestroySemaphore(Context->GetDevice(), m_RenderFinishedSemaphores[Idx], nullptr);
-
-		for (size_t Idx = 0; Idx < m_ImageFences.size(); Idx++)
-			vkDestroyFence(Context->GetDevice(), m_ImageFences[Idx], nullptr);
-
-		m_CurrentFrame = 0;
 		m_CurrentImage = 0;
 
 		Create(true);
 	}
 
-	bool VulkanSwapChain::AcquireNextImage()
+	bool VulkanSwapChain::AcquireNextImage(VkDevice InDevice, VkSemaphore InImageAvailableSemaphore)
 	{
-		auto Ctx = GraphicsContext::Get<VulkanContext>();
-		vkWaitForFences(Ctx->GetDevice(), 1, &m_ImageFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-		VkResult Result = vkAcquireNextImageKHR(Ctx->GetDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImage);
+		VkResult Result = vkAcquireNextImageKHR(InDevice, m_SwapChain, UINT64_MAX, InImageAvailableSemaphore, VK_NULL_HANDLE, &m_CurrentImage);
 
 		if (Result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
@@ -319,7 +281,21 @@ namespace Fusion {
 			return false;
 		}
 
-		vkResetFences(Ctx->GetDevice(), 1, &m_ImageFences[m_CurrentFrame]);
+		FUSION_CORE_VERIFY(Result == VK_SUCCESS);
 		return true;
 	}
+
+	void VulkanSwapChain::Release()
+	{
+		for (auto& Framebuffer : m_FrameBuffers)
+			vkDestroyFramebuffer(m_Device->GetLogicalDevice(), Framebuffer, nullptr);
+
+		vkDestroyRenderPass(m_Device->GetLogicalDevice(), m_RenderPass, nullptr);
+
+		for (auto& View : m_ImageViews)
+			vkDestroyImageView(m_Device->GetLogicalDevice(), View, nullptr);
+
+		vkDestroySwapchainKHR(m_Device->GetLogicalDevice(), m_SwapChain, nullptr);
+	}
+
 }
