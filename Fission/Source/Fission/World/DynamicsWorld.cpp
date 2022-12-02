@@ -26,7 +26,7 @@ namespace Fission {
 	{
 		for (const auto& ActiveActorID : m_ActiveBodies)
 			m_BodyAllocator->RemoveBody(ActiveActorID);
-		
+
 		m_ActiveBodies.clear();
 
 		delete m_BodyAllocator;
@@ -57,7 +57,7 @@ namespace Fission {
 	{
 		if (InBodyID.IsInvalid())
 		{
-			__debugbreak();
+			//__debugbreak();
 			return;
 		}
 
@@ -388,7 +388,7 @@ namespace Fission {
 		glm::vec3 VelocityDiff = Velocity0 - Velocity1;
 		float ImpulseJ = (1.0f + InContact.CombinedRestitution) * glm::dot(VelocityDiff, InContact.Normal) / (Body0->InverseMass + Body1->InverseMass + AngularFactor);
 		glm::vec3 Impulse = InContact.Normal * ImpulseJ;
-		
+
 		AddImpulse(InContact.BodyA, Impulse * -1.0f, InContact.PointA);
 		AddImpulse(InContact.BodyB, Impulse * 1.0f, InContact.PointB);
 
