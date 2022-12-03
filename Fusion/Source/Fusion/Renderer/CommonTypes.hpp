@@ -86,9 +86,14 @@ namespace Fusion {
 		case EFormat::RG32UInt: return 2 * sizeof(uint32_t);
 		case EFormat::R32Float: return 1 * sizeof(float);
 		case EFormat::R32UInt: return 1 * sizeof(uint32_t);
-		case EFormat::RGBA8Unorm: return 4 * sizeof(uint8_t);
-		case EFormat::RGBA8UInt: return 4 * sizeof(uint8_t);
-		case EFormat::D24UnormS8UInt:  return 4 * sizeof(uint8_t);
+		case EFormat::RGBA8Unorm:
+		case EFormat::RGBA8UInt:
+		case EFormat::D24UnormS8UInt:
+			return 4 * sizeof(uint8_t);
+		case EFormat::RGBA32SInt: return 4 * sizeof(int32_t);
+		case EFormat::RGB32SInt: return 3 * sizeof(int32_t);
+		case EFormat::RG32SInt: return 2 * sizeof(int32_t);
+		case EFormat::R32SInt: return 1 * sizeof(int32_t);
 		}
 
 		FUSION_CORE_VERIFY(false);

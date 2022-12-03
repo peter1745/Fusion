@@ -17,10 +17,6 @@ namespace Fusion {
 		Create(false);
 	}
 
-	VulkanSwapChain::~VulkanSwapChain()
-	{
-	}
-
 	void VulkanSwapChain::Bind(CommandList* InCommandList)
 	{
 		auto CmdList = dynamic_cast<VulkanCommandList*>(InCommandList)->GetBuffer();
@@ -93,23 +89,78 @@ namespace Fusion {
 	{
 		auto Context = GraphicsContext::Get<VulkanContext>();
 
-		InitSurface();
+		SurfaceProperties SurfaceProps = m_Device->GetSurfaceProperties(Context->GetSurface());
+
+		VkSurfaceFormatKHR Format = SurfaceProps.Formats[0];
+		if (Format.format != VK_FORMAT_B8G8R8A8_UNORM || Format.colorSpace != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+		{
+			// Find suitable format
+
+			for (uint32_t Idx = 1; Idx < SurfaceProps.Formats.size(); Idx++)
+			{
+				Format = SurfaceProps.Formats[Idx];
+
+				if (Format.format == VK_FORMAT_B8G8R8A8_UNORM)
+					break;
+			}
+
+			if (Format.format != VK_FORMAT_B8G8R8A8_UNORM)
+				Format = SurfaceProps.Formats[0]; // Just pick the first if the desired one isn't found
+		}
+
+		// Find suitable present mode
+		VkPresentModeKHR PresentMode = SurfaceProps.PresentModes[0];
+		if (PresentMode != VK_PRESENT_MODE_MAILBOX_KHR)
+		{
+			for (uint32_t Idx = 1; Idx < SurfaceProps.PresentModes.size(); Idx++)
+			{
+				PresentMode = SurfaceProps.PresentModes[Idx];
+				if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+					break;
+			}
+
+			// Look for FIFO if mailbox isn't supported
+			if (PresentMode != VK_PRESENT_MODE_MAILBOX_KHR)
+			{
+				for (uint32_t Idx = 1; Idx < SurfaceProps.PresentModes.size(); Idx++)
+				{
+					PresentMode = SurfaceProps.PresentModes[Idx];
+					if (PresentMode == VK_PRESENT_MODE_FIFO_KHR)
+						break;
+				}
+			}
+		}
+
+		if (SurfaceProps.Capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+		{
+			m_ImageExtent = SurfaceProps.Capabilities.currentExtent;
+		}
+		else
+		{
+			auto* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
+			int32_t ImageWidth = 0, ImageHeight = 0;
+			glfwGetFramebufferSize(NativeWindow, &ImageWidth, &ImageHeight);
+			m_ImageExtent.width = std::clamp(uint32_t(ImageWidth), SurfaceProps.Capabilities.minImageExtent.width, SurfaceProps.Capabilities.maxImageExtent.width);
+			m_ImageExtent.height = std::clamp(uint32_t(ImageHeight), SurfaceProps.Capabilities.minImageExtent.height, SurfaceProps.Capabilities.maxImageExtent.height);
+		}
+
+		m_ImageCount = std::min(SurfaceProps.Capabilities.minImageCount + 1, SurfaceProps.Capabilities.maxImageCount);
 
 		VkSwapchainCreateInfoKHR SwapchainInfo = {};
 		SwapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		SwapchainInfo.surface = Context->GetSurface();
 		SwapchainInfo.minImageCount = m_ImageCount;
-		SwapchainInfo.imageFormat = m_SurfaceFormat.format;
-		SwapchainInfo.imageColorSpace = m_SurfaceFormat.colorSpace;
+		SwapchainInfo.imageFormat = Format.format;
+		SwapchainInfo.imageColorSpace = Format.colorSpace;
 		SwapchainInfo.imageExtent = m_ImageExtent;
 		SwapchainInfo.imageArrayLayers = 1;
 		SwapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		SwapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		SwapchainInfo.queueFamilyIndexCount = 0;
 		SwapchainInfo.pQueueFamilyIndices = nullptr;
-		SwapchainInfo.preTransform = m_SurfaceCapabilities.currentTransform;
+		SwapchainInfo.preTransform = SurfaceProps.Capabilities.currentTransform;
 		SwapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		SwapchainInfo.presentMode = m_PresentMode;
+		SwapchainInfo.presentMode = PresentMode;
 		SwapchainInfo.clipped = VK_TRUE;
 		SwapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -128,7 +179,7 @@ namespace Fusion {
 				ImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 				ImageViewInfo.image = m_Images[Idx];
 				ImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-				ImageViewInfo.format = m_SurfaceFormat.format;
+				ImageViewInfo.format = Format.format;
 
 				ImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageViewInfo.subresourceRange.levelCount = 1;
@@ -143,7 +194,7 @@ namespace Fusion {
 		VkAttachmentDescription AttachmentInfo = {};
 		AttachmentInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		AttachmentInfo.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		AttachmentInfo.format = m_SurfaceFormat.format;
+		AttachmentInfo.format = Format.format;
 		AttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		AttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		AttachmentInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -181,77 +232,6 @@ namespace Fusion {
 		}
 	}
 
-	void VulkanSwapChain::InitSurface()
-	{
-		auto Context = GraphicsContext::Get<VulkanContext>();
-
-		// Select a surface format
-		{
-			uint32_t NumFormats = 0;
-			vkGetPhysicalDeviceSurfaceFormatsKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, nullptr);
-			std::vector<VkSurfaceFormatKHR> SupportedFormats(NumFormats);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumFormats, SupportedFormats.data());
-
-			bool FoundSRGBFormat = false;
-			for (const auto& Format : SupportedFormats)
-			{
-				if (Format.colorSpace != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-					continue;
-
-				if (Format.format == VK_FORMAT_B8G8R8A8_SRGB || Format.format == VK_FORMAT_R8G8B8A8_SRGB)
-				{
-					FoundSRGBFormat = true;
-					m_SurfaceFormat = Format;
-					break;
-				}
-			}
-
-			if (!FoundSRGBFormat)
-				m_SurfaceFormat = SupportedFormats[0];
-
-			m_SurfaceFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
-		}
-
-		// Find a present mode
-		{
-			uint32_t NumPresentModes = 0;
-			vkGetPhysicalDeviceSurfacePresentModesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, nullptr);
-			std::vector<VkPresentModeKHR> SupportedPresentModes(NumPresentModes);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &NumPresentModes, SupportedPresentModes.data());
-
-			for (const auto& PresentMode : SupportedPresentModes)
-			{
-				if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-				{
-					// NOTE(Peter): We'll use VK_PRESENT_MODE_FIFO_KHR if we can't find a Mailbox present mode
-					m_PresentMode = PresentMode;
-					break;
-				}
-			}
-		}
-
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_Device->GetPhysicalDevice(), Context->GetSurface(), &m_SurfaceCapabilities);
-
-		// Create Image Extent
-		{
-			if (m_SurfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-			{
-				m_ImageExtent = m_SurfaceCapabilities.currentExtent;
-			}
-			else
-			{
-				auto* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
-				int32_t ImageWidth = 0, ImageHeight = 0;
-				glfwGetFramebufferSize(NativeWindow, &ImageWidth, &ImageHeight);
-				m_ImageExtent.width = std::clamp(uint32_t(ImageWidth), m_SurfaceCapabilities.minImageExtent.width, m_SurfaceCapabilities.maxImageExtent.width);
-				m_ImageExtent.height = std::clamp(uint32_t(ImageHeight), m_SurfaceCapabilities.minImageExtent.height, m_SurfaceCapabilities.maxImageExtent.height);
-			}
-		}
-
-		// Get image count
-		m_ImageCount = std::min(m_SurfaceCapabilities.minImageCount + 1, m_SurfaceCapabilities.maxImageCount);
-	}
-
 	void VulkanSwapChain::Invalidate()
 	{
 		m_Device->Wait();
@@ -287,6 +267,9 @@ namespace Fusion {
 
 	void VulkanSwapChain::Release()
 	{
+		// Ensure the queue isn't busy before we try to destroy the resources
+		vkQueueWaitIdle(m_Device->GetQueueInfo().Queue);
+
 		for (auto& Framebuffer : m_FrameBuffers)
 			vkDestroyFramebuffer(m_Device->GetLogicalDevice(), Framebuffer, nullptr);
 

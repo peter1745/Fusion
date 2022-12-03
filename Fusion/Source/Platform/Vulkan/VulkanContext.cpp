@@ -12,10 +12,7 @@
 namespace Fusion {
 
 #ifdef FUSION_DEBUG
-	static constexpr bool s_EnableValidation = true;
 	static const std::vector<const char*> s_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-#else
-	static constexpr bool s_EnableValidation = false;
 #endif
 
 	static const std::vector<const char*> c_InstanceExtensions = { "VK_KHR_get_physical_device_properties2", "VK_EXT_debug_utils" };
@@ -47,18 +44,17 @@ namespace Fusion {
 			InstanceInfo.enabledExtensionCount = InstanceExtensions.size();
 			InstanceInfo.ppEnabledExtensionNames = InstanceExtensions.data();
 
-			if constexpr (s_EnableValidation)
-			{
-				InstanceInfo.enabledLayerCount = s_ValidationLayers.size();
-				InstanceInfo.ppEnabledLayerNames = s_ValidationLayers.data();
-			}
+#ifdef FUSION_DEBUG
+			InstanceInfo.enabledLayerCount = s_ValidationLayers.size();
+			InstanceInfo.ppEnabledLayerNames = s_ValidationLayers.data();
+#endif
 
 			FUSION_CORE_VERIFY(vkCreateInstance(&InstanceInfo, nullptr, &m_Instance) == VK_SUCCESS);
 		}
 
 		// Create Window Surface via GLFW
 		{
-			GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
+			auto* NativeWindow = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle());
 			glfwCreateWindowSurface(m_Instance, NativeWindow, nullptr, &m_Surface);
 		}
 
@@ -73,8 +69,17 @@ namespace Fusion {
 
 	VulkanContext::~VulkanContext()
 	{
-		evkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+	}
 
+	void VulkanContext::Release()
+	{
+		m_TemporaryCommandAllocator->Release();
+		m_TemporaryCommandAllocator = nullptr;
+
+		m_Device->Release();
+		m_Device = nullptr;
+
+		evkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 }

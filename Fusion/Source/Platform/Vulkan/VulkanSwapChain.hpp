@@ -9,7 +9,7 @@ namespace Fusion {
 	{
 	public:
 		VulkanSwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
-		~VulkanSwapChain();
+		~VulkanSwapChain() override = default;
 
 		void Bind(CommandList* InCommandList) override;
 		void Clear() override;
@@ -20,8 +20,7 @@ namespace Fusion {
 
 		bool AcquireNextImage(VkDevice InDevice, VkSemaphore InImageAvailableSemaphore);
 
-		uint32_t GetMinImageCount() const { return m_SurfaceCapabilities.minImageCount; }
-		uint32_t GetImageCount() const { return m_ImageCount; }
+		uint32_t GetImageCount() const override { return m_ImageCount; }
 
 		auto GetRenderPass() { return m_RenderPass; }
 		auto GetRenderPass() const { return m_RenderPass; }
@@ -30,7 +29,6 @@ namespace Fusion {
 
 	private:
 		void Create(bool InWasInvalidated);
-		void InitSurface();
 
 		void Invalidate();
 
@@ -38,10 +36,6 @@ namespace Fusion {
 		SwapChainInfo m_CreateInfo;
 
 		Shared<VulkanDevice> m_Device = nullptr;
-
-		VkSurfaceFormatKHR m_SurfaceFormat = {};
-		VkPresentModeKHR m_PresentMode = VK_PRESENT_MODE_FIFO_KHR;
-		VkSurfaceCapabilitiesKHR m_SurfaceCapabilities = {};
 
 		VkExtent2D m_ImageExtent = {};
 		uint32_t m_ImageCount = 0;

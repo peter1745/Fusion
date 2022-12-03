@@ -17,6 +17,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return nullptr;
 		case ERendererAPI::D3D12: return Shared<D3D12Image2D>::Create(InCreateInfo);
 #endif
+		case ERendererAPI::Vulkan: return nullptr;
 		}
 
 		return nullptr;

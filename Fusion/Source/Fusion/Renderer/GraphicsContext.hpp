@@ -18,6 +18,8 @@ namespace Fusion {
 		virtual Shared<Device> GetDevice() const = 0;
 		virtual Shared<DescriptorHeap> GetDescriptorHeap(EDescriptorHeapType InType) const = 0;
 
+		virtual void Release() = 0;
+
 	public:
 		template <typename TContext>
 		inline static Shared<TContext> Get()

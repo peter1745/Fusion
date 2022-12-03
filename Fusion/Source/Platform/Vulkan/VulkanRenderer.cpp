@@ -3,6 +3,8 @@
 #include "VulkanCommandList.hpp"
 #include "VulkanContext.hpp"
 
+#include <tracy/Tracy.hpp>
+
 namespace Fusion {
 
 	VulkanRenderer::VulkanRenderer(const RendererInfo& InInfo)
@@ -48,7 +50,7 @@ namespace Fusion {
 
 	void VulkanRenderer::BeginFrame()
 	{
-		m_CurrentFrame = (m_CurrentFrame + 1) % m_FramesInFlight;
+		ZoneScoped;
 
 		auto Device = m_Context->GetDevice().As<VulkanDevice>();
 
@@ -80,6 +82,8 @@ namespace Fusion {
 
 	void VulkanRenderer::EndFrame()
 	{
+		ZoneScoped;
+
 		auto* CommandList = dynamic_cast<VulkanCommandList*>(m_CommandAllocators[m_CurrentFrame]->GetCommandList(0));
 
 		CommandList->EndRecording();
@@ -103,15 +107,18 @@ namespace Fusion {
 			SubmitInfo.signalSemaphoreCount = 1;
 			SubmitInfo.pSignalSemaphores = SignalSemaphores;
 
-			const auto& QueueInfo =	m_Context->GetDevice().As<VulkanDevice>()->GetQueueInfo();
+			const auto& QueueInfo = m_Context->GetDevice().As<VulkanDevice>()->GetQueueInfo();
 			FUSION_CORE_VERIFY(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, m_ImageFences[m_CurrentFrame]) == VK_SUCCESS);
 		}
 
 		m_SwapChain->Present(m_RenderFinishedSemaphores[m_CurrentFrame]);
+
+		m_CurrentFrame = (m_CurrentFrame + 1) % m_FramesInFlight;
 	}
 
 	void VulkanRenderer::ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists)
 	{
+		ZoneScoped;
 		auto Ctx = GraphicsContext::Get<VulkanContext>();
 
 		std::vector<VkCommandBuffer> CommandBuffers;
@@ -150,6 +157,8 @@ namespace Fusion {
 		for (auto& ImageFence : m_ImageFences)
 			vkDestroyFence(Device->GetLogicalDevice(), ImageFence, nullptr);
 
+		for (auto& CommandAllocator : m_CommandAllocators)
+			CommandAllocator->Release();
 		m_CommandAllocators.clear();
 	}
 

@@ -80,14 +80,17 @@ namespace Fusion {
 			Keyboard::Get().ResetReleasedKeys();
 
 			// End of frame
-			FrameMarkEnd("MainThread");
+			FrameMarkNamed("MainThread");
 
 			// TODO(Peter): Handle with event
 			m_Running = !m_Window->ShouldClose();
 		}
 
-		m_Context->GetDevice()->Wait();
 		OnShutdown();
+
+		m_SwapChain->Release();
+		m_Context->GetDevice()->Wait();
+		m_Context->Release();
 	}
 
 	Application& Application::Get() { return *s_Application; }
@@ -98,11 +101,6 @@ namespace Fusion {
 		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent) {
 			m_Running = false;
 			return true;
-		});
-
-		Dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& InResizeEvent) {
-			//m_SwapChain->Resize(InResizeEvent.GetWidth(), InResizeEvent.GetHeight());
-			return false;
 		});
 
 		OnEvent(InEvent);

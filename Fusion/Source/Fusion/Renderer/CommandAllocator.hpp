@@ -22,6 +22,8 @@ namespace Fusion {
 		virtual void DestroyCommandList(CommandList* InCommandList) = 0;
 
 		virtual void Reset() = 0;
+
+		virtual void Release() = 0;
 	};
 
 }

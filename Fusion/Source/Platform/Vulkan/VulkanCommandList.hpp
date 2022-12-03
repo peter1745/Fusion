@@ -31,6 +31,8 @@ namespace Fusion {
 
 		void EndRecording() override;
 
+		void Release() override;
+
 		auto GetBuffer() { return m_CommandBuffer; }
 		auto GetBuffer() const { return m_CommandBuffer; }
 

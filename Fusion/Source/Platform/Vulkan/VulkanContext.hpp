@@ -20,6 +20,8 @@ namespace Fusion {
 			return nullptr;
 		}
 
+		void Release() override;
+
 		auto GetTemporaryCommandAllocator() { return m_TemporaryCommandAllocator; }
 		auto GetTemporaryCommandAllocator() const { return m_TemporaryCommandAllocator; }
 

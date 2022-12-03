@@ -10,7 +10,11 @@
 namespace Fusion {
 
 	// TODO(Peter): Maybe support Bundle as well?
-	enum class ECommandListType { Direct, Compute };
+	enum class ECommandListType
+	{
+		Direct,
+		Compute
+	};
 
 	class Buffer;
 	class DescriptorHeap;
@@ -38,6 +42,7 @@ namespace Fusion {
 
 		virtual void EndRecording() = 0;
 
+		virtual void Release() = 0;
 	};
 
 }

@@ -4,21 +4,24 @@
 
 namespace Fission {
 
-	enum class EBroadPhaseAlgorithm { SAP };
+	enum class EBroadPhaseAlgorithm
+	{
+		SAP
+	};
 
 	struct BroadPhasePairs
 	{
 		int32_t IDIndex0;
 		int32_t IDIndex1;
 
-		bool operator==(const BroadPhasePairs& InOther)
+		bool operator==(const BroadPhasePairs& InOther) const
 		{
 			return (IDIndex0 == InOther.IDIndex0 && IDIndex1 == InOther.IDIndex1) || (IDIndex0 == InOther.IDIndex1 && IDIndex1 == InOther.IDIndex0);
 		}
 
-		bool operator!=(const BroadPhasePairs& InOther)
+		bool operator!=(const BroadPhasePairs& InOther) const
 		{
-			return *this != InOther;
+			return !(*this == InOther);
 		}
 	};
 
@@ -30,8 +33,7 @@ namespace Fission {
 
 		virtual void Execute(float InDeltaTime) = 0;
 
-		virtual const std::vector<BroadPhasePairs>& GetCollisionPairs() const = 0;
-
+		[[nodiscard]] virtual const std::vector<BroadPhasePairs>& GetCollisionPairs() const = 0;
 	};
 
 }

@@ -11,6 +11,7 @@ namespace Fusion {
 	{
 	public:
 		VulkanRenderer(const RendererInfo& InInfo);
+		~VulkanRenderer() = default;
 
 		void BeginFrame() override;
 		void EndFrame() override;
@@ -21,7 +22,7 @@ namespace Fusion {
 		CommandList* GetCurrentCommandList() const override { return m_CommandAllocators[m_CurrentFrame]->GetCommandList(0); }
 
 		[[nodiscard]] uint32_t GetFramesInFlight() const override { return m_FramesInFlight; }
-	    [[nodiscard]] uint32_t GetCurrentFrame() const override { return m_CurrentFrame; }
+		[[nodiscard]] uint32_t GetCurrentFrame() const override { return m_CurrentFrame; }
 
 		void Release() override;
 

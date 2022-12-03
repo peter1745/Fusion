@@ -73,7 +73,6 @@ project "FusionEditor"
         filter "system:linux"
             debugformat "Dwarf-4"
 
-
         removefiles {
             "%{prj.location}/Source/Platform/D3D11/**",
             "%{prj.location}/Source/Platform/D3D12/**"

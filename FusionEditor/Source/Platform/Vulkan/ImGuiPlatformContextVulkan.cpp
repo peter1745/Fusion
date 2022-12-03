@@ -50,7 +50,7 @@ namespace FusionEditor {
 		ImGuiInitInfo.PipelineCache = nullptr;
 		ImGuiInitInfo.DescriptorPool = m_FontDescriptorPool;
 		ImGuiInitInfo.Subpass = 0;
-		ImGuiInitInfo.MinImageCount = InSwapChain.As<Fusion::VulkanSwapChain>()->GetMinImageCount();
+		ImGuiInitInfo.MinImageCount = Device->GetSurfaceProperties(VkContext->GetSurface()).Capabilities.minImageCount;
 		ImGuiInitInfo.ImageCount = InSwapChain.As<Fusion::VulkanSwapChain>()->GetImageCount();
 		ImGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGuiInitInfo.Allocator = nullptr;
@@ -60,7 +60,7 @@ namespace FusionEditor {
 		{
 			auto CommandAllocator = VkContext->GetTemporaryCommandAllocator();
 			auto CommandList = CommandAllocator->AllocateCommandList();
-			auto CmdList = static_cast<Fusion::VulkanCommandList*>(CommandList)->GetBuffer();
+			auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(CommandList)->GetBuffer();
 
 			vkResetCommandBuffer(CmdList, 0);
 
@@ -110,10 +110,14 @@ namespace FusionEditor {
 
 	void ImGuiPlatformContextVulkan::ShutdownPlatform()
 	{
+		auto Ctx = Fusion::GraphicsContext::Get<Fusion::VulkanContext>();
+		auto Device = Ctx->GetDevice().As<Fusion::VulkanDevice>();
+
+		vkQueueWaitIdle(Device->GetQueueInfo().Queue);
+
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 
-		auto Ctx = Fusion::GraphicsContext::Get<Fusion::VulkanContext>();
-		vkDestroyDescriptorPool(Ctx->GetDevice().As<Fusion::VulkanDevice>()->GetLogicalDevice(), m_FontDescriptorPool, nullptr);
+		vkDestroyDescriptorPool(Device->GetLogicalDevice(), m_FontDescriptorPool, nullptr);
 	}
 }

@@ -19,6 +19,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return Shared<D3D11Buffer>::Create(InCreateInfo);
 		case ERendererAPI::D3D12: return Shared<D3D12Buffer>::Create(InCreateInfo);
 #endif
+		case ERendererAPI::Vulkan: return nullptr;
 		}
 
 		return nullptr;

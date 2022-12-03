@@ -28,6 +28,25 @@ namespace Fusion {
 		m_PhysicalDevice = VK_NULL_HANDLE;
 	}
 
+	SurfaceProperties VulkanDevice::GetSurfaceProperties(VkSurfaceKHR InSurface) const
+	{
+		SurfaceProperties Result = {};
+
+		uint32_t NumFormats = 0;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, InSurface, &NumFormats, nullptr);
+		Result.Formats.resize(NumFormats);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, InSurface, &NumFormats, Result.Formats.data());
+
+		uint32_t NumPresentModes = 0;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, InSurface, &NumPresentModes, nullptr);
+		Result.PresentModes.resize(NumPresentModes);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, InSurface, &NumPresentModes, Result.PresentModes.data());
+
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_PhysicalDevice, InSurface, &Result.Capabilities);
+
+		return Result;
+	}
+
 	void VulkanDevice::FindSuitablePhysicalDevice(VkInstance InInstance, VkSurfaceKHR InSurface)
 	{
 		uint32_t NumPhysicalDevices = 0;
@@ -75,6 +94,17 @@ namespace Fusion {
 			{
 				FUSION_CORE_INFO("\tType: Virtual");
 				Score += 1;
+				break;
+			}
+			case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+			{
+				FUSION_CORE_INFO("\tType: Unknown");
+				Score = 0;
+				break;
+			}
+			case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM:
+			{
+				FUSION_CORE_VERIFY(false);
 				break;
 			}
 			}
@@ -155,7 +185,7 @@ namespace Fusion {
 		vkGetDeviceQueue(m_Device, m_Queue.QueueFamily, 0, &m_Queue.Queue);
 	}
 
-	std::vector<QueueInfo> VulkanDevice::GetQueues(VkPhysicalDevice InPhysicalDevice, VkSurfaceKHR InSurface) const
+	std::vector<QueueInfo> VulkanDevice::GetQueues(VkPhysicalDevice InPhysicalDevice, VkSurfaceKHR InSurface)
 	{
 		uint32_t NumQueues = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(InPhysicalDevice, &NumQueues, nullptr);

@@ -3,10 +3,10 @@
 namespace Fission {
 
 	BoxShape::BoxShape(const glm::vec3& InHalfSize)
-		: ConvexShape(EShapeType::Box), m_HalfSize(InHalfSize)
+	    : ConvexShape(EShapeType::Box), m_HalfSize(InHalfSize)
 	{
-		m_BoundingBox.Expand(-InHalfSize);
-		m_BoundingBox.Expand(InHalfSize);
+		m_BoundingBox.Expand(-m_HalfSize);
+		m_BoundingBox.Expand(m_HalfSize);
 
 		const auto& MinBound = m_BoundingBox.GetMinBound();
 		const auto& MaxBound = m_BoundingBox.GetMaxBound();

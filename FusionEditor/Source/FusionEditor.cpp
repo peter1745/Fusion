@@ -17,9 +17,6 @@
 
 #include "AssetSystem/AssetUtils.hpp"
 
-#include <Fusion/Renderer/Mesh.hpp>
-#include <Fusion/Renderer/DescriptorHeap.hpp>
-#include <Fusion/Renderer/GraphicsPipeline.hpp>
 #include <Fusion/Serialization/World/WorldSerializer.hpp>
 #include <Fusion/IO/FileIO.hpp>
 #include <Fusion/IO/Keyboard.hpp>
@@ -172,6 +169,9 @@ namespace FusionEditor {
 	{
 		NFD::Quit();
 		ShutdownImGui();
+
+		m_Renderer->Release();
+		m_Renderer = nullptr;
 	}
 
 	void FusionEditorApp::OnEvent(Event& InEvent)

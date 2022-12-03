@@ -18,6 +18,13 @@ namespace Fusion {
 		bool IsValid() const { return QueueFamily != UINT32_MAX; }
 	};
 
+	struct SurfaceProperties
+	{
+		std::vector<VkSurfaceFormatKHR> Formats;
+		std::vector<VkPresentModeKHR> PresentModes;
+		VkSurfaceCapabilitiesKHR Capabilities;
+	};
+
 	class VulkanDevice : public Device
 	{
 	public:
@@ -35,11 +42,13 @@ namespace Fusion {
 
 		void Release() override;
 
+		SurfaceProperties GetSurfaceProperties(VkSurfaceKHR InSurface) const;
+
 	private:
 		void FindSuitablePhysicalDevice(VkInstance InInstance, VkSurfaceKHR InSurface);
 		void CreateLogicalDevice();
 
-		std::vector<QueueInfo> GetQueues(VkPhysicalDevice InPhysicalDevice, VkSurfaceKHR InSurface) const;
+		static std::vector<QueueInfo> GetQueues(VkPhysicalDevice InPhysicalDevice, VkSurfaceKHR InSurface);
 
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;

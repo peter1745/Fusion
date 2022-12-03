@@ -14,7 +14,7 @@ namespace FusionEditor {
 	using namespace Fusion;
 
 	ActorDetailsWindow::ActorDetailsWindow(const ActorSelectionManager& InSelectionManager)
-		: EditorWindow("ActorDetailsWindowID"), m_SelectionManager(InSelectionManager)
+	    : EditorWindow("ActorDetailsWindowID"), m_SelectionManager(InSelectionManager)
 	{
 		SetTitle("Actor Details");
 
@@ -34,8 +34,7 @@ namespace FusionEditor {
 
 		RenderComponentMenu();
 
-		ComponentUtils::Each(m_CurrentActor, UI::UIEditableComponents{}, [InActor = m_CurrentActor]<typename TComponent>(TComponent * InComp) mutable
-		{
+		ComponentUtils::Each(m_CurrentActor, UI::UIEditableComponents {}, [InActor = m_CurrentActor]<typename TComponent>(TComponent* InComp) mutable {
 			bool ShouldRender = true;
 			bool OpenContextMenu = false;
 
@@ -44,7 +43,7 @@ namespace FusionEditor {
 			if constexpr (Fusion::ComponentAttributes<TComponent>::CanDisable)
 				ShouldRender = UI::BeginComponentHeader(ComponentUI<TComponent>::DisplayName, InComp->IsActive, &OpenContextMenu);
 			else
-				ShouldRender = UI::BeginHeader(ComponentUI<TComponent>::DisplayName, &OpenContextMenu);
+				ShouldRender = UI::BeginHeader(ComponentUI<TComponent>::DisplayName, true, &OpenContextMenu);
 
 			if (OpenContextMenu)
 				ImGui::OpenPopup("ComponentContextMenu");

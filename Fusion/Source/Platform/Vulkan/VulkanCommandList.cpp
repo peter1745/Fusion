@@ -13,7 +13,6 @@ namespace Fusion {
 
 	void VulkanCommandList::Reset()
 	{
-		vkResetCommandBuffer(m_CommandBuffer, 0);
 	}
 
 	void VulkanCommandList::BeginRecording()
@@ -68,5 +67,14 @@ namespace Fusion {
 	void VulkanCommandList::EndRecording()
 	{
 		FUSION_CORE_VERIFY(vkEndCommandBuffer(m_CommandBuffer) == VK_SUCCESS);
+	}
+
+	void Fusion::VulkanCommandList::Release()
+	{
+		if (m_CommandBuffer == VK_NULL_HANDLE)
+			return;
+
+		vkResetCommandBuffer(m_CommandBuffer, 0);
+		m_CommandBuffer = VK_NULL_HANDLE;
 	}
 }

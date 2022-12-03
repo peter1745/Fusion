@@ -25,6 +25,8 @@ namespace Fusion {
 
 		void Reset() override;
 
+		void Release() override;
+
 	private:
 		CommandAllocatorInfo m_CreateInfo;
 		Shared<VulkanDevice> m_Device = nullptr;

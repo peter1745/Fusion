@@ -31,6 +31,8 @@ namespace Fusion {
 	class DescriptorHeap : public SharedObject
 	{
 	public:
+		virtual ~DescriptorHeap() = default;
+
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) = 0;
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) = 0;
 		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) = 0;

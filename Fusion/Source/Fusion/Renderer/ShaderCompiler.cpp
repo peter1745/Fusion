@@ -18,6 +18,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return MakeUnique<D3D11ShaderCompiler>();
 		case ERendererAPI::D3D12: return MakeUnique<D3D12ShaderCompiler>();
 #endif
+		case ERendererAPI::Vulkan: return nullptr;
 		}
 
 		return nullptr;

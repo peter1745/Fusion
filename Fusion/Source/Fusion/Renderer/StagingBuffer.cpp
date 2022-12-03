@@ -3,8 +3,8 @@
 #include "RenderSettings.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/D3D11StagingBuffer.hpp"
-	#include "Platform/D3D12/D3D12StagingBuffer.hpp"
+#include "Platform/D3D11/D3D11StagingBuffer.hpp"
+#include "Platform/D3D12/D3D12StagingBuffer.hpp"
 #endif
 
 namespace Fusion {
@@ -18,6 +18,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return MakeUnique<D3D11StagingBuffer>(InCreateInfo);
 		case ERendererAPI::D3D12: return MakeUnique<D3D12StagingBuffer>(InCreateInfo);
 #endif
+		case ERendererAPI::Vulkan: return nullptr;
 		}
 
 		return nullptr;

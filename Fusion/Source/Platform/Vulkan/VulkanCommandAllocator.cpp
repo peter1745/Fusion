@@ -31,8 +31,7 @@ namespace Fusion {
 
 	VulkanCommandAllocator::~VulkanCommandAllocator()
 	{
-		m_CommandLists.clear();
-		vkDestroyCommandPool(m_Device->GetLogicalDevice(), m_CommandPool, nullptr);
+		Release();
 	}
 
 	CommandList* VulkanCommandAllocator::AllocateCommandList()
@@ -73,6 +72,21 @@ namespace Fusion {
 	void VulkanCommandAllocator::Reset()
 	{
 		vkResetCommandPool(m_Device->GetLogicalDevice(), m_CommandPool, 0);
+	}
+
+	void VulkanCommandAllocator::Release()
+	{
+		if (!m_Device || m_CommandPool == VK_NULL_HANDLE)
+			return;
+
+		for (auto& CmdList : m_CommandLists)
+			CmdList->Release();
+
+		m_CommandLists.clear();
+		vkDestroyCommandPool(m_Device->GetLogicalDevice(), m_CommandPool, nullptr);
+
+		m_CommandPool = VK_NULL_HANDLE;
+		m_Device = nullptr;
 	}
 
 }
