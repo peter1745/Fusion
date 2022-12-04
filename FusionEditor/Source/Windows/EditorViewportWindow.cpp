@@ -23,10 +23,10 @@ namespace FusionEditor {
 		m_SelectionManager->AddSelectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorSelected));
 		m_SelectionManager->AddDeselectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorDeselected));
 
-		Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
-		StagingBufferCreateInfo.Format = Fusion::EFormat::RG32UInt;
-		StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
-		m_StagingBuffer = Fusion::StagingBuffer::Create(StagingBufferCreateInfo);
+		//Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
+		//StagingBufferCreateInfo.Format = Fusion::EFormat::RG32UInt;
+		//StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
+		//m_StagingBuffer = Fusion::StagingBuffer::Create(StagingBufferCreateInfo);
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)

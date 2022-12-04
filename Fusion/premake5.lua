@@ -21,7 +21,10 @@ project "Fusion"
     includedirs {
         "Source/",
         "%{wks.location}/Fission/Source",
-		"%{wks.location}/ThirdParty/glad/include",
+        "%{IncludeDirs.glad}",
+        "%{IncludeDirs.shaderc}",
+        "%{IncludeDirs.SPIRV_Cross}",
+        "%{IncludeDirs.VulkanMemoryAllocator}",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",

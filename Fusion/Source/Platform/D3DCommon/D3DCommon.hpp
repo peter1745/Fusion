@@ -34,11 +34,6 @@ namespace Fusion {
 
 	// Compiler Structs + Enums
 
-	enum class EShaderType
-	{
-		Vertex, Pixel
-	};
-
 	enum class EShaderResourceType
 	{
 		ConstantBuffer,

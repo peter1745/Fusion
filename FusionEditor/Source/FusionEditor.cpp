@@ -202,7 +202,7 @@ namespace FusionEditor {
 	{
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World, m_ActorSelectionManager);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true, m_ActorSelectionManager);
-		//m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
+		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
 		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 

@@ -3,9 +3,11 @@
 #include "RenderSettings.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/D3D11ShaderCompiler.hpp"
-	#include "Platform/D3D12/D3D12ShaderCompiler.hpp"
+#include "Platform/D3D11/D3D11ShaderCompiler.hpp"
+#include "Platform/D3D12/D3D12ShaderCompiler.hpp"
 #endif
+
+#include "Platform/Vulkan/VulkanShaderCompiler.hpp"
 
 namespace Fusion {
 
@@ -18,7 +20,7 @@ namespace Fusion {
 		case ERendererAPI::D3D11: return MakeUnique<D3D11ShaderCompiler>();
 		case ERendererAPI::D3D12: return MakeUnique<D3D12ShaderCompiler>();
 #endif
-		case ERendererAPI::Vulkan: return nullptr;
+		case ERendererAPI::Vulkan: return MakeUnique<VulkanShaderCompiler>();
 		}
 
 		return nullptr;

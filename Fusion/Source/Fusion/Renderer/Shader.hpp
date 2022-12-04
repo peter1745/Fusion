@@ -7,6 +7,11 @@
 
 namespace Fusion {
 
+	enum class EShaderType
+	{
+		Vertex, Pixel
+	};
+
 	class Shader : public SharedObject
 	{
 	public:

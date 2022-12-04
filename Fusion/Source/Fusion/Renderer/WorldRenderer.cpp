@@ -14,33 +14,33 @@ namespace Fusion {
 	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
 	    : m_World(InWorld)
 	{
-		/*Compiler = ShaderCompiler::Create();
+		Compiler = ShaderCompiler::Create();
 
-		GraphicsPipelineInfo PipelineInfo = {};
-		PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.hlsl");
-		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
-		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
-		PipelineInfo.RenderTargetCount = 2;
-		PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
-		PipelineInfo.RenderTargetFormats[1] = EFormat::RG32UInt;
-		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
-		m_Pipeline = GraphicsPipeline::Create(PipelineInfo);
+		//GraphicsPipelineInfo PipelineInfo = {};
+		//PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.glsl");
+		//PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
+		//PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
+		//PipelineInfo.RenderTargetCount = 1;
+		//PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
+		//PipelineInfo.RenderTargetFormats[1] = EFormat::RG32UInt;
+		//PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
+		//m_Pipeline = GraphicsPipeline::Create(PipelineInfo);
 
-		BufferInfo TransformDataBufferInfo = {};
-		TransformDataBufferInfo.HeapType = EHeapType::Default;
-		TransformDataBufferInfo.State = BufferStates::Constant;
-		TransformDataBufferInfo.Size = sizeof(TransformData);
-		TransformDataBufferInfo.Alignment = 16;
-		m_TransformBuffer = Buffer::Create(TransformDataBufferInfo);
+		//BufferInfo TransformDataBufferInfo = {};
+		//TransformDataBufferInfo.HeapType = EHeapType::Default;
+		//TransformDataBufferInfo.State = BufferStates::Constant;
+		//TransformDataBufferInfo.Size = sizeof(TransformData);
+		//TransformDataBufferInfo.Alignment = 16;
+		//m_TransformBuffer = Buffer::Create(TransformDataBufferInfo);
 
-		BufferInfo TransformUploadBufferInfo = {};
-		TransformUploadBufferInfo.HeapType = EHeapType::Upload;
-		TransformUploadBufferInfo.State = BufferStates::Constant;
-		TransformUploadBufferInfo.Size = sizeof(TransformData);
-		TransformUploadBufferInfo.Alignment = 16;
-		m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
+		//BufferInfo TransformUploadBufferInfo = {};
+		//TransformUploadBufferInfo.HeapType = EHeapType::Upload;
+		//TransformUploadBufferInfo.State = BufferStates::Constant;
+		//TransformUploadBufferInfo.Size = sizeof(TransformData);
+		//TransformUploadBufferInfo.Alignment = 16;
+		//m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
 
-		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");*/
+		//Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)

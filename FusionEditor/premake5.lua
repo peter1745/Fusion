@@ -78,12 +78,23 @@ project "FusionEditor"
             "%{prj.location}/Source/Platform/D3D12/**"
         }
 
-        result, err = os.outputof("pkg-config --libs gtk+-3.0")
-
-        linkoptions {
-			result,
-			'-lvulkan'
+        libdirs
+        {
+            "%{LibraryDir.shaderc}",
+            "%{LibraryDir.SPIRV_Cross}",
+            "%{LibraryDir.VulkanMemoryAllocator}"
         }
+
+        links
+        {
+            "vulkan",
+            "shaderc_combined",
+            "spirv-cross",
+            "VulkanMemoryAllocator",
+        }
+
+        result, err = os.outputof("pkg-config --libs gtk+-3.0")
+        linkoptions { result }
 
     filter "configurations:Debug"
         defines "FUSION_DEBUG"

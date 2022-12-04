@@ -8,7 +8,7 @@
 namespace FusionEditor {
 
 	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld)
-		: EditorWindow(InTitle, 300, 300), m_World(InWorld)
+	    : EditorWindow(InTitle, 300, 300), m_World(InWorld)
 	{
 		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
 
@@ -31,9 +31,9 @@ namespace FusionEditor {
 		RenderTextureCreateInfo.DepthAttachment = { Fusion::EFormat::D24UnormS8UInt, Fusion::ImageFlags::AllowDepthStencil, Fusion::ImageStates::DepthWrite };
 		m_RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 
-		auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-		m_RTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 0);
-		m_ColorPickingRTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 1);
+		//auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
+		//m_RTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 0);
+		//m_ColorPickingRTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 1);
 	}
 
 	void ViewportWindowBase::OnRender()
@@ -45,16 +45,16 @@ namespace FusionEditor {
 		//WindowViewport.Height = m_RenderHeight;
 		//WindowViewport.MinDepth = 0.0f;
 		//WindowViewport.MaxDepth = 1.0f;
-//
+		//
 		//auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
-//
+		//
 		//m_RenderTexture->TransitionImages(CmdList, Fusion::ImageStates::RenderTarget, Fusion::ImageStates::DepthWrite);
 		//CmdList->SetViewports({ WindowViewport });
 		//m_RenderTexture->Bind(CmdList);
 		//m_RenderTexture->Clear();
-//
+		//
 		//RenderWorld();
-//
+		//
 		//m_RenderTexture->Unbind(CmdList);
 		//m_RenderTexture->TransitionImages(CmdList, Fusion::ImageStates::PixelShaderResource, Fusion::ImageStates::PixelShaderResource);
 	}
@@ -63,23 +63,23 @@ namespace FusionEditor {
 	{
 		//auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		//uint32_t FrameIndex = Context->GetCurrentFrameIndex();
-//
+		//
 		//uint32_t ViewportWidth = m_RenderWidth;// GetWindowWidth();
 		//uint32_t ViewportHeight = m_RenderHeight;// GetWindowHeight();
-//
+		//
 		//const auto& ImageSize = m_RenderTexture->GetImage(0, FrameIndex)->GetSize();
 		//if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		//{
 		//	auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
 		//	Heap->Deallocate(m_RTVAllocations[FrameIndex]);
 		//	Heap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex]);
-//
+		//
 		//	m_RenderTexture->Resize(0, FrameIndex, { ViewportWidth, ViewportHeight });
 		//	m_RenderTexture->Resize(1, FrameIndex, { ViewportWidth, ViewportHeight });
 		//
 		//	m_RTVAllocations[FrameIndex] = Heap->AllocateShaderResourceView(m_RenderTexture, 0, FrameIndex);
 		//	m_ColorPickingRTVAllocations[FrameIndex] = Heap->AllocateShaderResourceView(m_RenderTexture, 1, FrameIndex);
-//
+		//
 		//	OnResize(ViewportWidth, ViewportHeight);
 		//}
 	}
@@ -88,12 +88,12 @@ namespace FusionEditor {
 	{
 		//ImVec2 MinBound = ImGui::GetCursorPos();
 		//ImVec2 MaxBound = ImGui::GetContentRegionMax();
-//
+		//
 		//m_MinRenderBoundX = MinBound.x;
 		//m_MinRenderBoundY = MinBound.y;
 		//m_RenderWidth = MaxBound.x - MinBound.x;
 		//m_RenderHeight = MaxBound.y - MinBound.y;
-//
+		//
 		//auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		//uint32_t FrameIdx = Context->GetCurrentFrameIndex();
 		//auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
