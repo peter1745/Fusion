@@ -9,7 +9,7 @@ namespace Fusion {
 	class VulkanShader : public Shader
 	{
 	public:
-		explicit VulkanShader(const CompiledShaderData& InData);
+		explicit VulkanShader(const VulkanCompiledShaderData& InData);
 
 		void Bind() override;
 		void Unbind() override;
@@ -25,7 +25,7 @@ namespace Fusion {
 		const auto& GetReflectedModules() const { return m_CompiledData.ReflectionData; }
 
 	private:
-		CompiledShaderData m_CompiledData;
+		VulkanCompiledShaderData m_CompiledData;
 	};
 
 }

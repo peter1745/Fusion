@@ -12,7 +12,7 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContextD3D12::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContextD3D12::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain)
 	{
 		Fusion::Shared<Fusion::D3D12Context> D3DContext = InContext.As<Fusion::D3D12Context>();
 
@@ -22,10 +22,12 @@ namespace FusionEditor {
 		D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle = { Heap->GetCPUDescriptorHandle(HeapRef) };
 		D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle = { Heap->GetGPUDescriptorHandle(HeapRef) };
 
+		uint32_t FramesInFlight = std::min(3U, InSwapChain->GetImageCount());
+
 		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(InWindow->GetWindowHandle()), true);
 		ImGui_ImplDX12_Init(
-			D3DContext->GetDevice().Get(),
-			D3DContext->GetFramesInFlight(),
+			D3DContext->GetDevice().As<Fusion::D3D12Device>()->GetDevice().Get(),
+		    FramesInFlight,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
 			Heap->GetHeap(),
 			CPUHandle,
@@ -39,10 +41,10 @@ namespace FusionEditor {
 		ImGui_ImplGlfw_NewFrame();
 	}
 
-	void ImGuiPlatformContextD3D12::EndFramePlatform()
+	void ImGuiPlatformContextD3D12::EndFramePlatform(Fusion::CommandList* InCommandList)
 	{
 		auto Context = Fusion::GraphicsContext::Get<Fusion::D3D12Context>();
-		auto& CmdList = static_cast<Fusion::D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
+		auto& CmdList = dynamic_cast<Fusion::D3D12CommandList*>(InCommandList)->GetNativeList();
 		auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
 		CmdList->SetDescriptorHeaps(1, Heap.As<Fusion::D3D12DescriptorHeap>()->GetHeap());
 

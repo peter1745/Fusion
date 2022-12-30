@@ -17,8 +17,8 @@ namespace Fusion {
 		{
 		case ERendererAPI::None: return nullptr;
 #ifdef FUSION_PLATFORM_WINDOWS
-		case ERendererAPI::D3D11: return Shared<D3D11SwapChain>::Create(InCreateInfo);
-		case ERendererAPI::D3D12: return Shared<D3D12SwapChain>::Create(InCreateInfo);
+		case ERendererAPI::D3D11: return Shared<D3D11SwapChain>::Create(InContext, InCreateInfo);
+		case ERendererAPI::D3D12: return Shared<D3D12SwapChain>::Create(InContext, InCreateInfo);
 #endif
 		case ERendererAPI::Vulkan: return Shared<VulkanSwapChain>::Create(InContext, InCreateInfo);
 		}

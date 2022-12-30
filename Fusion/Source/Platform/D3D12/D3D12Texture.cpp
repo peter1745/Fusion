@@ -62,12 +62,12 @@ namespace Fusion {
 
 	void D3D12Texture2D::Bind(uint32_t InSlot)
 	{
-		if (m_ShaderResourceViewAllocation.Heap != nullptr && m_Image->GetState() & ImageStates::PixelShaderResource)
+		/*if (m_ShaderResourceViewAllocation.Heap != nullptr && m_Image->GetState() & ImageStates::PixelShaderResource)
 		{
 			auto& NativeList = static_cast<D3D12CommandList*>(GraphicsContext::Get<D3D12Context>()->GetCurrentCommandList())->GetNativeList();
 			D3D12_GPU_DESCRIPTOR_HANDLE Handle = { GraphicsContext::Get<D3D12Context>()->GetDescriptorHeap(EDescriptorHeapType::SRV_CBV_UAV)->GetGPUDescriptorHandle(m_ShaderResourceViewAllocation) };
 			NativeList->SetGraphicsRootDescriptorTable(InSlot, Handle);
-		}
+		}*/
 	}
 
 }

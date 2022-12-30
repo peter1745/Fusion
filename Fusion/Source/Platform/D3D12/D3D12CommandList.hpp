@@ -28,7 +28,9 @@ namespace Fusion {
 		virtual void DrawIndexed(const IndexBufferView& InBufferView) override;
 
 		virtual void EndRecording() override;
-				
+
+		void Release() override;
+
 		auto& GetNativeList() { return m_CommandList; }
 
 	private:

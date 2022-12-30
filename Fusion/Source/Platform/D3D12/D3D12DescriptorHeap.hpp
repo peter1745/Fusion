@@ -2,7 +2,7 @@
 
 #include "Fusion/Renderer/DescriptorHeap.hpp"
 
-#include "D3D12Common.hpp"
+#include "D3D12Device.hpp"
 #include "D3D12Buffer.hpp"
 
 namespace Fusion {
@@ -10,7 +10,7 @@ namespace Fusion {
 	class D3D12DescriptorHeap : public DescriptorHeap
 	{
 	public:
-		D3D12DescriptorHeap(D3DComPtr<ID3D12Device9> InDevice, const DescriptorHeapInfo& InCreateInfo);
+		D3D12DescriptorHeap(const Shared<D3D12Device>& InDevice, const DescriptorHeapInfo& InCreateInfo);
 		D3D12DescriptorHeap(const DescriptorHeapInfo& InCreateInfo);
 
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) override;
@@ -38,6 +38,8 @@ namespace Fusion {
 
 	private:
 		DescriptorHeapInfo m_CreateInfo;
+
+		Shared<D3D12Device> m_Device;
 
 		D3DComPtr<ID3D12DescriptorHeap> m_DescriptorHeap;
 		D3D12_CPU_DESCRIPTOR_HANDLE m_CPUStart{};

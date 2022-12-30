@@ -23,49 +23,44 @@ namespace Fusion {
 		return D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
 	}
 
-	D3D12DescriptorHeap::D3D12DescriptorHeap(D3DComPtr<ID3D12Device9> InDevice, const DescriptorHeapInfo& InCreateInfo)
-		: m_CreateInfo(InCreateInfo), m_AllocationMap(InCreateInfo.Capacity >> 6, ~0ULL)
+	D3D12DescriptorHeap::D3D12DescriptorHeap(const Shared<D3D12Device>& InDevice, const DescriptorHeapInfo& InCreateInfo)
+		: m_CreateInfo(InCreateInfo), m_Device(InDevice), m_AllocationMap(InCreateInfo.Capacity >> 6, ~0ULL)
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC DescriptorHeapDesc = {};
 		DescriptorHeapDesc.Type = EDescriptorHeapTypeToD3D12DescriptorHeapType(InCreateInfo.Type);
 		DescriptorHeapDesc.NumDescriptors = InCreateInfo.Capacity;
 		DescriptorHeapDesc.Flags = InCreateInfo.ShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		DescriptorHeapDesc.NodeMask = 0;
-		InDevice->CreateDescriptorHeap(&DescriptorHeapDesc, m_DescriptorHeap, m_DescriptorHeap);
+		m_Device->GetDevice()->CreateDescriptorHeap(&DescriptorHeapDesc, m_DescriptorHeap, m_DescriptorHeap);
 
 		m_CPUStart = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 		if (InCreateInfo.ShaderVisible)
 			m_GPUStart = m_DescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 
-		m_HeapIncrementSize = InDevice->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
+		m_HeapIncrementSize = m_Device->GetDevice()->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 	}
 
 	D3D12DescriptorHeap::D3D12DescriptorHeap(const DescriptorHeapInfo& InCreateInfo)
-		: m_CreateInfo(InCreateInfo), m_AllocationMap(InCreateInfo.Capacity >> 6, ~0ULL)
+	    : m_CreateInfo(InCreateInfo), m_Device(GraphicsContext::Get<D3D12Context>()->GetDevice()), m_AllocationMap(InCreateInfo.Capacity >> 6, ~0ULL)
 	{
-		auto Context = GraphicsContext::Get<Fusion::D3D12Context>();
-		auto& Device = Context->GetDevice();
-
 		D3D12_DESCRIPTOR_HEAP_DESC DescriptorHeapDesc = {};
 		DescriptorHeapDesc.Type = EDescriptorHeapTypeToD3D12DescriptorHeapType(InCreateInfo.Type);
 		DescriptorHeapDesc.NumDescriptors = InCreateInfo.Capacity;
 		DescriptorHeapDesc.Flags = InCreateInfo.ShaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		DescriptorHeapDesc.NodeMask = 0;
-		Device->CreateDescriptorHeap(&DescriptorHeapDesc, m_DescriptorHeap, m_DescriptorHeap);
+		m_Device->GetDevice()->CreateDescriptorHeap(&DescriptorHeapDesc, m_DescriptorHeap, m_DescriptorHeap);
 
 		m_CPUStart = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 		if (InCreateInfo.ShaderVisible)
 			m_GPUStart = m_DescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-		
-		m_HeapIncrementSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
+
+		m_HeapIncrementSize = m_Device->GetDevice()->GetDescriptorHandleIncrementSize(DescriptorHeapDesc.Type);
 	}
 
 	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateShaderResourceView(const Shared<Texture2D>& InTexture)
 	{
-		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
-
 		auto D3DTexture = InTexture.As<D3D12Texture2D>();
 		const auto& TextureInfo = InTexture->GetInfo();
 
@@ -84,15 +79,13 @@ namespace Fusion {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 		DescriptorHandle.ptr += Allocation.Index * m_HeapIncrementSize;
-		Device->CreateShaderResourceView(D3DTexture->GetImage().As<D3D12Image2D>()->GetResource(), &SRVDesc, DescriptorHandle);
+		m_Device->GetDevice()->CreateShaderResourceView(D3DTexture->GetImage().As<D3D12Image2D>()->GetResource(), &SRVDesc, DescriptorHandle);
 
 		return Allocation;
 	}
 
 	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
 	{
-		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
-
 		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
@@ -116,15 +109,13 @@ namespace Fusion {
 		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 		DescriptorHandle.ptr += Allocation.Index * m_HeapIncrementSize;
 
-		Device->CreateShaderResourceView(Attachment.Images[InFrameIdx]->GetResource(), &SRVDesc, DescriptorHandle);
+		m_Device->GetDevice()->CreateShaderResourceView(Attachment.Images[InFrameIdx]->GetResource(), &SRVDesc, DescriptorHandle);
 
 		return Allocation;
 	}
 
 	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
-		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
-
 		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
@@ -151,7 +142,7 @@ namespace Fusion {
 			D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 			DescriptorHandle.ptr += Allocation.Index * m_HeapIncrementSize;
 
-			Device->CreateShaderResourceView(Attachment.Images[Idx]->GetResource(), &SRVDesc, DescriptorHandle);
+			m_Device->GetDevice()->CreateShaderResourceView(Attachment.Images[Idx]->GetResource(), &SRVDesc, DescriptorHandle);
 
 			Allocations[Idx] = Allocation;
 		}
@@ -161,8 +152,6 @@ namespace Fusion {
 
 	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateConstantBufferView(D3D12Buffer* InBuffer, uint32_t InSize)
 	{
-		auto& Device = GraphicsContext::Get<Fusion::D3D12Context>()->GetDevice();
-
 		auto Allocation = Reserve();
 		if (Allocation.Heap == nullptr)
 			return { nullptr, ~0U };
@@ -176,7 +165,7 @@ namespace Fusion {
 		ViewDesc.BufferLocation = InBuffer->GetGPUBufferLocation();
 		ViewDesc.SizeInBytes = Align<256>(InSize);
 
-		Device->CreateConstantBufferView(&ViewDesc, DescriptorHandle);
+		m_Device->GetDevice()->CreateConstantBufferView(&ViewDesc, DescriptorHandle);
 
 		return Allocation;
 	}

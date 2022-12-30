@@ -13,11 +13,11 @@
 
 namespace FusionEditor {
 
-	void ImGuiPlatformContextD3D11::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext)
+	void ImGuiPlatformContextD3D11::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain)
 	{
-		Fusion::Shared<Fusion::D3D11Context> D3DContext = InContext.As<Fusion::D3D11Context>();
+		auto Device = InContext->GetDevice().As<Fusion::D3D11Device>();
 		ImGui_ImplGlfw_InitForOther(static_cast<GLFWwindow*>(InWindow->GetWindowHandle()), true);
-		ImGui_ImplDX11_Init(D3DContext->GetDevice(), D3DContext->GetDeviceContext());
+		ImGui_ImplDX11_Init(Device->GetDevice(), Device->GetDeviceContext());
 	}
 
 	void ImGuiPlatformContextD3D11::BeginFramePlatform()
@@ -26,7 +26,7 @@ namespace FusionEditor {
 		ImGui_ImplGlfw_NewFrame();
 	}
 
-	void ImGuiPlatformContextD3D11::EndFramePlatform()
+	void ImGuiPlatformContextD3D11::EndFramePlatform(Fusion::CommandList* InCommandList)
 	{
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

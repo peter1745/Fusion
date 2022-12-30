@@ -6,7 +6,7 @@
 
 namespace Fusion {
 
-	VulkanShader::VulkanShader(const CompiledShaderData& InData)
+	VulkanShader::VulkanShader(const VulkanCompiledShaderData& InData)
 	    : m_CompiledData(InData)
 	{
 	}

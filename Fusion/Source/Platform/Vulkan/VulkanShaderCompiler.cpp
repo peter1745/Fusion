@@ -139,7 +139,7 @@ namespace Fusion {
 
 	Shared<Shader> VulkanShaderCompiler::CreateShader(const std::filesystem::path& InFilePath)
 	{
-		CompiledShaderData ShaderData = {};
+		VulkanCompiledShaderData ShaderData = {};
 
 		TryCompileAndReflectModule(InFilePath, EShaderType::Vertex, ShaderData);
 		TryCompileAndReflectModule(InFilePath, EShaderType::Pixel, ShaderData);
@@ -147,7 +147,7 @@ namespace Fusion {
 		return Shared<VulkanShader>::Create(ShaderData);
 	}
 
-	void VulkanShaderCompiler::TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, CompiledShaderData& OutData)
+	void VulkanShaderCompiler::TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, VulkanCompiledShaderData& OutData)
 	{
 		shaderc::SpvCompilationResult Result = TryCompileModule(InFilePath, InShaderType);
 
@@ -256,7 +256,7 @@ namespace Fusion {
 		return Module;
 	}
 
-	void VulkanShaderCompiler::ReflectShader(const std::vector<uint32_t>& InByteCode, ModuleReflectionData& OutReflectionData)
+	void VulkanShaderCompiler::ReflectShader(const std::vector<uint32_t>& InByteCode, VulkanModuleReflectionData& OutReflectionData)
 	{
 		FUSION_CORE_INFO("Reflecting for Vulkan");
 

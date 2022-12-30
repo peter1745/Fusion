@@ -250,7 +250,7 @@ namespace FusionEditor {
 		auto* CommandList = m_Renderer->GetCurrentCommandList();
 
 		m_SwapChain->Bind(CommandList);
-		m_SwapChain->Clear();
+		m_SwapChain->Clear(CommandList);
 		m_ImGuiContext->EndFrame(CommandList);
 		m_SwapChain->Unbind(CommandList);
 	}

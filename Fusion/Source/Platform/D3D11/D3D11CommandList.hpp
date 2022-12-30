@@ -28,11 +28,13 @@ namespace Fusion {
 
 		virtual void EndRecording() override;
 
+		void Release() override;
+
 		auto& GetNativeList() { return m_DeviceContext; }
 		const auto& GetNativeList() const { return m_DeviceContext; }
 
 	private:
-		Shared<D3D11CommandAllocator> m_Allocator = nullptr;
+		Shared<D3D11CommandAllocator> m_Allocator;
 		D3DComPtr<ID3D11DeviceContext> m_DeviceContext;
 	};
 

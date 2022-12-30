@@ -71,7 +71,7 @@ namespace Fusion {
 			memcpy(ClearValue.Color, &m_CreateInfo.ClearColor[0], sizeof(m_CreateInfo.ClearColor));
 		}
 
-		GraphicsContext::Get<D3D12Context>()->GetDevice()->CreateCommittedResource2(
+		GraphicsContext::Get<D3D12Context>()->GetDevice().As<D3D12Device>()->GetDevice()->CreateCommittedResource2(
 			&HeapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&ResourceDesc,

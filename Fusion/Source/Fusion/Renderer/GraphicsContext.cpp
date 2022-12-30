@@ -3,8 +3,8 @@
 #include "RenderSettings.hpp"
 
 #ifdef FUSION_PLATFORM_WINDOWS
-	#include "Platform/D3D11/D3D11DescriptorHeap.hpp"
-	#include "Platform/D3D12/D3D12DescriptorHeap.hpp"
+	#include "Platform/D3D11/D3D11Context.hpp"
+	#include "Platform/D3D12/D3D12Context.hpp"
 #endif
 
 #include "Platform/Vulkan/VulkanContext.hpp"

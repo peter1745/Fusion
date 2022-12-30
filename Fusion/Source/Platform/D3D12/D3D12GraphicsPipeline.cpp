@@ -54,7 +54,7 @@ namespace Fusion {
 	D3D12GraphicsPipeline::D3D12GraphicsPipeline(const GraphicsPipelineInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
+		/*auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& Device = Context->GetDevice();
 
 		auto D3DShader = m_CreateInfo.PipelineShader.As<D3D12Shader>();
@@ -159,7 +159,7 @@ namespace Fusion {
 
 		PipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		HRESULT res = Device->CreateGraphicsPipelineState(&PipelineStateDesc, m_Pipeline, m_Pipeline);
+		HRESULT res = Device->CreateGraphicsPipelineState(&PipelineStateDesc, m_Pipeline, m_Pipeline);*/
 	}
 
 	D3D12GraphicsPipeline::~D3D12GraphicsPipeline()
@@ -196,7 +196,7 @@ namespace Fusion {
 		if (FAILED(D3D12SerializeVersionedRootSignature(&RootSignatureDesc, Blob, Error)))
 			return;
 
-		GraphicsContext::Get<D3D12Context>()->GetDevice()->CreateRootSignature(0, Blob->GetBufferPointer(), Blob->GetBufferSize(), m_PipelineRootSignature, m_PipelineRootSignature);
+		//GraphicsContext::Get<D3D12Context>()->GetDevice()->CreateRootSignature(0, Blob->GetBufferPointer(), Blob->GetBufferSize(), m_PipelineRootSignature, m_PipelineRootSignature);
 	}
 
 	void D3D12GraphicsPipeline::ProcessShaderModule(EShaderType InModuleType, const ModuleReflectionData& InReflectionData, RootSignatureData& InData)

@@ -29,6 +29,8 @@ project "Fission"
     filter "system:windows"
         systemversion "latest"
 
+        buildoptions { "/EHsc", "/Zc:preprocessor" }
+
     filter "system:linux"
         debugformat "Dwarf-4"
 

@@ -9,7 +9,7 @@ namespace Fusion {
 	D3D11Texture2D::D3D11Texture2D(const Texture2DInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
+		/*Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
 
 		Image2DInfo TextureInfo = {};
 		TextureInfo.Size.Width = InCreateInfo.Width;
@@ -26,7 +26,7 @@ namespace Fusion {
 		ShaderResourceViewDesc.Format = EFormatToDXGIFormat(InCreateInfo.Format);
 		ShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		ShaderResourceViewDesc.Texture2D.MipLevels = 1;
-		D3DContext->GetDevice()->CreateShaderResourceView(m_Image->GetResource(), &ShaderResourceViewDesc, m_ShaderResourceView);
+		D3DContext->GetDevice()->CreateShaderResourceView(m_Image->GetResource(), &ShaderResourceViewDesc, m_ShaderResourceView);*/
 	}
 
 	D3D11Texture2D::~D3D11Texture2D()
@@ -35,8 +35,8 @@ namespace Fusion {
 
 	void D3D11Texture2D::Bind(uint32_t InSlot)
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->PSSetShaderResources(InSlot, 1, m_ShaderResourceView);
+		//ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		//DeviceContext->PSSetShaderResources(InSlot, 1, m_ShaderResourceView);
 	}
 
 }

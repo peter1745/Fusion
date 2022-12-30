@@ -34,7 +34,7 @@ namespace Fusion {
 	D3D11Buffer::D3D11Buffer(const BufferInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		auto Context = GraphicsContext::Get<D3D11Context>();
+		auto& Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
 
 		D3D11_BUFFER_DESC BufferDesc = {};
 		BufferDesc.Usage = HeapTypeToD3D11Usage(InCreateInfo.HeapType);
@@ -63,7 +63,7 @@ namespace Fusion {
 			InitialData.SysMemSlicePitch = 0;
 		}
 
-		Context->GetDevice()->CreateBuffer(&BufferDesc, InCreateInfo.InitialData == nullptr ? nullptr : &InitialData, m_Buffer);
+		Device->CreateBuffer(&BufferDesc, InCreateInfo.InitialData == nullptr ? nullptr : &InitialData, m_Buffer);
 	}
 
 	D3D11Buffer::~D3D11Buffer() {}
@@ -71,20 +71,20 @@ namespace Fusion {
 	Byte* D3D11Buffer::Map()
 	{
 		D3D11_MAPPED_SUBRESOURCE MappedResource = {};
-		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->Map(m_Buffer, 0, D3D11_MAP_READ, 0, &MappedResource);
+		GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDeviceContext()->Map(m_Buffer, 0, D3D11_MAP_READ, 0, &MappedResource);
 		return reinterpret_cast<Byte*>(MappedResource.pData);
 	}
 
 	void D3D11Buffer::Unmap(Byte* InPtr)
 	{
-		GraphicsContext::Get<D3D11Context>()->GetDeviceContext()->Unmap(m_Buffer, 0);
+		GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDeviceContext()->Unmap(m_Buffer, 0);
 	}
 
 	void D3D11Buffer::Transition(CommandList* InCmdList, EBufferState InState) {}
 
 	void D3D11Buffer::SetData(CommandList* InCmdList, const void* InData, const Shared<Buffer>& InUploadBuffer)
 	{
-		auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDeviceContext();
 		auto UploadBuffer = InUploadBuffer.As<D3D11Buffer>();
 
 		D3D11_MAPPED_SUBRESOURCE MappedResource = {};

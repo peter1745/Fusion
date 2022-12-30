@@ -1,8 +1,15 @@
 #pragma once
 
 #include "Fusion/Core/Enum.hpp"
+#include "Fusion/Core/Assert.hpp"
 
 namespace Fusion {
+
+	enum class EShaderType
+	{
+		Vertex,
+		Pixel
+	};
 
 	enum class EBufferUsage
 	{

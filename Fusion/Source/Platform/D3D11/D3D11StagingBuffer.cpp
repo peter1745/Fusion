@@ -15,7 +15,7 @@ namespace Fusion {
 		StagingBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 		StagingBufferDesc.MiscFlags = 0;
 		StagingBufferDesc.StructureByteStride = GetFormatSize(InCreateInfo.Format);
-		Fusion::GraphicsContext::Get<Fusion::D3D11Context>()->GetDevice()->CreateBuffer(&StagingBufferDesc, nullptr, m_Buffer);*/
+		Fusion::GraphicsContext::Get<Fusion::D3D11Context>()->GetDevice()->CreateBuffer(&StagingBufferDesc, nullptr, m_Buffer);
 
 		D3D11_TEXTURE2D_DESC StagingTextureDesc = {};
 		StagingTextureDesc.Width = InCreateInfo.Size / GetFormatSize(InCreateInfo.Format);
@@ -27,7 +27,7 @@ namespace Fusion {
 		StagingTextureDesc.Usage = D3D11_USAGE_STAGING;
 		StagingTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 		StagingTextureDesc.MiscFlags = 0;
-		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateTexture2D(&StagingTextureDesc, nullptr, m_Buffer);
+		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateTexture2D(&StagingTextureDesc, nullptr, m_Buffer);*/
 	}
 
 	D3D11StagingBuffer::~D3D11StagingBuffer()
@@ -51,16 +51,17 @@ namespace Fusion {
 
 	Byte* D3D11StagingBuffer::Map()
 	{
-		auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		/*auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
 		D3D11_MAPPED_SUBRESOURCE MappedResource = {};
 		DeviceContext->Map(m_Buffer, 0, D3D11_MAP_READ, 0, &MappedResource);
-		return static_cast<Byte*>(MappedResource.pData);
+		return static_cast<Byte*>(MappedResource.pData);*/
+		return nullptr;
 	}
 
 	void D3D11StagingBuffer::Unmap(Byte* InPtr)
 	{
-		auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->Unmap(m_Buffer, 0);
+		//auto& DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		//DeviceContext->Unmap(m_Buffer, 0);
 	}
 
 }

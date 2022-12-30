@@ -31,6 +31,8 @@ namespace Fusion {
 
 	public:
 		static Unique<Renderer> Create(const RendererInfo& InInfo);
+
+		static Renderer& GetCurrent();
 	};
 
 }

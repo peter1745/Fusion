@@ -9,10 +9,10 @@
 
 namespace Fusion {
 
-	D3D11SwapChain::D3D11SwapChain(const SwapChainInfo& InCreateInfo)
+	D3D11SwapChain::D3D11SwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
+		m_Device = InContext->GetDevice().As<D3D11Device>();
 		const auto& TargetWindow = Application::Get().GetWindow();
 
 		uint32_t Width = InCreateInfo.Width == 0 ? TargetWindow->GetWidth() : InCreateInfo.Width;
@@ -40,10 +40,10 @@ namespace Fusion {
 		D3DComPtr<IDXGIDevice> DXGIDevice;
 		D3DComPtr<IDXGIAdapter> DXGIAdapter;
 		D3DComPtr<IDXGIFactory> DXGIFactory;
-		D3DContext->GetDevice()->QueryInterface(DXGIDevice, DXGIDevice);
+		m_Device->GetDevice()->QueryInterface(DXGIDevice, DXGIDevice);
 		DXGIDevice->GetParent(DXGIAdapter, DXGIAdapter);
 		DXGIAdapter->GetParent(DXGIFactory, DXGIFactory);
-		DXGIFactory->CreateSwapChain(D3DContext->GetDevice(), &SwapChainDesc, m_SwapChain);
+		DXGIFactory->CreateSwapChain(m_Device->GetDevice(), &SwapChainDesc, m_SwapChain);
 
 		DXGIFactory.Release();
 		DXGIAdapter.Release();
@@ -57,18 +57,15 @@ namespace Fusion {
 		m_SwapChain->SetFullscreenState(false, nullptr);
 	}
 
-	void D3D11SwapChain::Bind()
+	void D3D11SwapChain::Bind(CommandList* InCommandList)
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-		DeviceContext->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
-		DeviceContext->RSSetViewports(1, &m_Viewport);
+		m_Device->GetDeviceContext()->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
+		m_Device->GetDeviceContext()->RSSetViewports(1, &m_Viewport);
 	}
 
-	void D3D11SwapChain::Clear()
+	void D3D11SwapChain::Clear(CommandList* InCommandList)
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
-
-		DeviceContext->ClearRenderTargetView(m_RenderTargetView, glm::value_ptr(m_CreateInfo.RenderTargetClearColor));
+		m_Device->GetDeviceContext()->ClearRenderTargetView(m_RenderTargetView, glm::value_ptr(m_CreateInfo.RenderTargetClearColor));
 	}
 
 	void D3D11SwapChain::Present()
@@ -95,10 +92,8 @@ namespace Fusion {
 
 	void D3D11SwapChain::Invalidate()
 	{
-		Shared<D3D11Context> D3DContext = GraphicsContext::Get<D3D11Context>();
-
 		ID3D11RenderTargetView* NullViews[] = { nullptr };
-		D3DContext->GetDeviceContext()->OMSetRenderTargets(1, NullViews, nullptr);
+		m_Device->GetDeviceContext()->OMSetRenderTargets(1, NullViews, nullptr);
 
 		m_RenderTargetView.Release();
 
@@ -106,10 +101,10 @@ namespace Fusion {
 
 		D3DComPtr<ID3D11Texture2D> RenderTargetTexture;
 		m_SwapChain->GetBuffer(0, RenderTargetTexture, RenderTargetTexture);
-		D3DContext->GetDevice()->CreateRenderTargetView(RenderTargetTexture, nullptr, m_RenderTargetView);
+		m_Device->GetDevice()->CreateRenderTargetView(RenderTargetTexture, nullptr, m_RenderTargetView);
 		RenderTargetTexture.Release();
 
-		D3DContext->GetDeviceContext()->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
+		m_Device->GetDeviceContext()->OMSetRenderTargets(1, m_RenderTargetView, nullptr);
 
 		// TODO(Peter): Rasterizer State should belong to a pipeline (allow states to be shared by multiple pipelines)
 		D3D11_RASTERIZER_DESC RasterizerDesc;
@@ -126,8 +121,8 @@ namespace Fusion {
 		RasterizerDesc.SlopeScaledDepthBias = 0.0f;
 
 		ID3D11RasterizerState* RasterizerState;
-		D3DContext->GetDevice()->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
-		D3DContext->GetDeviceContext()->RSSetState(RasterizerState);
+		m_Device->GetDevice()->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
+		m_Device->GetDeviceContext()->RSSetState(RasterizerState);
 		RasterizerState->Release();
 
 		ZeroMemory(&m_Viewport, sizeof(D3D11_VIEWPORT));
@@ -137,7 +132,13 @@ namespace Fusion {
 		m_Viewport.Height = static_cast<float>(m_CreateInfo.Height);
 		m_Viewport.MinDepth = 0.0f;
 		m_Viewport.MaxDepth = 1.0f;
-		D3DContext->GetDeviceContext()->RSSetViewports(1, &m_Viewport);
+		m_Device->GetDeviceContext()->RSSetViewports(1, &m_Viewport);
+	}
+
+	void D3D11SwapChain::Release()
+	{
+		m_RenderTargetView.Release();
+		m_SwapChain.Release();
 	}
 
 }

@@ -16,6 +16,8 @@ namespace Fusion {
 
 	void D3D11Image2D::Invalidate()
 	{
+		auto Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
+
 		m_Image.Release();
 
 		D3D11_TEXTURE2D_DESC ImageDesc = {};
@@ -52,7 +54,7 @@ namespace Fusion {
 		InitialData.SysMemPitch = m_CreateInfo.Size.Width * m_CreateInfo.Channels;
 		InitialData.SysMemSlicePitch = InitialData.SysMemPitch * m_CreateInfo.Size.Height;
 
-		GraphicsContext::Get<D3D11Context>()->GetDevice()->CreateTexture2D(&ImageDesc, m_CreateInfo.InitialData != nullptr ? &InitialData : nullptr, m_Image);
+		Device->CreateTexture2D(&ImageDesc, m_CreateInfo.InitialData != nullptr ? &InitialData : nullptr, m_Image);
 	}
 
 }

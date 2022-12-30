@@ -1,6 +1,7 @@
 #include "UILibrary.hpp"
 
 #include <Fusion/IO/Mouse.hpp>
+#include <Fusion/Renderer/RenderSettings.hpp>
 
 namespace FusionEditor::UI {
 

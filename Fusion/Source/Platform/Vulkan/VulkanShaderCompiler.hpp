@@ -31,7 +31,7 @@ namespace Fusion {
 		std::vector<UniformInfo> Uniforms;
 	};
 
-	struct ModuleReflectionData
+	struct VulkanModuleReflectionData
 	{
 		std::vector<ShaderIOParameter> InputParameters;
 		// NOTE(Peter): Even though Vulkan currently only allows one push constant per shader module
@@ -41,10 +41,10 @@ namespace Fusion {
 		std::vector<ShaderIOParameter> OutputParameters;
 	};
 
-	struct CompiledShaderData
+	struct VulkanCompiledShaderData
 	{
 		std::unordered_map<EShaderType, std::vector<uint32_t>> ModuleByteCodes;
-		std::unordered_map<EShaderType, ModuleReflectionData> ReflectionData;
+		std::unordered_map<EShaderType, VulkanModuleReflectionData> ReflectionData;
 	};
 
 	class VulkanShaderCompiler : public ShaderCompiler
@@ -53,9 +53,9 @@ namespace Fusion {
 		Shared<Shader> CreateShader(const std::filesystem::path& InFilePath) override;
 
 	private:
-		void TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, CompiledShaderData& OutData);
+		void TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, VulkanCompiledShaderData& OutData);
 		shaderc::SpvCompilationResult TryCompileModule(const std::filesystem::path& InFilePath, EShaderType InShaderType);
-		void ReflectShader(const std::vector<uint32_t>& InByteCode, ModuleReflectionData& OutReflectionData);
+		void ReflectShader(const std::vector<uint32_t>& InByteCode, VulkanModuleReflectionData& OutReflectionData);
 	};
 
 }

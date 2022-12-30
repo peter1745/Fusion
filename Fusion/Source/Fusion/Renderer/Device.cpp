@@ -1,8 +1,5 @@
-//
-// Created by peter on 2022-12-02.
-//
-
+#include "FusionPCH.hpp"
 #include "Device.hpp"
 
 namespace Fusion {
-} // Fusion
+}

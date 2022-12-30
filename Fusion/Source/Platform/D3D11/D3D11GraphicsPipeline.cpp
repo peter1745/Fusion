@@ -50,7 +50,7 @@ namespace Fusion {
 	D3D11GraphicsPipeline::D3D11GraphicsPipeline(const GraphicsPipelineInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		auto Context = GraphicsContext::Get<D3D11Context>();
+		/*auto Context = GraphicsContext::Get<D3D11Context>();
 		auto& Device = Context->GetDevice();
 
 		auto D3DShader = m_CreateInfo.PipelineShader.As<D3D11Shader>();
@@ -167,7 +167,7 @@ namespace Fusion {
 
 		auto VertexByteCode = D3DShader->GetByteCode(EShaderType::Vertex);
 		if (VertexByteCode.IsValid())
-			Device->CreateInputLayout(InputElements.data(), InputElements.size(), VertexByteCode->GetBufferPointer(), VertexByteCode->GetBufferSize(), m_InputLayout);
+			Device->CreateInputLayout(InputElements.data(), InputElements.size(), VertexByteCode->GetBufferPointer(), VertexByteCode->GetBufferSize(), m_InputLayout);*/
 	}
 
 	D3D11GraphicsPipeline::~D3D11GraphicsPipeline()

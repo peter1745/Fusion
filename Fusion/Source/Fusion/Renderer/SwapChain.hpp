@@ -20,7 +20,7 @@ namespace Fusion {
 		virtual ~SwapChain() = default;
 
 		virtual void Bind(CommandList* InCommandList) = 0;
-		virtual void Clear() = 0;
+		virtual void Clear(CommandList* InCommandList) = 0;
 		virtual void Unbind(CommandList* InCommandList) = 0;
 
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;

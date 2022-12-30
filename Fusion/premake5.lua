@@ -7,9 +7,6 @@ project "Fusion"
     targetdir (BuildDir .. "/%{prj.name}")
     objdir (IntermediatesDir .. "/%{prj.name}")
 
-    pchheader "FusionPCH.hpp"
-    pchsource "Source/FusionPCH.cpp"
-
     files {
         "Source/**.cpp",
         "Source/**.hpp",
@@ -42,8 +39,21 @@ project "Fusion"
         "YAML_CPP_STATIC_DEFINE"
     }
 
+    filter "action:vs*"
+        pchheader "FusionPCH.hpp"
+        pchsource "Source/FusionPCH.cpp"
+
+    filter "action:not vs*"
+        pchheader "FusionPCH.hpp"
+
     filter "system:windows"
         systemversion "latest"
+
+        externalincludedirs {
+            os.getenv("VULKAN_SDK") .. "/Include"
+        }
+
+        buildoptions { "/EHsc", "/Zc:preprocessor" }
 
         includedirs {
             "%{IncludeDirs.DXC}"

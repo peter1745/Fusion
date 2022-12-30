@@ -1,3 +1,4 @@
+#include "FusionPCH.hpp"
 #include "VulkanSwapChain.hpp"
 #include "VulkanContext.hpp"
 #include "VulkanFunctions.hpp"
@@ -53,7 +54,7 @@ namespace Fusion {
 		vkCmdBeginRenderPass(CmdList, &RenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
-	void VulkanSwapChain::Clear() {}
+	void VulkanSwapChain::Clear(CommandList* InCommandList) {}
 
 	void VulkanSwapChain::Present(VkSemaphore InFinishedSemaphore)
 	{

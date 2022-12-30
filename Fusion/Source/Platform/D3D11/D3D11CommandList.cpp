@@ -111,4 +111,10 @@ namespace Fusion {
 
 	}
 
+	void Fusion::D3D11CommandList::Release()
+	{
+		m_Allocator.Reset();
+		m_DeviceContext.Release();
+	}
+
 }

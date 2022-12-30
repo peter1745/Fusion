@@ -105,4 +105,8 @@ namespace Fusion {
 		m_CommandList->Close();
 	}
 
+	void D3D12CommandList::Release()
+	{
+	}
+
 }

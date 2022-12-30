@@ -12,7 +12,7 @@ namespace Fusion {
 		~VulkanSwapChain() override = default;
 
 		void Bind(CommandList* InCommandList) override;
-		void Clear() override;
+		void Clear(CommandList* InCommandList) override;
 		void Present(VkSemaphore InFinishedSemaphore);
 		void Unbind(CommandList* InCommandList) override;
 

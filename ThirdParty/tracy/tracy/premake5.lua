@@ -26,7 +26,8 @@ project "Tracy"
             "public/libbacktrace/mmapio.cpp",
             "public/libbacktrace/macho.cpp",
             "public/libbacktrace/fileline.cpp",
-            "public/libbacktrace/elf.cpp"
+            "public/libbacktrace/elf.cpp",
+            "public/libbacktrace/dwarf.cpp"
         }
 
     filter "system:linux"

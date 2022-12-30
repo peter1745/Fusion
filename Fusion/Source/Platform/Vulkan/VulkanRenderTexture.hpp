@@ -2,12 +2,14 @@
 
 #include "Fusion/Renderer/RenderTexture.hpp"
 
+#include "VulkanImage.hpp"
+
 namespace Fusion {
 
 	class VulkanRenderTexture : public RenderTexture
 	{
 	public:
-		explicit VulkanRenderTexture(const RenderTextureInfo& InCreateInfo);
+		explicit VulkanRenderTexture(const Shared<Device>& InDevice, const RenderTextureInfo& InCreateInfo);
 
 		void Bind(CommandList* InCommandList) override;
 		void Unbind(CommandList* InCommandList) override;
@@ -28,6 +30,12 @@ namespace Fusion {
 
 	private:
 		RenderTextureInfo m_CreateInfo;
+
+		std::vector<Shared<VulkanImage2D>> m_Images;
+		std::vector<VkImageView> m_ImageViews;
+
+		VkFramebuffer m_FrameBuffer = VK_NULL_HANDLE;
+		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 	};
 
 }

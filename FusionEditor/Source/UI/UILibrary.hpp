@@ -2,6 +2,7 @@
 
 #include "Fusion/STL/InitializerList.hpp"
 #include "Fusion/World/Components/AllComponents.hpp"
+#include "Fusion/Renderer/RenderTexture.hpp"
 
 #include <string_view>
 #include <spdlog/fmt/fmt.h>

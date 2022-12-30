@@ -2,15 +2,19 @@
 #include "D3D12RenderTexture.hpp"
 #include "D3D12Context.hpp"
 
+#include "Fusion/Renderer/Renderer.hpp"
+
 namespace Fusion {
 
 	D3D12RenderTexture::D3D12RenderTexture(const RenderTextureInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& Device = Context->GetDevice();
+		auto& Device = Context->GetDevice().As<D3D12Device>()->GetDevice();
 
 		m_Attachments.resize(InCreateInfo.ColorAttachments.size());
+
+		uint32_t FrameCount = Renderer::GetCurrent().GetFramesInFlight();
 
 		for (size_t Idx = 0; Idx < InCreateInfo.ColorAttachments.size(); Idx++)
 		{
@@ -25,14 +29,14 @@ namespace Fusion {
 			ImageInfo.InitialState = AttachmentInfo.InitialState;
 			ImageInfo.ClearColor = AttachmentInfo.ClearColor;
 
-			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
+			for (size_t ImageIdx = 0; ImageIdx < FrameCount; ImageIdx++)
 				Attachment.Images.push_back(Shared<D3D12Image2D>::Create(ImageInfo));
 		}
 
 		// NOTE(Peter): Probably better to have a really large heap for RTVs, and then simply allocate into it
 		D3D12_DESCRIPTOR_HEAP_DESC DescriptorHeapDesc = {};
 		DescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		DescriptorHeapDesc.NumDescriptors = Context->GetFramesInFlight() * m_Attachments.size();
+		DescriptorHeapDesc.NumDescriptors = FrameCount * m_Attachments.size();
 		DescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		DescriptorHeapDesc.NodeMask = 0;
 		Device->CreateDescriptorHeap(&DescriptorHeapDesc, m_RenderTargetDescriptorHeap, m_RenderTargetDescriptorHeap);
@@ -75,12 +79,12 @@ namespace Fusion {
 			DepthImageInfo.Flags = AttachmentInfo.Flags;
 			DepthImageInfo.InitialState = AttachmentInfo.InitialState;
 
-			for (size_t ImageIdx = 0; ImageIdx < Context->GetFramesInFlight(); ImageIdx++)
+			for (size_t ImageIdx = 0; ImageIdx < FrameCount; ImageIdx++)
 				m_DepthStencilAttachment.Images.push_back(Shared<D3D12Image2D>::Create(DepthImageInfo));
 
 			// NOTE(Peter): Again, probably should have a global heap for DSVs that we allocate into
 			DescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-			DescriptorHeapDesc.NumDescriptors = Context->GetFramesInFlight();
+			DescriptorHeapDesc.NumDescriptors = FrameCount;
 			Device->CreateDescriptorHeap(&DescriptorHeapDesc, m_DepthStencilDescriptorHeap, m_DepthStencilDescriptorHeap);
 
 			m_DepthStencilViewHandle = m_DepthStencilDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -92,7 +96,7 @@ namespace Fusion {
 			DepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 			DepthStencilViewDesc.Texture2D.MipSlice = 0;
 
-			for (size_t DepthImageIdx = 0; DepthImageIdx < Context->GetFramesInFlight(); DepthImageIdx++)
+			for (size_t DepthImageIdx = 0; DepthImageIdx < FrameCount; DepthImageIdx++)
 			{
 				auto& Resource = m_DepthStencilAttachment.Images[DepthImageIdx]->GetResource();
 				D3D12_CPU_DESCRIPTOR_HANDLE Handle = m_DepthStencilViewHandle;
@@ -105,7 +109,7 @@ namespace Fusion {
 	void D3D12RenderTexture::Bind(CommandList* InCommandList)
 	{
 		// TODO(Peter): Maybe take in the desired frame index as a parameter?
-		uint32_t CurrentFrameIdx = GraphicsContext::Get<D3D12Context>()->GetCurrentFrameIndex();
+		uint32_t CurrentFrameIdx = Renderer::GetCurrent().GetCurrentFrame();
 		
 		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
 
@@ -151,7 +155,7 @@ namespace Fusion {
 		m_CreateInfo.Width = InSize.Width;
 		m_CreateInfo.Height = InSize.Height;
 
-		auto& Device = GraphicsContext::Get<D3D12Context>()->GetDevice();
+		auto& Device = GraphicsContext::Get<D3D12Context>()->GetDevice().As<D3D12Device>()->GetDevice();
 
 		// Resize attachment image
 		{
@@ -199,7 +203,7 @@ namespace Fusion {
 	{
 		auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
-		uint32_t CurrentFrameIdx = Context->GetCurrentFrameIndex();
+		uint32_t CurrentFrameIdx = Renderer::GetCurrent().GetCurrentFrame();
 
 		// NOTE(Peter): We don't call Image2D::Transition here because it's more efficient to batch
 		//				the barriers together, instead of doing them one at a time

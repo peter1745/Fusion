@@ -18,7 +18,7 @@ namespace Fusion {
 
 	void D3D11Shader::Bind()
 	{
-		ID3D11DeviceContext* Context = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		auto Context = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDeviceContext();
 		Context->IASetInputLayout(m_InputLayout);
 		Context->VSSetShader(m_VertexShader, nullptr, 0);
 		Context->PSSetShader(m_PixelShader, nullptr, 0);
@@ -30,7 +30,7 @@ namespace Fusion {
 
 	void D3D11Shader::CreateShaders()
 	{
-		ID3D11Device* Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
+		auto& Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
 
 		if (m_CompiledShaderData.CompiledByteCodes.find(EShaderType::Vertex) != m_CompiledShaderData.CompiledByteCodes.end())
 		{

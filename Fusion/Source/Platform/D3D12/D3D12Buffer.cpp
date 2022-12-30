@@ -55,7 +55,7 @@ namespace Fusion {
 	D3D12Buffer::D3D12Buffer(const BufferInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
+		/*auto Context = GraphicsContext::Get<D3D12Context>();
 		auto& Device = Context->GetDevice();
 
 		D3D12_HEAP_PROPERTIES HeapProperties = {};
@@ -107,7 +107,7 @@ namespace Fusion {
 			{
 				Instance->SetData(InCmdList, Instance->m_CreateInfo.InitialData, Instance->m_UploadBuffer);
 			});
-		}
+		}*/
 	}
 
 	D3D12Buffer::~D3D12Buffer()

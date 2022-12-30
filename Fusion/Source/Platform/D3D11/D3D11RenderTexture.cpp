@@ -24,18 +24,12 @@ namespace Fusion {
 
 	void D3D11RenderTexture::Bind(CommandList* InCommandList)
 	{
-		ID3D11DeviceContext* DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDeviceContext();
+		auto NativeList = static_cast<D3D11CommandList*>(InCommandList)->GetNativeList();
 
 		std::vector<ID3D11RenderTargetView*> RenderTargetViews(m_AttachmentRenderTargetViews.size());
 		for (size_t Idx = 0; Idx < m_AttachmentRenderTargetViews.size(); Idx++)
 			RenderTargetViews[Idx] = m_AttachmentRenderTargetViews[Idx];
-		DeviceContext->OMSetRenderTargets(UINT(RenderTargetViews.size()), RenderTargetViews.data(), m_DepthStencilView);
-
-		for (size_t Idx = 0; Idx < m_AttachmentRenderTargetViews.size(); Idx++)
-			DeviceContext->ClearRenderTargetView(m_AttachmentRenderTargetViews[Idx], glm::value_ptr(m_CreateInfo.ColorAttachments[Idx].ClearColor));
-
-		if (m_HasDepthStencilAttachment)
-			DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		NativeList->OMSetRenderTargets(UINT(RenderTargetViews.size()), RenderTargetViews.data(), m_DepthStencilView);
 	}
 
 	void D3D11RenderTexture::Unbind(CommandList* InCommandList)
@@ -44,15 +38,23 @@ namespace Fusion {
 
 	void D3D11RenderTexture::Clear()
 	{
+		auto DeviceContext = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDeviceContext();
+
+		for (size_t Idx = 0; Idx < m_AttachmentRenderTargetViews.size(); Idx++)
+			DeviceContext->ClearRenderTargetView(m_AttachmentRenderTargetViews[Idx], glm::value_ptr(m_CreateInfo.ColorAttachments[Idx].ClearColor));
+
+		if (m_HasDepthStencilAttachment)
+			DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
 	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize)
 	{
-		auto Device = GraphicsContext::Get<D3D11Context>()->GetDevice();
+		auto Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
 
 		m_CreateInfo.Width = InSize.Width;
 		m_CreateInfo.Height = InSize.Height;
 
+		m_ColorAttachmentResourceViews[InAttachmentIndex]->Release();
 		m_AttachmentRenderTargetViews[InAttachmentIndex].Release();
 		m_AttachmentImages[InAttachmentIndex]->Resize(InSize);
 
@@ -64,6 +66,15 @@ namespace Fusion {
 		ColorAttachmentViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 		ColorAttachmentViewDesc.Texture2D.MipSlice = 0;
 		Device->CreateRenderTargetView(m_AttachmentImages[InAttachmentIndex]->GetResource(), &ColorAttachmentViewDesc, m_AttachmentRenderTargetViews[InAttachmentIndex]);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceViewDesc;
+		ZeroMemory(&ShaderResourceViewDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+		ShaderResourceViewDesc.Format = ColorAttachmentViewDesc.Format;
+		ShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		ShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+		ShaderResourceViewDesc.Texture2D.MipLevels = 1;
+		Device->CreateShaderResourceView(m_AttachmentImages[InAttachmentIndex]->GetResource(), &ShaderResourceViewDesc, &m_ColorAttachmentResourceViews[InAttachmentIndex]);
+
 
 		if (m_HasDepthStencilAttachment)
 		{
@@ -81,14 +92,16 @@ namespace Fusion {
 	void D3D11RenderTexture::Invalidate()
 	{
 		auto Context = GraphicsContext::Get<D3D11Context>();
-		auto Device = Context->GetDevice();
+		auto Device = Context->GetDevice().As<D3D11Device>()->GetDevice();
 
 		m_DepthStencilView.Release();
 		m_DepthStencilImage.Reset();
 
+		m_ColorAttachmentResourceViews.clear();
 		m_AttachmentRenderTargetViews.clear();
 		m_AttachmentImages.clear();
 
+		m_ColorAttachmentResourceViews.resize(m_CreateInfo.ColorAttachments.size());
 		m_AttachmentRenderTargetViews.resize(m_CreateInfo.ColorAttachments.size());
 		m_AttachmentImages.reserve(m_CreateInfo.ColorAttachments.size());
 
@@ -112,13 +125,13 @@ namespace Fusion {
 			ColorAttachmentViewDesc.Texture2D.MipSlice = 0;
 			Device->CreateRenderTargetView(m_AttachmentImages[Idx]->GetResource(), &ColorAttachmentViewDesc, m_AttachmentRenderTargetViews[Idx]);
 
-			/*D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceViewDesc;
+			D3D11_SHADER_RESOURCE_VIEW_DESC ShaderResourceViewDesc;
 			ZeroMemory(&ShaderResourceViewDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-			ShaderResourceViewDesc.Format = ColorAttachmentDesc.Format;
+			ShaderResourceViewDesc.Format = ColorAttachmentViewDesc.Format;
 			ShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			ShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 			ShaderResourceViewDesc.Texture2D.MipLevels = 1;
-			Device->CreateShaderResourceView(m_ColorAttachmentTextures[Idx], &ShaderResourceViewDesc, &m_ColorAttachmentResourceViews[Idx]);*/
+			Device->CreateShaderResourceView(m_AttachmentImages[Idx]->GetResource(), &ShaderResourceViewDesc, &m_ColorAttachmentResourceViews[Idx]);
 		}
 
 		m_HasDepthStencilAttachment = IsDepthFormat(m_CreateInfo.DepthAttachment.Format);

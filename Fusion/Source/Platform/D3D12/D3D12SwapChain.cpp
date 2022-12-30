@@ -11,10 +11,10 @@
 
 namespace Fusion {
 
-	D3D12SwapChain::D3D12SwapChain(const SwapChainInfo& InCreateInfo)
+	D3D12SwapChain::D3D12SwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo)
 		: m_CreateInfo(InCreateInfo)
 	{
-		Shared<D3D12Context> Context = GraphicsContext::Get<D3D12Context>();
+		m_Device = InContext->GetDevice().As<D3D12Device>();
 
 		DXGI_SWAP_CHAIN_DESC1 SwapChainDesc = {};
 		SwapChainDesc.BufferCount = 3;
@@ -28,8 +28,8 @@ namespace Fusion {
 
 		HWND WindowHandle = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetWindowHandle()));
 		D3DComPtr<IDXGISwapChain1> SwapChain;
-		Context->GetDXGIFactory()->CreateSwapChainForHwnd(Context->GetCommandQueue(), WindowHandle, &SwapChainDesc, nullptr, nullptr, SwapChain);
-		Context->GetDXGIFactory()->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER);
+		InContext.As<D3D12Context>()->GetDXGIFactory()->CreateSwapChainForHwnd(m_Device->GetGraphicsCommandQueue(), WindowHandle, &SwapChainDesc, nullptr, nullptr, SwapChain);
+		InContext.As<D3D12Context>()->GetDXGIFactory()->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER);
 
 		m_SwapChain = SwapChain;
 		m_SwapChain->GetDesc1(&SwapChainDesc);
@@ -44,16 +44,16 @@ namespace Fusion {
 		RTVDescriptorHeapDesc.NumDescriptors = SwapChainDesc.BufferCount;
 		RTVDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		RTVDescriptorHeapDesc.NodeMask = 0;
-		Context->GetDevice()->CreateDescriptorHeap(&RTVDescriptorHeapDesc, m_RTVDescriptorHeap, m_RTVDescriptorHeap);
+		m_Device->GetDevice()->CreateDescriptorHeap(&RTVDescriptorHeapDesc, m_RTVDescriptorHeap, m_RTVDescriptorHeap);
 
 		m_RTVHeapStart = m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		m_RTVHeapIncrement = Context->GetDevice()->GetDescriptorHandleIncrementSize(RTVDescriptorHeapDesc.Type);
+		m_RTVHeapIncrement = m_Device->GetDevice()->GetDescriptorHandleIncrementSize(RTVDescriptorHeapDesc.Type);
 
 		auto Handle = m_RTVHeapStart;
 		for (uint32_t Idx = 0; Idx < SwapChainDesc.BufferCount; Idx++)
 		{
 			m_SwapChain->GetBuffer(Idx, m_Images[Idx], m_Images[Idx]);
-			Context->GetDevice()->CreateRenderTargetView(m_Images[Idx], nullptr, Handle);
+			m_Device->GetDevice()->CreateRenderTargetView(m_Images[Idx], nullptr, Handle);
 			Handle.ptr += m_RTVHeapIncrement;
 		}
 	}
@@ -62,10 +62,9 @@ namespace Fusion {
 	{
 	}
 
-	void D3D12SwapChain::Bind()
+	void D3D12SwapChain::Bind(CommandList* InCommandList)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
 
 		D3D12_VIEWPORT Viewport = {};
 		Viewport.TopLeftX = 0.0f;
@@ -99,33 +98,32 @@ namespace Fusion {
 		CmdList->OMSetRenderTargets(1, &CurrentImageHandle, false, nullptr);
 	}
 
-	void D3D12SwapChain::Clear()
+	void D3D12SwapChain::Clear(CommandList* InCommandList)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE CurrentImageHandle = m_RTVHeapStart;
 		CurrentImageHandle.ptr += m_CurrentImageIndex * m_RTVHeapIncrement;
 		CmdList->ClearRenderTargetView(CurrentImageHandle, glm::value_ptr(m_CreateInfo.RenderTargetClearColor), 0, nullptr);
 	}
 
-	void D3D12SwapChain::Present()
+	void D3D12SwapChain::Present(D3DComPtr<ID3D12Fence1> InFence, HANDLE InEvent, uint64_t InFenceValue)
 	{
 		m_SwapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 
 		const auto& Window = Application::Get().GetWindow();
 		if (Window->GetWidth() != m_CreateInfo.Width || Window->GetHeight() != m_CreateInfo.Height)
 		{
+			m_Device->Wait(InFence, InEvent, InFenceValue);
 			Resize(Window->GetWidth(), Window->GetHeight());
 		}
 
 		m_CurrentImageIndex = m_SwapChain->GetCurrentBackBufferIndex();
 	}
 
-	void D3D12SwapChain::Unbind()
+	void D3D12SwapChain::Unbind(CommandList* InCommandList)
 	{
-		auto Context = GraphicsContext::Get<D3D12Context>();
-		auto& CmdList = static_cast<D3D12CommandList*>(Context->GetCurrentCommandList())->GetNativeList();
+		auto& CmdList = static_cast<D3D12CommandList*>(InCommandList)->GetNativeList();
 
 		// Transition image from rendering to present mode
 		D3D12_RESOURCE_BARRIER Barrier = {};
@@ -147,7 +145,7 @@ namespace Fusion {
 
 		m_Images.clear();
 
-		Context->WaitForGPU();
+		//m_Device->Wait();
 
 		m_SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
 
@@ -159,12 +157,19 @@ namespace Fusion {
 		for (uint32_t Idx = 0; Idx < SwapChainDesc.BufferCount; Idx++)
 		{
 			m_SwapChain->GetBuffer(Idx, m_Images[Idx], m_Images[Idx]);
-			Context->GetDevice()->CreateRenderTargetView(m_Images[Idx], nullptr, Handle);
+			m_Device->GetDevice()->CreateRenderTargetView(m_Images[Idx], nullptr, Handle);
 			Handle.ptr += m_RTVHeapIncrement;
 		}
 
 		m_CreateInfo.Width = InWidth;
 		m_CreateInfo.Height = InHeight;
+	}
+
+	void D3D12SwapChain::Release()
+	{
+		m_RTVDescriptorHeap.Release();
+		m_Images.clear();
+		m_SwapChain.Release();
 	}
 
 }

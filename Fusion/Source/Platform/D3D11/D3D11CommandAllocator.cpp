@@ -4,45 +4,42 @@
 
 namespace Fusion {
 
-	D3D11CommandAllocator::D3D11CommandAllocator(D3DComPtr<ID3D11DeviceContext> InDeviceContext, const CommandAllocatorInfo& InCreateInfo)
-		: m_CreateInfo(InCreateInfo)
+	D3D11CommandAllocator::D3D11CommandAllocator(const Shared<D3D11Device>& InDevice, const CommandAllocatorInfo& InCreateInfo)
+		: m_CreateInfo(InCreateInfo), m_Device(InDevice)
 	{
-		FUSION_CORE_VERIFY(InCreateInfo.ListType == ECommandListType::Direct, "Currently only supports Direct Command Lists!");
-		AllocateCommandLists(InDeviceContext, InCreateInfo.InitialListCount);
-	}
-
-	D3D11CommandAllocator::D3D11CommandAllocator(const CommandAllocatorInfo& InCreateInfo)
-		: m_CreateInfo(InCreateInfo)
-	{
+		for (uint32_t Idx = 0; Idx < m_CreateInfo.InitialListCount; Idx++)
+			m_CommandLists.emplace_back(MakeUnique<D3D11CommandList>(this, m_Device->GetDeviceContext()));
 	}
 
 	D3D11CommandAllocator::~D3D11CommandAllocator()
 	{
 		m_CommandLists.clear();
+		m_Device.Reset();
 	}
 
 	CommandList* D3D11CommandAllocator::AllocateCommandList()
 	{
-		return AllocateCommandList(GraphicsContext::Get<D3D11Context>()->GetDeviceContext());
-	}
-
-	CommandList* D3D11CommandAllocator::AllocateCommandList(D3DComPtr<ID3D11DeviceContext> InDeviceContext)
-	{
-		return m_CommandLists.emplace_back(MakeUnique<D3D11CommandList>(this, InDeviceContext)).get();
+		return m_CommandLists.emplace_back(MakeUnique<D3D11CommandList>(this, m_Device->GetDeviceContext())).get();
 	}
 
 	std::vector<CommandList*> D3D11CommandAllocator::AllocateCommandLists(size_t InCount)
 	{
-		return AllocateCommandLists(GraphicsContext::Get<D3D11Context>()->GetDeviceContext(), InCount);
-	}
-
-	std::vector<CommandList*> D3D11CommandAllocator::AllocateCommandLists(D3DComPtr<ID3D11DeviceContext> InDeviceContext, size_t InCount)
-	{
 		std::vector<CommandList*> Result;
 		Result.reserve(InCount);
 		for (size_t Idx = 0; Idx < InCount; Idx++)
-			Result.push_back(AllocateCommandList(InDeviceContext));
+			Result.push_back(AllocateCommandList());
 		return Result;
+	}
+
+	void D3D11CommandAllocator::DestroyCommandList(CommandList* InCommandList)
+	{
+		FUSION_CORE_VERIFY(false);
+	}
+
+	void D3D11CommandAllocator::Release()
+	{
+		m_CommandLists.clear();
+		m_Device.Reset();
 	}
 
 }

@@ -64,6 +64,8 @@ namespace Fusion {
 		AllocatorInfo.InitialListCount = 1;
 		m_TemporaryCommandAllocator = Shared<VulkanCommandAllocator>::Create(m_Device, AllocatorInfo);
 
+		m_Allocator = MakeUnique<VulkanAllocator>(m_Instance, m_Device);
+
 		s_CurrentContext = this;
 	}
 
