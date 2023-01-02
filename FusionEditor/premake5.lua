@@ -30,6 +30,7 @@ project "FusionEditor"
         "%{wks.location}/FusionEditor/Source",
         "%{wks.location}/Fusion/Source",
         "%{wks.location}/Fission/Source",
+        "%{IncludeDirs.VulkanMemoryAllocator}",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
@@ -53,19 +54,16 @@ project "FusionEditor"
 
         buildoptions { "/EHsc", "/Zc:preprocessor" }
 
-        externalincludedirs
-        {
-            os.getenv("VULKAN_SDK") .. "/Include"
+        externalincludedirs {
+            (os.getenv("VULKAN_SDK") or "") .. "/Include"
         }
 
-        libdirs
-        {
+        libdirs {
             "%{wks.location}/ThirdParty/DXC/lib/",
-            os.getenv("VULKAN_SDK") .. "/Lib/"
+            (os.getenv("VULKAN_SDK") or "") .. "/Lib/"
         }
 
-        links
-        {
+        links {
             "d3d12.lib",
             "d3d11.lib",
             "dxgi.lib",
@@ -85,8 +83,7 @@ project "FusionEditor"
         links { "shaderc_combinedd.lib", "spirv-cross-cored.lib", "spirv-cross-cppd.lib", "spirv-cross-glsld.lib" }
 
     filter "action:vs*"
-        postbuildcommands
-        {
+        postbuildcommands {
             '{COPY} "../ThirdParty/DXC/bin/dxcompiler.dll" "%{cfg.targetdir}"',
             '{COPY} "../ThirdParty/DXC/bin/dxil.dll" "%{cfg.targetdir}"'
         }
@@ -101,15 +98,13 @@ project "FusionEditor"
             "%{prj.location}/Source/Platform/D3D12/**"
         }
 
-        libdirs
-        {
+        libdirs {
             "%{LibraryDir.shaderc}",
             "%{LibraryDir.SPIRV_Cross}",
             "%{LibraryDir.VulkanMemoryAllocator}"
         }
 
-        links
-        {
+        links {
             "vulkan",
             "shaderc_combined",
             "spirv-cross",

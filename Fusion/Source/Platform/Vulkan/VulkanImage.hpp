@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Fusion/Renderer/Device.hpp"
-#include "Fusion/Renderer/Image.hpp"
-
 #include "VulkanCommon.hpp"
+#include "VulkanDevice.hpp"
+#include "Fusion/Renderer/Image.hpp"
 
 #include <VMA/vk_mem_alloc.h>
 
@@ -27,6 +26,8 @@ namespace Fusion {
 		virtual EImageState GetState() const override { return m_State; }
 
 		virtual const Image2DInfo& GetInfo() const override { return m_CreateInfo; }
+
+		void Release() override;
 
 		VkImage GetImage() { return m_Image; }
 

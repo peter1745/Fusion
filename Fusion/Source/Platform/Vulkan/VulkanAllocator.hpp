@@ -14,7 +14,8 @@ namespace Fusion {
 		VulkanAllocator(VkInstance InInstance, const Shared<VulkanDevice>& InDevice);
 		~VulkanAllocator();
 
-		VmaAllocation AllocateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage);
+		VmaAllocation CreateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage);
+		void DestroyImage(VmaAllocation InAllocation, VkImage InImage);
 
 	private:
 		VmaAllocator m_Allocator = VK_NULL_HANDLE;

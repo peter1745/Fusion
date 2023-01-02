@@ -11,7 +11,7 @@ namespace FusionEditor {
 	public:
 		virtual ~ImGuiRenderTextureImage() = default;
 
-		virtual void DrawImage(const ImVec2& InSize) const = 0;
+		virtual void DrawImage(const ImVec2& InSize) = 0;
 
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;
 

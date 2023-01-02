@@ -46,6 +46,8 @@ namespace Fusion {
 
 		virtual const Image2DInfo& GetInfo() const = 0;
 
+		virtual void Release() = 0;
+
 	public:
 		static Shared<Image2D> Create(const Image2DInfo& InCreateInfo);
 	};

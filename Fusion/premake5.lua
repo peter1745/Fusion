@@ -50,14 +50,12 @@ project "Fusion"
         systemversion "latest"
 
         externalincludedirs {
-            os.getenv("VULKAN_SDK") .. "/Include"
+            (os.getenv("VULKAN_SDK") or "") .. "/Include"
         }
 
         buildoptions { "/EHsc", "/Zc:preprocessor" }
 
-        includedirs {
-            "%{IncludeDirs.DXC}"
-        }
+        includedirs { "%{IncludeDirs.DXC}" }
 
     filter "system:linux"
         pic "On"

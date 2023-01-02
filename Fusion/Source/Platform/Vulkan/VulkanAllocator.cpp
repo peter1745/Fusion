@@ -18,7 +18,7 @@ namespace Fusion {
 	{
 	}
 
-	VmaAllocation VulkanAllocator::AllocateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage)
+	VmaAllocation VulkanAllocator::CreateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage)
 	{
 		VmaAllocationCreateInfo AllocationInfo = {};
 		AllocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -27,6 +27,11 @@ namespace Fusion {
 		vmaCreateImage(m_Allocator, &InCreateInfo, &AllocationInfo, OutImage, &Allocation, nullptr);
 
 		return Allocation;
+	}
+
+	void VulkanAllocator::DestroyImage(VmaAllocation InAllocation, VkImage InImage)
+	{
+		vmaDestroyImage(m_Allocator, InImage, InAllocation);
 	}
 
 }

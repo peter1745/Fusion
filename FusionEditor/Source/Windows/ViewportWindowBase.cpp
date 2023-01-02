@@ -34,8 +34,8 @@ namespace FusionEditor {
 
 		m_ViewportImage = ImGuiRenderTextureImage::Create(m_RenderTexture);
 
-		auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-		m_ColorPickingRTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 1);
+		//auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
+		//m_ColorPickingRTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 1);
 	}
 
 	void ViewportWindowBase::OnRender()
@@ -72,12 +72,12 @@ namespace FusionEditor {
 		const auto& ImageSize = m_RenderTexture->GetImage(0, FrameIndex)->GetSize();
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		{
-			auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-			Heap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex]);
+			//auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
+			//Heap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex]);
 		
 			m_ViewportImage->Resize(ViewportWidth, ViewportHeight);
 		
-			m_ColorPickingRTVAllocations[FrameIndex] = Heap->AllocateShaderResourceView(m_RenderTexture, 1, FrameIndex);
+			//m_ColorPickingRTVAllocations[FrameIndex] = Heap->AllocateShaderResourceView(m_RenderTexture, 1, FrameIndex);
 		
 			OnResize(ViewportWidth, ViewportHeight);
 		}
@@ -91,7 +91,7 @@ namespace FusionEditor {
 		m_MinRenderBoundX = MinBound.x;
 		m_MinRenderBoundY = MinBound.y;
 		m_RenderWidth = MaxBound.x - MinBound.x;
-		m_RenderHeight = MaxBound.y - MinBound.y;
+		m_RenderHeight = glm::max(0.0f, MaxBound.y - MinBound.y);
 
 		m_ViewportImage->DrawImage(ImVec2(MaxBound.x - MinBound.x, MaxBound.y - MinBound.y));
 	}

@@ -52,6 +52,20 @@ namespace Fusion {
 	{
 		ZoneScoped;
 
+		for (auto It = m_DestroyQueue.begin(); It != m_DestroyQueue.end();)
+		{
+			if (It->FrameIndex == m_CurrentFrame)
+			{
+				FUSION_CORE_VERIFY(It->DestroyFunc, "DestroyFunc isn't valid!");
+				It->DestroyFunc();
+				It = m_DestroyQueue.erase(It);
+			}
+			else
+			{
+				It++;
+			}
+		}
+
 		auto Device = m_Context->GetDevice().As<VulkanDevice>();
 
 		vkWaitForFences(Device->GetLogicalDevice(), 1, &m_ImageFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);

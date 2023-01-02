@@ -24,6 +24,13 @@ namespace Fusion {
 		[[nodiscard]] uint32_t GetFramesInFlight() const override { return m_FramesInFlight; }
 		[[nodiscard]] uint32_t GetCurrentFrame() const override { return m_CurrentFrame; }
 
+		void SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc) override
+		{
+			auto& DestroyInfo = m_DestroyQueue.emplace_back();
+			DestroyInfo.FrameIndex = (m_CurrentFrame + InFrameOffset) % m_FramesInFlight;
+			DestroyInfo.DestroyFunc = InFunc;
+		}
+
 		void Release() override;
 
 	private:
@@ -38,6 +45,8 @@ namespace Fusion {
 		std::vector<VkFence> m_ImageFences;
 
 		std::vector<Shared<VulkanCommandAllocator>> m_CommandAllocators;
+
+		ResourceDestroyQueue m_DestroyQueue;
 	};
 
 }

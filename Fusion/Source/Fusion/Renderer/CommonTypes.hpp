@@ -58,6 +58,7 @@ namespace Fusion {
 		static constexpr EImageState ResolveDst = (1 << 9);
 		static constexpr EImageState ResolveSrc = (1 << 10);
 		static constexpr EImageState ShadingRateSrc = (1 << 11);
+		static constexpr EImageState Undefined = (1 << 12);
 	};
 
 	namespace ImageFlags

@@ -51,14 +51,12 @@ namespace Fusion {
 
 	static constexpr VkImageLayout ImageStatesToVkImageLayout(EImageState InStates)
 	{
-		uint64_t Result = 0;
-		
-		if (InStates & ImageStates::RenderTarget) Result |= VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-		//if (InStates & ImageStates::DepthWrite) Result |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		//if (InStates & ImageStates::DepthRead) Result |= D3D12_RESOURCE_STATE_DEPTH_READ;
+		if (InStates & ImageStates::RenderTarget) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+		if (InStates & ImageStates::DepthWrite) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+		if (InStates & ImageStates::DepthRead) return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		//if (InStates & ImageStates::UnorderedAccess) Result |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		//if (InStates & ImageStates::NonPixelShaderResource) Result |= D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-		if (InStates & ImageStates::PixelShaderResource) Result |= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		if (InStates & ImageStates::PixelShaderResource) return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		//if (InStates & ImageStates::IndirectArgument) Result |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
 		//if (InStates & ImageStates::CopyDst) Result |= D3D12_RESOURCE_STATE_COPY_DEST;
 		//if (InStates & ImageStates::CopySrc) Result |= D3D12_RESOURCE_STATE_COPY_SOURCE;
@@ -66,6 +64,6 @@ namespace Fusion {
 		//if (InStates & ImageStates::ResolveSrc) Result |= D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
 		//if (InStates & ImageStates::ShadingRateSrc) Result |= D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE;
 
-		return static_cast<VkImageLayout>(Result);
+		return VK_IMAGE_LAYOUT_UNDEFINED;
 	}
 }

@@ -43,6 +43,8 @@ namespace Fusion {
 
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) = 0;
 
+		virtual void Release() = 0;
+
 		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const = 0;
 
 		virtual const RenderTextureInfo& GetInfo() const = 0;

@@ -3,6 +3,8 @@
 #include "VulkanContext.hpp"
 #include "VulkanImage.hpp"
 
+#include "Fusion/Renderer/Renderer.hpp"
+
 namespace Fusion {
 
 	VulkanImage2D::VulkanImage2D(const Shared<Device>& InDevice, const Image2DInfo& InCreateInfo)
@@ -15,6 +17,9 @@ namespace Fusion {
 
 	void VulkanImage2D::Transition(CommandList* InCmdList, EImageState InState)
 	{
+		if (m_State == InState)
+			return;
+
 		VulkanCommandList* CommandList = static_cast<VulkanCommandList*>(InCmdList);
 
 		VkImageMemoryBarrier Barrier = {};
@@ -24,7 +29,7 @@ namespace Fusion {
 		Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		Barrier.image = m_Image;
-		Barrier.subresourceRange.aspectMask = IsDepthFormat(m_CreateInfo.Format) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		Barrier.subresourceRange.aspectMask = IsDepthFormat(m_CreateInfo.Format) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_COLOR_BIT;
 		Barrier.subresourceRange.baseMipLevel = 0;
 		Barrier.subresourceRange.levelCount = 1;
 		Barrier.subresourceRange.baseArrayLayer = 0;
@@ -57,7 +62,16 @@ namespace Fusion {
 		ImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		ImageCreateInfo.flags = 0;
 
-		m_Allocation = Allocator->AllocateImage(ImageCreateInfo, &m_Image);
+		m_Allocation = Allocator->CreateImage(ImageCreateInfo, &m_Image);
+	}
+
+	void VulkanImage2D::Release()
+	{
+		Renderer::GetCurrent().SubmitResourceForDestruction(3, [InAllocation = m_Allocation, InImage = m_Image]()
+	    {
+		    auto* Allocator = GraphicsContext::Get<VulkanContext>()->GetAllocator();
+		    Allocator->DestroyImage(InAllocation, InImage);
+	    });
 	}
 
 }
