@@ -34,12 +34,12 @@ namespace Fusion {
 		virtual void Unbind(CommandList* InCommandList) = 0;
 		virtual void Clear() = 0;
 
-		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize) = 0;
+		virtual void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize) = 0;
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const = 0;
+		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const = 0;
 
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) = 0;
 

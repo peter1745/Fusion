@@ -9,13 +9,13 @@ namespace FusionEditor {
 	class ImGuiRenderTextureImageD3D12 : public ImGuiRenderTextureImage
 	{
 	public:
-		ImGuiRenderTextureImageD3D12(const Fusion::Shared<Fusion::RenderTexture>& InRenderTexture);
+		ImGuiRenderTextureImageD3D12(const std::vector<Fusion::Shared<Fusion::RenderTexture>>& InRenderTextures);
 
-		void DrawImage(const ImVec2& InSize) const override;
+		void DrawImage(const ImVec2& InSize) override;
 		void Resize(uint32_t InWidth, uint32_t InHeight) override;
 
 	private:
-		Fusion::Shared<Fusion::RenderTexture> m_TargetTexture = nullptr;
+		std::vector<Fusion::Shared<Fusion::RenderTexture>> m_TargetTextures;
 
 		Fusion::Shared<Fusion::DescriptorHeap> m_DescriptorHeap = nullptr;
 		std::vector<Fusion::DescriptorHeapAllocation> m_RTVAllocations;

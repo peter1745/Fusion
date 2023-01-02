@@ -9,38 +9,38 @@
 
 namespace Fusion {
 
-	struct D3D12RenderTextureAttachment { std::vector<Shared<D3D12Image2D>> Images; };
-
 	class D3D12RenderTexture : public RenderTexture
 	{
 	public:
 		D3D12RenderTexture(const RenderTextureInfo& InCreateInfo);
 
-		virtual void Bind(CommandList* InCommandList) override;
-		virtual void Unbind(CommandList* InCommandList) override;
+		void Bind(CommandList* InCommandList) override;
+		void Unbind(CommandList* InCommandList) override;
 
-		virtual void Clear() override;
+		void Clear() override;
 		
-		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize) override;
+		void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize) override;
 
-		virtual uint32_t GetWidth() const override { return m_CreateInfo.Width; }
-		virtual uint32_t GetHeight() const override { return m_CreateInfo.Height; }
+		uint32_t GetWidth() const override { return m_CreateInfo.Width; }
+		uint32_t GetHeight() const override { return m_CreateInfo.Height; }
 
-		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override;
+		Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const override { return m_Attachments[InAttachmentIndex]; }
 
-		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override;
+		void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override;
 
-		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const override;
+		void* GetColorTextureID(uint32_t InColorAttachmentIdx) const override;
 
-		virtual const RenderTextureInfo& GetInfo() const override { return m_CreateInfo; }
+		const RenderTextureInfo& GetInfo() const override { return m_CreateInfo; }
+
+		void Release() override;
 
 		auto& GetColorAttachments() { return m_Attachments; }
 		const auto& GetColorAttachments() const { return m_Attachments; }
 
 	private:
 		RenderTextureInfo m_CreateInfo{};
-		std::vector<D3D12RenderTextureAttachment> m_Attachments;
-		D3D12RenderTextureAttachment m_DepthStencilAttachment{};
+		std::vector<Shared<D3D12Image2D>> m_Attachments;
+		Shared<D3D12Image2D> m_DepthStencilAttachment = nullptr;
 		bool m_HasDepthStencilAttachment = false;
 
 		D3DComPtr<ID3D12DescriptorHeap> m_RenderTargetDescriptorHeap;

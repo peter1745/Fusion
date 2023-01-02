@@ -36,6 +36,10 @@ namespace Fusion {
 	{
 	}
 
+	void D3D11Renderer::SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc)
+	{
+	}
+
 	void D3D11Renderer::Release()
 	{
 		m_CommandAllocator->Release();

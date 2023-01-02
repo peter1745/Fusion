@@ -18,12 +18,12 @@ namespace Fusion {
 
 		virtual void Clear() override;
 	
-		virtual void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize) override;
+		virtual void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize) override;
 
 		virtual uint32_t GetWidth() const override { return m_CreateInfo.Width; }
 		virtual uint32_t GetHeight() const override { return m_CreateInfo.Height; }
 
-		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override;
+		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const override;
 
 		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override {}
 
@@ -34,6 +34,8 @@ namespace Fusion {
 		}
 
 		virtual const RenderTextureInfo& GetInfo() const override { return m_CreateInfo; }
+
+		void Release() override;
 
 	private:
 		void Invalidate();

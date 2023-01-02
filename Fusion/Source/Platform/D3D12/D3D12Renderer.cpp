@@ -73,6 +73,10 @@ namespace Fusion {
 		Device->GetGraphicsCommandQueue()->ExecuteCommandLists(uint32_t(InCommandLists.size()), CommandLists.data());
 	}
 
+	void D3D12Renderer::SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc)
+	{
+	}
+
 	void D3D12Renderer::Release()
 	{
 	}

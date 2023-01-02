@@ -15,12 +15,12 @@ namespace Fusion {
 		void Unbind(CommandList* InCommandList) override;
 		void Clear() override;
 
-		void Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize) override;
+		void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize) override;
 
 		uint32_t GetWidth() const override { return m_CreateInfo.Width; }
 		uint32_t GetHeight() const override { return m_CreateInfo.Height; }
 
-		Shared<Image2D> GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const override { return m_Images[InAttachmentIndex]; }
+		Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const override { return m_Images[InAttachmentIndex]; }
 		VkImageView GetImageView(uint32_t InAttachmentIndex) const { return m_ImageViews[InAttachmentIndex]; }
 
 		void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) override;

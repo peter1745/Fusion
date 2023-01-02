@@ -49,6 +49,10 @@ project "FusionEditor"
         "YAML_CPP_STATIC_DEFINE"
     }
 
+    libdirs {
+        "%{LibraryDir.VulkanMemoryAllocator}"
+    }
+
     filter "system:windows"
         systemversion "latest"
 
@@ -71,6 +75,8 @@ project "FusionEditor"
             "dxcompiler.lib",
 
             "vulkan-1.lib",
+
+            "VulkanMemoryAllocator.lib",
 
             "Ws2_32.lib",
             "Dbghelp.lib"
@@ -100,8 +106,7 @@ project "FusionEditor"
 
         libdirs {
             "%{LibraryDir.shaderc}",
-            "%{LibraryDir.SPIRV_Cross}",
-            "%{LibraryDir.VulkanMemoryAllocator}"
+            "%{LibraryDir.SPIRV_Cross}"
         }
 
         links {

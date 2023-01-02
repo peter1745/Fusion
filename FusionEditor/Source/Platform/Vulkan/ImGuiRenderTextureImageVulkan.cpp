@@ -9,8 +9,8 @@
 
 namespace FusionEditor {
 
-	ImGuiRenderTextureImageVulkan::ImGuiRenderTextureImageVulkan(const Fusion::Shared<Fusion::RenderTexture>& InRenderTexture)
-	    : m_TargetTexture(InRenderTexture)
+	ImGuiRenderTextureImageVulkan::ImGuiRenderTextureImageVulkan(const std::vector<Fusion::Shared<Fusion::RenderTexture>>& InRenderTextures)
+	    : m_TargetTextures(InRenderTextures)
 	{
 		auto Device = Fusion::GraphicsContext::Get<Fusion::VulkanContext>()->GetDevice().As<Fusion::VulkanDevice>();
 
@@ -25,7 +25,7 @@ namespace FusionEditor {
 
 		vkCreateSampler(Device->GetLogicalDevice(), &SamplerInfo, nullptr, &m_Sampler);
 
-		m_DescriptorSets.resize(Fusion::Renderer::GetCurrent().GetFramesInFlight(), VK_NULL_HANDLE);
+		m_DescriptorSets.resize(InRenderTextures.size(), VK_NULL_HANDLE);
 	}
 
 	void ImGuiRenderTextureImageVulkan::DrawImage(const ImVec2& InSize)
@@ -34,8 +34,9 @@ namespace FusionEditor {
 
 		if (m_DescriptorSets[FrameIndex] == VK_NULL_HANDLE)
 		{
-			Fusion::EImageState State = m_TargetTexture.As<Fusion::VulkanRenderTexture>()->GetImage(0, 0)->GetState();
-			VkImageView View = m_TargetTexture.As<Fusion::VulkanRenderTexture>()->GetImageView(0);
+			auto VulkanRT = m_TargetTextures[FrameIndex].As<Fusion::VulkanRenderTexture>();
+			Fusion::EImageState State = VulkanRT->GetImage(0)->GetState();
+			VkImageView View = VulkanRT->GetImageView(0);
 			VkImageLayout Layout = Fusion::ImageStatesToVkImageLayout(State);
 			m_DescriptorSets[FrameIndex] = ImGui_ImplVulkan_AddTexture(m_Sampler, View, Layout);
 		}
@@ -45,16 +46,17 @@ namespace FusionEditor {
 
 	void ImGuiRenderTextureImageVulkan::Resize(uint32_t InWidth, uint32_t InHeight)
 	{
-		Fusion::Renderer::GetCurrent().SubmitResourceForDestruction(3, [InInstance = this, FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame()]()
+		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
+		Fusion::Renderer::GetCurrent().SubmitResourceForDestruction(3, [InInstance = this, InFrameIndex = FrameIndex]()
 	    {
-			if (InInstance->m_DescriptorSets[FrameIndex] == VK_NULL_HANDLE)
+			if (InInstance->m_DescriptorSets[InFrameIndex] == VK_NULL_HANDLE)
 				return;
 
-			ImGui_ImplVulkan_RemoveTexture(InInstance->m_DescriptorSets[FrameIndex]);
-			InInstance->m_DescriptorSets[FrameIndex] = VK_NULL_HANDLE;
+			ImGui_ImplVulkan_RemoveTexture(InInstance->m_DescriptorSets[InFrameIndex]);
+			InInstance->m_DescriptorSets[InFrameIndex] = VK_NULL_HANDLE;
 		});
 
-		m_TargetTexture->Resize(0, 0, { InWidth, InHeight });
+		m_TargetTextures[FrameIndex]->Resize(0, { InWidth, InHeight });
 	}
 
 }

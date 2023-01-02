@@ -47,7 +47,7 @@ namespace Fusion {
 			DeviceContext->ClearDepthStencilView(m_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize)
+	void D3D11RenderTexture::Resize(uint32_t InAttachmentIndex, const ImageSize& InSize)
 	{
 		auto Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
 
@@ -84,9 +84,28 @@ namespace Fusion {
 		}
 	}
 
-	Shared<Image2D> D3D11RenderTexture::GetImage(uint32_t InAttachmentIndex, uint32_t InImageIndex) const
+	Shared<Image2D> D3D11RenderTexture::GetImage(uint32_t InAttachmentIndex) const
 	{
 		return m_AttachmentImages[InAttachmentIndex];
+	}
+
+	void D3D11RenderTexture::Release()
+	{
+		m_DepthStencilView.Release();
+
+		for (auto RenderTargetView : m_AttachmentRenderTargetViews)
+			RenderTargetView.Release();
+		m_AttachmentRenderTargetViews.clear();
+
+		m_DepthStencilImage->Release();
+
+		for (auto AttachmentShaderResourceView : m_ColorAttachmentResourceViews)
+			AttachmentShaderResourceView->Release();
+		m_ColorAttachmentResourceViews.clear();
+
+		for (auto AttachmentImage : m_AttachmentImages)
+			AttachmentImage->Release();
+		m_AttachmentImages.clear();
 	}
 
 	void D3D11RenderTexture::Invalidate()

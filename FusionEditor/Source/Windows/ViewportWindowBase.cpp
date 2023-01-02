@@ -30,12 +30,17 @@ namespace FusionEditor {
 		RenderTextureCreateInfo.Height = 300U;
 		RenderTextureCreateInfo.ColorAttachments = { ColorAttachment, ColorPickingAttachment };
 		RenderTextureCreateInfo.DepthAttachment = { Fusion::EFormat::D24UnormS8UInt, Fusion::ImageFlags::AllowDepthStencil, Fusion::ImageStates::DepthWrite };
-		m_RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 
-		m_ViewportImage = ImGuiRenderTextureImage::Create(m_RenderTexture);
+		auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
 
-		//auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-		//m_ColorPickingRTVAllocations = Heap->AllocateShaderResourceViews(m_RenderTexture, 1);
+		for (uint32_t Idx = 0; Idx < Fusion::Renderer::GetCurrent().GetFramesInFlight(); Idx++)
+		{
+			auto RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
+			m_RenderTextures.push_back(RenderTexture);
+			//m_ColorPickingRTVAllocations.push_back(Heap->AllocateShaderResourceView(RenderTexture, 1));
+		}
+
+		m_ViewportImage = ImGuiRenderTextureImage::Create(m_RenderTextures);
 	}
 
 	void ViewportWindowBase::OnRender()
@@ -50,15 +55,17 @@ namespace FusionEditor {
 		
 		auto* CmdList = Fusion::Renderer::GetCurrent().GetCurrentCommandList();
 
-		m_RenderTexture->TransitionImages(CmdList, Fusion::ImageStates::RenderTarget, Fusion::ImageStates::DepthWrite);
+		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
+
+		m_RenderTextures[FrameIndex]->TransitionImages(CmdList, Fusion::ImageStates::RenderTarget, Fusion::ImageStates::DepthWrite);
 		CmdList->SetViewports({ WindowViewport });
-		m_RenderTexture->Bind(CmdList);
-		m_RenderTexture->Clear();
+		m_RenderTextures[FrameIndex]->Bind(CmdList);
+		m_RenderTextures[FrameIndex]->Clear();
 		
 		RenderWorld();
 
-		m_RenderTexture->Unbind(CmdList);
-		m_RenderTexture->TransitionImages(CmdList, Fusion::ImageStates::PixelShaderResource, Fusion::ImageStates::PixelShaderResource);
+		m_RenderTextures[FrameIndex]->Unbind(CmdList);
+		m_RenderTextures[FrameIndex]->TransitionImages(CmdList, Fusion::ImageStates::PixelShaderResource, Fusion::ImageStates::PixelShaderResource);
 	}
 
 	void ViewportWindowBase::OnUpdate([[maybe_unused]] float InDeltaTime)
@@ -69,7 +76,7 @@ namespace FusionEditor {
 		uint32_t ViewportWidth = m_RenderWidth;// GetWindowWidth();
 		uint32_t ViewportHeight = m_RenderHeight;// GetWindowHeight();
 		
-		const auto& ImageSize = m_RenderTexture->GetImage(0, FrameIndex)->GetSize();
+		const auto& ImageSize = m_RenderTextures[FrameIndex]->GetImage(0)->GetSize();
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		{
 			//auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);

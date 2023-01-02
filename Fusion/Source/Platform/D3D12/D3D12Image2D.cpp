@@ -27,6 +27,11 @@ namespace Fusion {
 		m_State = InState;
 	}
 
+	void D3D12Image2D::Release()
+	{
+		m_Resource.Release();
+	}
+
 	void D3D12Image2D::Invalidate()
 	{
 		// NOTE(Peter): We may have to transition the image into a safe state.

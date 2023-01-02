@@ -16,7 +16,7 @@ namespace FusionEditor {
 		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;
 
 	public:
-		static Fusion::Unique<ImGuiRenderTextureImage> Create(const Fusion::Shared<Fusion::RenderTexture>& InRenderTexture);
+		static Fusion::Unique<ImGuiRenderTextureImage> Create(const std::vector<Fusion::Shared<Fusion::RenderTexture>>& InRenderTextures);
 	};
 
 }

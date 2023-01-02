@@ -125,6 +125,19 @@ namespace FusionEditor {
 				App->ShowImportWindowForFile(InFilePaths[Idx]);
 		});
 
+		switch (RenderSettings::Get().API)
+		{
+		case ERendererAPI::D3D11:
+			SetTitle("Fusion Editor (D3D11)");
+			break;
+		case ERendererAPI::D3D12:
+			SetTitle("Fusion Editor (D3D12)");
+			break;
+		case ERendererAPI::Vulkan:
+			SetTitle("Fusion Editor (Vulkan)");
+			break;
+		}
+
 		TestSignedVolumeProjection();
 	}
 

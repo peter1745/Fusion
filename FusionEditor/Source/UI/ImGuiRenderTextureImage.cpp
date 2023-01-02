@@ -11,15 +11,15 @@
 
 namespace FusionEditor {
 
-	Fusion::Unique<ImGuiRenderTextureImage> ImGuiRenderTextureImage::Create(const Fusion::Shared<Fusion::RenderTexture>& InRenderTexture)
+	Fusion::Unique<ImGuiRenderTextureImage> ImGuiRenderTextureImage::Create(const std::vector<Fusion::Shared<Fusion::RenderTexture>>& InRenderTextures)
 	{
 		switch (Fusion::RenderSettings::Get().API)
 		{
 #ifdef FUSION_PLATFORM_WINDOWS
-		case Fusion::ERendererAPI::D3D11: return Fusion::MakeUnique<ImGuiRenderTextureImageD3D11>(InRenderTexture);
-		case Fusion::ERendererAPI::D3D12: return Fusion::MakeUnique<ImGuiRenderTextureImageD3D12>(InRenderTexture);
+		case Fusion::ERendererAPI::D3D11: return Fusion::MakeUnique<ImGuiRenderTextureImageD3D11>(InRenderTextures);
+		case Fusion::ERendererAPI::D3D12: return Fusion::MakeUnique<ImGuiRenderTextureImageD3D12>(InRenderTextures);
 #endif
-		case Fusion::ERendererAPI::Vulkan: return Fusion::MakeUnique<ImGuiRenderTextureImageVulkan>(InRenderTexture);
+		case Fusion::ERendererAPI::Vulkan: return Fusion::MakeUnique<ImGuiRenderTextureImageVulkan>(InRenderTextures);
 		}
 
 		return nullptr;

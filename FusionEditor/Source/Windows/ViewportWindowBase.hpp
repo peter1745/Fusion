@@ -30,7 +30,7 @@ namespace FusionEditor {
 	protected:
 		Fusion::Shared<Fusion::World> m_World = nullptr;
 		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;
-		Fusion::Shared<Fusion::RenderTexture> m_RenderTexture = nullptr;
+		std::vector<Fusion::Shared<Fusion::RenderTexture>> m_RenderTextures;
 
 		uint32_t m_MinRenderBoundX = 0;
 		uint32_t m_MinRenderBoundY = 0;

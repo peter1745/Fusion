@@ -84,7 +84,7 @@ namespace Fusion {
 		return Allocation;
 	}
 
-	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
+	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
 		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
@@ -109,45 +109,9 @@ namespace Fusion {
 		D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
 		DescriptorHandle.ptr += Allocation.Index * m_HeapIncrementSize;
 
-		m_Device->GetDevice()->CreateShaderResourceView(Attachment.Images[InFrameIdx]->GetResource(), &SRVDesc, DescriptorHandle);
+		m_Device->GetDevice()->CreateShaderResourceView(Attachment->GetResource(), &SRVDesc, DescriptorHandle);
 
 		return Allocation;
-	}
-
-	std::vector<DescriptorHeapAllocation> D3D12DescriptorHeap::AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
-	{
-		auto D3DRenderTexture = InRenderTexture.As<D3D12RenderTexture>();
-		const auto& RTInfo = D3DRenderTexture->GetInfo();
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-		SRVDesc.Format = EFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
-		SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		SRVDesc.Texture2D.MipLevels = 1;
-		SRVDesc.Texture2D.MostDetailedMip = 0;
-		SRVDesc.Texture2D.PlaneSlice = 0;
-		SRVDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
-		auto& Attachment = D3DRenderTexture->GetColorAttachments()[InAttachmentIndex];
-
-		std::vector<DescriptorHeapAllocation> Allocations(Attachment.Images.size());
-		for (size_t Idx = 0; Idx < Attachment.Images.size(); Idx++)
-		{
-			auto Allocation = Reserve();
-			if (Allocation.Heap == nullptr)
-				break;
-
-			Allocation.Type = EAllocationType::ShaderResourceView;
-
-			D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle = m_CPUStart;
-			DescriptorHandle.ptr += Allocation.Index * m_HeapIncrementSize;
-
-			m_Device->GetDevice()->CreateShaderResourceView(Attachment.Images[Idx]->GetResource(), &SRVDesc, DescriptorHandle);
-
-			Allocations[Idx] = Allocation;
-		}
-
-		return Allocations;
 	}
 
 	DescriptorHeapAllocation D3D12DescriptorHeap::AllocateConstantBufferView(D3D12Buffer* InBuffer, uint32_t InSize)

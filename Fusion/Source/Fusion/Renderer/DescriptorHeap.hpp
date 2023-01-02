@@ -34,8 +34,7 @@ namespace Fusion {
 		virtual ~DescriptorHeap() = default;
 
 		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<Texture2D>& InTexture) = 0;
-		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx) = 0;
-		virtual std::vector<DescriptorHeapAllocation> AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) = 0;
+		virtual DescriptorHeapAllocation AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex) = 0;
 
 		virtual uintptr_t GetCPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const = 0;
 		virtual uintptr_t GetGPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const = 0;

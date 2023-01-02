@@ -25,6 +25,8 @@ namespace Fusion {
 
 		virtual const Image2DInfo& GetInfo() const override { return m_CreateInfo; }
 
+		void Release() override;
+
 		auto& GetResource() { return m_Resource; }
 		const auto& GetResource() const { return m_Resource; }
 

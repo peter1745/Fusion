@@ -58,7 +58,7 @@ namespace Fusion {
 	{
 	}
 
-	void VulkanRenderTexture::Resize(uint32_t InAttachmentIndex, uint32_t InFrameIndex, const ImageSize& InSize)
+	void VulkanRenderTexture::Resize(uint32_t InAttachmentIndex, const ImageSize& InSize)
 	{
 		if (InSize.Width == 0 || InSize.Height == 0)
 			return;

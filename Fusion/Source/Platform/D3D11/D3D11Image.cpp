@@ -14,6 +14,11 @@ namespace Fusion {
 	{
 	}
 
+	void D3D11Image2D::Release()
+	{
+		m_Image.Release();
+	}
+
 	void D3D11Image2D::Invalidate()
 	{
 		auto Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();

@@ -24,6 +24,8 @@ namespace Fusion {
 		uint32_t GetFramesInFlight() const override { return m_FramesInFlight; }
 		uint32_t GetCurrentFrame() const override { return m_CurrentFrame; }
 
+		void SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc) override;
+
 		void Release() override;
 
 	private:

@@ -15,14 +15,14 @@ namespace Fusion {
 		return { this, 0 };
 	}
 
-	DescriptorHeapAllocation D3D11DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex, uint32_t InFrameIdx)
+	DescriptorHeapAllocation D3D11DescriptorHeap::AllocateShaderResourceView(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
 	{
 		auto& Device = GraphicsContext::Get<D3D11Context>()->GetDevice().As<D3D11Device>()->GetDevice();
 
 		auto D3DRenderTexture = InRenderTexture.As<D3D11RenderTexture>();
 		const auto& RTInfo = D3DRenderTexture->GetInfo();
 
-		Shared<D3D11Image2D> Image = D3DRenderTexture->GetImage(InAttachmentIndex, 0).As<D3D11Image2D>();
+		Shared<D3D11Image2D> Image = D3DRenderTexture->GetImage(InAttachmentIndex).As<D3D11Image2D>();
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
 		SRVDesc.Format = EFormatToDXGIFormat(RTInfo.ColorAttachments[InAttachmentIndex].Format);
@@ -35,11 +35,6 @@ namespace Fusion {
 
 		m_NextSRVIndex++;
 		return { Allocation };
-	}
-
-	std::vector<DescriptorHeapAllocation> D3D11DescriptorHeap::AllocateShaderResourceViews(const Shared<RenderTexture>& InRenderTexture, uint32_t InAttachmentIndex)
-	{
-		return { AllocateShaderResourceView(InRenderTexture, InAttachmentIndex, 0) };
 	}
 
 	uintptr_t D3D11DescriptorHeap::GetCPUDescriptorHandle(const DescriptorHeapAllocation& InAlloc) const
