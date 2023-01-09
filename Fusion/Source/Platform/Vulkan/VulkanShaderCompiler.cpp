@@ -221,7 +221,7 @@ namespace Fusion {
 
 		shaderc::Compiler Compiler;
 		shaderc::CompileOptions Options;
-		Options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
+		Options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
 
 #ifdef FUSION_DEBUG
 		Options.SetGenerateDebugInfo();

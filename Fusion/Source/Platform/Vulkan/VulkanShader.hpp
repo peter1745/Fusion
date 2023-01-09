@@ -2,6 +2,7 @@
 
 #include "Fusion/Renderer/Shader.hpp"
 
+#include "VulkanCommon.hpp"
 #include "VulkanShaderCompiler.hpp"
 
 namespace Fusion {
@@ -24,8 +25,11 @@ namespace Fusion {
 
 		const auto& GetReflectedModules() const { return m_CompiledData.ReflectionData; }
 
+		const auto& GetShaderModules() const { return m_ShaderModules; }
+
 	private:
 		VulkanCompiledShaderData m_CompiledData;
+		std::unordered_map<EShaderType, VkShaderModule> m_ShaderModules;
 	};
 
 }

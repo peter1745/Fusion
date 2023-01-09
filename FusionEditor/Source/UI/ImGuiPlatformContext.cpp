@@ -2,11 +2,6 @@
 
 #include <Fusion/Renderer/RenderSettings.hpp>
 
-#ifdef FUSION_PLATFORM_WINDOWS
-#include "Platform/D3D11/ImGuiPlatformContextD3D11.hpp"
-#include "Platform/D3D12/ImGuiPlatformContextD3D12.hpp"
-#endif
-
 #include "Platform/Vulkan/ImGuiPlatformContextVulkan.hpp"
 
 #include <ImGui/imgui.h>
@@ -33,9 +28,9 @@ namespace FusionEditor {
 		InitPlatform(InWindow, InContext, InSwapChain);
 	}
 
-	void ImGuiPlatformContext::BeginFrame()
+	void ImGuiPlatformContext::BeginFrame(Fusion::CommandList* InCommandList)
 	{
-		BeginFramePlatform();
+		BeginFramePlatform(InCommandList);
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
 	}
@@ -56,10 +51,6 @@ namespace FusionEditor {
 		switch (Fusion::RenderSettings::Get().API)
 		{
 		case Fusion::ERendererAPI::None: return nullptr;
-#ifdef FUSION_PLATFORM_WINDOWS
-		case Fusion::ERendererAPI::D3D11: return std::make_unique<ImGuiPlatformContextD3D11>();
-		case Fusion::ERendererAPI::D3D12: return std::make_unique<ImGuiPlatformContextD3D12>();
-#endif
 		case Fusion::ERendererAPI::Vulkan: return std::make_unique<ImGuiPlatformContextVulkan>();
 		}
 

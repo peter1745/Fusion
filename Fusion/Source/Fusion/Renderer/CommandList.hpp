@@ -30,7 +30,7 @@ namespace Fusion {
 		virtual void BeginRecording() = 0;
 		virtual void SetViewports(const std::vector<Viewport>& InViewports) = 0;
 
-		virtual void SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer) = 0;
+		virtual void SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData) = 0;
 
 		virtual void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture) = 0;
 		virtual void SetVertexBuffer(const VertexBufferView& InBufferView) = 0;

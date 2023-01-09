@@ -6,6 +6,7 @@
 #include "WorldOutlinerWindow.hpp"
 
 #include <Fusion/Renderer/GraphicsContext.hpp>
+#include <Fusion/Renderer/Renderer.hpp>
 #include <Fusion/IO/Mouse.hpp>
 
 #include <glm/gtx/matrix_decompose.hpp>
@@ -168,36 +169,36 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderWorld()
 	{
-		//auto* CmdList = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentCommandList();
-		//
-		//uint32_t FrameIndex = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetCurrentFrameIndex();
-		//
-		//m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
-		//m_WorldRenderer->Render();
-		//m_WorldRenderer->End();
-		//
-		//auto MousePos = Fusion::Mouse::Get().GetPosition();
-		//MousePos.x -= m_MinRenderBoundX;
-		//MousePos.y -= m_MinRenderBoundY;
-		//
-		//const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
-		//const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
-		//
-		//if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
-		//{
-		//	Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
-		//	ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
-		//
-		//	Fusion::CopyRegionInfo CopyRegion = {};
-		//	CopyRegion.Left = MousePos.x;
-		//	CopyRegion.Top = MousePos.y;
-		//	CopyRegion.Right = MousePos.x + 1;
-		//	CopyRegion.Bottom = MousePos.y + 1;
-		//	m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
-		//	m_ShouldCopyFromBuffer = true;
-		//
-		//	ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);
-		//}
+		auto* CmdList = Fusion::Renderer::GetCurrent().GetCurrentCommandList();
+		
+		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
+		
+		m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
+		m_WorldRenderer->Render();
+		m_WorldRenderer->End();
+		
+		auto MousePos = Fusion::Mouse::Get().GetPosition();
+		MousePos.x -= m_MinRenderBoundX;
+		MousePos.y -= m_MinRenderBoundY;
+		
+		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
+		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
+		
+		if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		{
+			/*Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
+			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
+		
+			Fusion::CopyRegionInfo CopyRegion = {};
+			CopyRegion.Left = MousePos.x;
+			CopyRegion.Top = MousePos.y;
+			CopyRegion.Right = MousePos.x + 1;
+			CopyRegion.Bottom = MousePos.y + 1;
+			m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
+			m_ShouldCopyFromBuffer = true;
+		
+			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);*/
+		}
 	}
 
 	void EditorViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)

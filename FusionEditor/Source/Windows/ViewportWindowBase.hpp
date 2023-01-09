@@ -32,10 +32,10 @@ namespace FusionEditor {
 		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;
 		std::vector<Fusion::Shared<Fusion::RenderTexture>> m_RenderTextures;
 
-		uint32_t m_MinRenderBoundX = 0;
-		uint32_t m_MinRenderBoundY = 0;
-		uint32_t m_RenderWidth = 300;
-		uint32_t m_RenderHeight = 300;
+		float m_MinRenderBoundX = 0;
+		float m_MinRenderBoundY = 0;
+		float m_RenderWidth = 300;
+		float m_RenderHeight = 300;
 
 		bool m_IsHovered = false;
 

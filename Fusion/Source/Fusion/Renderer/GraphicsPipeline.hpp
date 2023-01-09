@@ -31,7 +31,7 @@ namespace Fusion {
 		uint8_t RenderTargetCount;
 		std::array<EFormat, 8> RenderTargetFormats;
 		std::array<RenderTargetBlendStateInfo, 8> RenderTargetBlendStates;
-		EFormat DepthStencilFormat;
+		EFormat DepthStencilFormat = EFormat::Unknown;
 	};
 
 	struct ResourceInfo

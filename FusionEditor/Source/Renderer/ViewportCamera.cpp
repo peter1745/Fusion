@@ -9,15 +9,27 @@ namespace FusionEditor {
 	
 	// NOTE(Peter): Viewport camera shamelessly stolen from Hazel. Thanks Yan and Karim ;)
 
+	static glm::mat4 PerspectiveFOV(float fov, float width, float height, float zNear, float zFar)
+	{
+		float rad = fov;
+		float h = glm::cos(0.5f * rad) / glm::sin(0.5f * rad);
+		float w = h * height / width;
+
+		glm::mat4 Result(0);
+		Result[0][0] = w;
+		Result[1][1] = -h;
+		Result[2][2] = zFar / (zNear - zFar);
+		Result[2][3] = -1.0f;
+		Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+		return Result;
+	}
+
 	ViewportCamera::ViewportCamera(uint32_t InWidth, uint32_t InHeight)
 	{
 		SetViewportSize(InWidth, InHeight);
 
-		constexpr glm::vec3 InitialPosition = { 5, 5, 5 };
+		constexpr glm::vec3 InitialPosition = { 0, 0, 10 };
 		m_Distance = glm::distance(InitialPosition, m_FocalPoint);
-
-		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
-		m_Pitch = glm::pi<float>() / 4.0f;
 
 		m_Location = m_FocalPoint - GetForwardDirection() * m_Distance + m_LocationDelta;
 		const glm::quat Orientation = GetOrientation();
@@ -28,7 +40,7 @@ namespace FusionEditor {
 
 	void ViewportCamera::SetViewportSize(uint32_t InWidth, uint32_t InHeight)
 	{
-		SetProjectionMatrix(glm::perspectiveFov(glm::radians(m_VerticalFOV), float(InWidth), float(InHeight), m_NearPlane, m_FarPlane));
+		SetProjectionMatrix(PerspectiveFOV(glm::radians(m_VerticalFOV), (float)InWidth, (float)InHeight, 0.01f, 1000.0f));
 	}
 
 	void ViewportCamera::OnUpdate(float InDeltaTime)

@@ -26,6 +26,9 @@ namespace Fusion {
 		auto GetTemporaryCommandAllocator() { return m_TemporaryCommandAllocator; }
 		auto GetTemporaryCommandAllocator() const { return m_TemporaryCommandAllocator; }
 
+		auto* GetTemporaryCommandList() { return m_TemporaryCommandAllocator->GetCommandList(0); }
+		auto* GetTemporaryCommandList() const { return m_TemporaryCommandAllocator->GetCommandList(0); }
+
 		auto GetInstance() { return m_Instance; }
 		auto GetInstance() const { return m_Instance; }
 

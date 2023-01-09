@@ -44,8 +44,8 @@ layout(location = 0) out vec4 OutColor;
 
 void main()
 {
-    vec3 NormalColor = (normalize(InData.Normal) * 0.5) + 0.5;
-    OutColor = vec4(NormalColor, 1.0);
+    //vec3 NormalColor = (normalize(InData.Normal) * 0.5) + 0.5;
+    OutColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 #endif

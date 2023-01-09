@@ -13,5 +13,11 @@ namespace Fusion {
 
 		evkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)(vkGetDeviceProcAddr(InDevice, "vkCmdPipelineBarrier2KHR"));
 		FUSION_CORE_VERIFY(evkCmdPipelineBarrier2KHR != nullptr);
+
+		evkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR) (vkGetDeviceProcAddr(InDevice, "vkCmdBeginRenderingKHR"));
+		FUSION_CORE_VERIFY(evkCmdBeginRenderingKHR != nullptr);
+
+		evkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR) (vkGetDeviceProcAddr(InDevice, "vkCmdEndRenderingKHR"));
+		FUSION_CORE_VERIFY(evkCmdEndRenderingKHR != nullptr);
 	}
 }

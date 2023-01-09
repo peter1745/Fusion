@@ -16,7 +16,7 @@ namespace FusionEditor {
 		virtual ~ImGuiPlatformContext() = default;
 
 		void Init(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain);
-		void BeginFrame();
+		void BeginFrame(Fusion::CommandList* InCommandList);
 		void EndFrame(Fusion::CommandList* InCommandList);
 		void Shutdown();
 
@@ -24,7 +24,7 @@ namespace FusionEditor {
 
 	private:
 		virtual void InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain) = 0;
-		virtual void BeginFramePlatform() = 0;
+		virtual void BeginFramePlatform(Fusion::CommandList* InCommandList) = 0;
 		virtual void EndFramePlatform(Fusion::CommandList* InCommandList) = 0;
 		virtual void ShutdownPlatform() = 0;
 

@@ -37,7 +37,7 @@ namespace FusionEditor {
 			auto VulkanRT = m_TargetTextures[FrameIndex].As<Fusion::VulkanRenderTexture>();
 			Fusion::EImageState State = VulkanRT->GetImage(0)->GetState();
 			VkImageView View = VulkanRT->GetImageView(0);
-			VkImageLayout Layout = Fusion::ImageStatesToVkImageLayout(State);
+			VkImageLayout Layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			m_DescriptorSets[FrameIndex] = ImGui_ImplVulkan_AddTexture(m_Sampler, View, Layout);
 		}
 

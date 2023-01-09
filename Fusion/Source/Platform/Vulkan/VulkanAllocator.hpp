@@ -17,6 +17,13 @@ namespace Fusion {
 		VmaAllocation CreateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage);
 		void DestroyImage(VmaAllocation InAllocation, VkImage InImage);
 
+		VmaAllocation CreateBuffer(const VkBufferCreateInfo& InCreateInfo, VkBuffer* OutBuffer);
+
+		void* MapMemory(VmaAllocation InAllocation) const;
+		void UnmapMemory(VmaAllocation InAllocation) const;
+
+		VmaAllocationInfo GetAllocationInfo(VmaAllocation InAllocation) const;
+
 	private:
 		VmaAllocator m_Allocator = VK_NULL_HANDLE;
 	};

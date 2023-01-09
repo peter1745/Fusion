@@ -34,7 +34,7 @@ namespace FusionEditor {
 		glm::vec3 m_Location = glm::vec3(0.0f);
 		glm::vec3 m_LocationDelta = glm::vec3(0.0f);
 		glm::vec3 m_Direction;
-		glm::vec3 m_FocalPoint = glm::vec3(0.0f);
+		glm::vec3 m_FocalPoint = glm::vec3(0.0f, 0.0f, 1.0f);
 
 		glm::vec3 m_RightDirection;
 

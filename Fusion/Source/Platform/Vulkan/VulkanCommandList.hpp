@@ -19,7 +19,7 @@ namespace Fusion {
 		void BeginRecording() override;
 		void SetViewports(const std::vector<Viewport>& InViewports) override;
 
-		void SetConstantBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InConstantBuffer) override;
+		void SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData) override;
 
 		void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture) override;
 		void SetVertexBuffer(const VertexBufferView& InBufferView) override;

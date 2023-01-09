@@ -2,10 +2,7 @@
 #include "GraphicsPipeline.hpp"
 #include "RenderSettings.hpp"
 
-#ifdef FUSION_PLATFORM_WINDOWS
-#include "Platform/D3D11/D3D11GraphicsPipeline.hpp"
-#include "Platform/D3D12/D3D12GraphicsPipeline.hpp"
-#endif
+#include "Platform/Vulkan/VulkanGraphicsPipeline.hpp"
 
 namespace Fusion {
 
@@ -14,11 +11,7 @@ namespace Fusion {
 		switch (RenderSettings::Get().API)
 		{
 		case ERendererAPI::None: return nullptr;
-#ifdef FUSION_PLATFORM_WINDOWS
-		case ERendererAPI::D3D11: return MakeUnique<D3D11GraphicsPipeline>(InCreateInfo);
-		case ERendererAPI::D3D12: return MakeUnique<D3D12GraphicsPipeline>(InCreateInfo);
-#endif
-		case ERendererAPI::Vulkan: return nullptr;
+		case ERendererAPI::Vulkan: return MakeUnique<VulkanGraphicsPipeline>(InCreateInfo);
 		}
 
 		return nullptr;

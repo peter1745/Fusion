@@ -40,9 +40,6 @@ namespace Fusion {
 		std::vector<Shared<VulkanImage2D>> m_Images;
 		std::vector<VkImageView> m_ImageViews;
 		std::vector<VkClearValue> m_ClearValues;
-
-		VkFramebuffer m_FrameBuffer = VK_NULL_HANDLE;
-		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 	};
 
 }

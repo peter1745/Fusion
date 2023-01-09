@@ -26,7 +26,6 @@
 #include <NFD-Extended/nfd.hpp>
 
 #include <GLFW/glfw3.h>
-
 namespace FusionEditor {
 
 	static void TestSignedVolumeProjection()
@@ -127,12 +126,6 @@ namespace FusionEditor {
 
 		switch (RenderSettings::Get().API)
 		{
-		case ERendererAPI::D3D11:
-			SetTitle("Fusion Editor (D3D11)");
-			break;
-		case ERendererAPI::D3D12:
-			SetTitle("Fusion Editor (D3D12)");
-			break;
 		case ERendererAPI::Vulkan:
 			SetTitle("Fusion Editor (Vulkan)");
 			break;
@@ -172,6 +165,11 @@ namespace FusionEditor {
 
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
+
+		auto* CommandList = m_Renderer->GetCurrentCommandList();
+		m_SwapChain->Bind(CommandList);
+		m_SwapChain->Clear(CommandList);
+		m_SwapChain->Unbind(CommandList);
 
 		DrawUI();
 
@@ -224,7 +222,9 @@ namespace FusionEditor {
 
 	void FusionEditorApp::DrawUI()
 	{
-		m_ImGuiContext->BeginFrame();
+		auto* CommandList = m_Renderer->GetCurrentCommandList();
+
+		m_ImGuiContext->BeginFrame(CommandList);
 
 		ImGuiViewport* MainViewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(MainViewport->Pos);
@@ -260,12 +260,7 @@ namespace FusionEditor {
 
 		ImGui::Render();
 
-		auto* CommandList = m_Renderer->GetCurrentCommandList();
-
-		m_SwapChain->Bind(CommandList);
-		m_SwapChain->Clear(CommandList);
 		m_ImGuiContext->EndFrame(CommandList);
-		m_SwapChain->Unbind(CommandList);
 	}
 
 	void FusionEditorApp::DrawMenuBar()

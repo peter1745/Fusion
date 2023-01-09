@@ -100,6 +100,17 @@ namespace Fusion {
 
 		auto* CommandList = dynamic_cast<VulkanCommandList*>(m_CommandAllocators[m_CurrentFrame]->GetCommandList(0));
 
+		ImageTransitionInfo TransitionInfo = {};
+		TransitionInfo.Image = m_SwapChain->GetImage(m_SwapChain->GetCurrentImage());
+		TransitionInfo.OldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		TransitionInfo.NewLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		TransitionInfo.SrcAccessFlag = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		TransitionInfo.DstAccessFlag = 0;
+		TransitionInfo.SrcStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		TransitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+		TransitionImage(CommandList->GetBuffer(), TransitionInfo);
+
 		CommandList->EndRecording();
 
 		// Submit command list (Deliberately not using ExecuteCommandLists)
@@ -132,6 +143,11 @@ namespace Fusion {
 
 	void VulkanRenderer::ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists)
 	{
+		ExecuteCommandLists(InCommandLists, true);
+	}
+
+	void VulkanRenderer::ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists, bool InShouldSignal)
+	{
 		ZoneScoped;
 		auto Ctx = GraphicsContext::Get<VulkanContext>();
 
@@ -142,20 +158,30 @@ namespace Fusion {
 
 		VkSubmitInfo SubmitInfo = {};
 		SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		SubmitInfo.waitSemaphoreCount = 1;
-		VkSemaphore WaitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-		VkPipelineStageFlags WaitStageFlags[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		SubmitInfo.pWaitSemaphores = WaitSemaphores;
-		SubmitInfo.pWaitDstStageMask = WaitStageFlags;
+
+		if (InShouldSignal)
+		{
+			SubmitInfo.waitSemaphoreCount = 1;
+			VkSemaphore WaitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+			VkPipelineStageFlags WaitStageFlags[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+			SubmitInfo.pWaitSemaphores = WaitSemaphores;
+			SubmitInfo.pWaitDstStageMask = WaitStageFlags;
+		}
+
 		SubmitInfo.commandBufferCount = InCommandLists.size();
 		SubmitInfo.pCommandBuffers = CommandBuffers.data();
 
-		VkSemaphore SignalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-		SubmitInfo.signalSemaphoreCount = 1;
-		SubmitInfo.pSignalSemaphores = SignalSemaphores;
+		if (InShouldSignal)
+		{
+			VkSemaphore SignalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+			SubmitInfo.signalSemaphoreCount = 1;
+			SubmitInfo.pSignalSemaphores = SignalSemaphores;
+		}
+
+		VkFence Fence = InShouldSignal ? m_ImageFences[m_CurrentFrame] : VK_NULL_HANDLE;
 
 		const auto& QueueInfo = Ctx->GetDevice().As<VulkanDevice>()->GetQueueInfo();
-		FUSION_CORE_VERIFY(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, m_ImageFences[m_CurrentFrame]) == VK_SUCCESS);
+		FUSION_CORE_VERIFY(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, Fence) == VK_SUCCESS);
 	}
 
 	void VulkanRenderer::Release()

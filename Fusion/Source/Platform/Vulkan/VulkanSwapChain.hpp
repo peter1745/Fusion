@@ -1,12 +1,16 @@
 #pragma once
 
 #include "Fusion/Renderer/SwapChain.hpp"
+#include "Fusion/STL/FunctionList.hpp"
+
+#include "VulkanCommon.hpp"
 #include "VulkanDevice.hpp"
 
 namespace Fusion {
 
 	class VulkanSwapChain : public SwapChain
 	{
+		using InvalidatedCallbacks = FunctionList<void(const VulkanSwapChain&)>;
 	public:
 		VulkanSwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
 		~VulkanSwapChain() override = default;
@@ -22,10 +26,25 @@ namespace Fusion {
 
 		uint32_t GetImageCount() const override { return m_ImageCount; }
 
-		auto GetRenderPass() { return m_RenderPass; }
-		auto GetRenderPass() const { return m_RenderPass; }
-
 		void Release() override;
+
+		VkImageView GetImageView(uint32_t InImageIndex) const { return m_ImageViews[InImageIndex]; }
+		VkFormat GetImageFormat() const { return m_ImageFormat; }
+		VkExtent2D GetImageExtent() const { return m_ImageExtent; }
+
+		VkImage GetImage(uint32_t InImageIndex) const { return m_Images[InImageIndex]; }
+
+		uint32_t GetCurrentImage() const { return m_CurrentImage; }
+
+		InvalidatedCallbacks::KeyType RegisterOnInvalidatedCallback(const InvalidatedCallbacks::FuncType& InCallback)
+		{
+			return m_OnInvalidatedCallbacks.AddFunction(InCallback);
+		}
+
+		void UnregisterOnInvalidatedCallback(const InvalidatedCallbacks::KeyType& InKey)
+		{
+			m_OnInvalidatedCallbacks.RemoveFunction(InKey);
+		}
 
 	private:
 		void Create(bool InWasInvalidated);
@@ -41,14 +60,14 @@ namespace Fusion {
 		uint32_t m_ImageCount = 0;
 		uint32_t m_CurrentImage = 0;
 
+		VkFormat m_ImageFormat;
+
 		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
-
-		std::vector<VkFramebuffer> m_FrameBuffers;
-
-		VkRenderPass m_RenderPass = VK_NULL_HANDLE;
 
 		std::vector<VkImage> m_Images;
 		std::vector<VkImageView> m_ImageViews;
+
+		InvalidatedCallbacks m_OnInvalidatedCallbacks;
 	};
 
 }

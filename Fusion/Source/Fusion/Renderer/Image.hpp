@@ -9,7 +9,6 @@
 
 namespace Fusion {
 
-	enum class EImageUsage { Texture, Attachment };
 
 	struct ImageSize { uint32_t Width; uint32_t Height; };
 

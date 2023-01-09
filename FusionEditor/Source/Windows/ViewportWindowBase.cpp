@@ -37,7 +37,6 @@ namespace FusionEditor {
 		{
 			auto RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
 			m_RenderTextures.push_back(RenderTexture);
-			//m_ColorPickingRTVAllocations.push_back(Heap->AllocateShaderResourceView(RenderTexture, 1));
 		}
 
 		m_ViewportImage = ImGuiRenderTextureImage::Create(m_RenderTextures);
@@ -73,19 +72,13 @@ namespace FusionEditor {
 		auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
 		
-		uint32_t ViewportWidth = m_RenderWidth;// GetWindowWidth();
-		uint32_t ViewportHeight = m_RenderHeight;// GetWindowHeight();
+		uint32_t ViewportWidth = m_RenderWidth;
+		uint32_t ViewportHeight = m_RenderHeight;
 		
 		const auto& ImageSize = m_RenderTextures[FrameIndex]->GetImage(0)->GetSize();
 		if (ViewportWidth != ImageSize.Width || ViewportHeight != ImageSize.Height)
 		{
-			//auto Heap = Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-			//Heap->Deallocate(m_ColorPickingRTVAllocations[FrameIndex]);
-		
 			m_ViewportImage->Resize(ViewportWidth, ViewportHeight);
-		
-			//m_ColorPickingRTVAllocations[FrameIndex] = Heap->AllocateShaderResourceView(m_RenderTexture, 1, FrameIndex);
-		
 			OnResize(ViewportWidth, ViewportHeight);
 		}
 	}

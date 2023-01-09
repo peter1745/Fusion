@@ -2,14 +2,7 @@
 
 namespace Fusion {
 
-	enum class ERendererAPI
-	{
-		None = -1,
-#ifdef FUSION_PLATFORM_WINDOWS
-		D3D11, D3D12,
-#endif
-		Vulkan
-	};
+	enum class ERendererAPI { None = -1, Vulkan };
 
 	struct RenderSettings
 	{

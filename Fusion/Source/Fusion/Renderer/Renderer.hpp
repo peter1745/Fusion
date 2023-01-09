@@ -46,6 +46,7 @@ namespace Fusion {
 		virtual void EndFrame() = 0;
 
 		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) = 0;
+		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists, bool InShouldSignal) = 0;
 
 		virtual Shared<CommandAllocator> GetCurrentCommandAllocator() const = 0;
 		virtual CommandList* GetCurrentCommandList() const = 0;

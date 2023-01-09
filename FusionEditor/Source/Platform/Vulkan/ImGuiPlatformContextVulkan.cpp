@@ -1,5 +1,7 @@
 #include "ImGuiPlatformContextVulkan.hpp"
 
+#include <Fusion/Renderer/Renderer.hpp>
+
 #include <Platform/Vulkan/VulkanContext.hpp>
 
 #include <ImGui/imgui.h>
@@ -12,6 +14,8 @@ namespace FusionEditor {
 
 	void ImGuiPlatformContextVulkan::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain)
 	{
+		m_SwapChain = InSwapChain.As<Fusion::VulkanSwapChain>();
+
 		auto VkContext = InContext.As<Fusion::VulkanContext>();
 		auto* NativeWindow = static_cast<GLFWwindow*>(InWindow->GetWindowHandle());
 		ImGui_ImplGlfw_InitForVulkan(NativeWindow, true);
@@ -41,6 +45,46 @@ namespace FusionEditor {
 		DescriptorPoolInfo.pPoolSizes = PoolSizes;
 		FUSION_CORE_VERIFY(vkCreateDescriptorPool(Device->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_FontDescriptorPool) == VK_SUCCESS);
 
+		VkAttachmentDescription ColorAttachmentDesc = {};
+		ColorAttachmentDesc.flags = 0;
+		ColorAttachmentDesc.format = m_SwapChain->GetImageFormat();
+		ColorAttachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
+		ColorAttachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		ColorAttachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		ColorAttachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		ColorAttachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		ColorAttachmentDesc.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		ColorAttachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference ColorAttachmentReference = {};
+		ColorAttachmentReference.attachment = 0;
+		ColorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkSubpassDescription SubpassDesc = {};
+		SubpassDesc.flags = 0;
+		SubpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		SubpassDesc.colorAttachmentCount = 1;
+		SubpassDesc.pColorAttachments = &ColorAttachmentReference;
+
+		VkSubpassDependency SubpassDependency = {};
+		SubpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		SubpassDependency.dstSubpass = 0;
+		SubpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		SubpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		SubpassDependency.srcAccessMask = 0;
+		SubpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		SubpassDependency.dependencyFlags = 0;
+
+		VkRenderPassCreateInfo RenderPassInfo = {};
+		RenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		RenderPassInfo.attachmentCount = 1;
+		RenderPassInfo.pAttachments = &ColorAttachmentDesc;
+		RenderPassInfo.subpassCount = 1;
+		RenderPassInfo.pSubpasses = &SubpassDesc;
+		RenderPassInfo.dependencyCount = 1;
+		RenderPassInfo.pDependencies = &SubpassDependency;
+		vkCreateRenderPass(Device->GetLogicalDevice(), &RenderPassInfo, nullptr, &m_RenderPass);
+
 		ImGui_ImplVulkan_InitInfo ImGuiInitInfo = {};
 		ImGuiInitInfo.Instance = VkContext->GetInstance();
 		ImGuiInitInfo.PhysicalDevice = Device->GetPhysicalDevice();
@@ -51,10 +95,10 @@ namespace FusionEditor {
 		ImGuiInitInfo.DescriptorPool = m_FontDescriptorPool;
 		ImGuiInitInfo.Subpass = 0;
 		ImGuiInitInfo.MinImageCount = Device->GetSurfaceProperties(VkContext->GetSurface()).Capabilities.minImageCount;
-		ImGuiInitInfo.ImageCount = InSwapChain.As<Fusion::VulkanSwapChain>()->GetImageCount();
+		ImGuiInitInfo.ImageCount = m_SwapChain->GetImageCount();
 		ImGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGuiInitInfo.Allocator = nullptr;
-		ImGui_ImplVulkan_Init(&ImGuiInitInfo, InSwapChain.As<Fusion::VulkanSwapChain>()->GetRenderPass());
+		ImGui_ImplVulkan_Init(&ImGuiInitInfo, m_RenderPass);
 
 		// Upload Fonts
 		{
@@ -84,10 +128,30 @@ namespace FusionEditor {
 
 			CommandAllocator->DestroyCommandList(CommandList);
 		}
+
+		m_FrameBuffers.resize(m_SwapChain->GetImageCount(), VK_NULL_HANDLE);
+
+		OnSwapChainInvalidated(*m_SwapChain);
+
+		m_SwapChainCallbackHandle = m_SwapChain->RegisterOnInvalidatedCallback(FUSION_BIND_FUNC(ImGuiPlatformContextVulkan::OnSwapChainInvalidated));
 	}
 
-	void ImGuiPlatformContextVulkan::BeginFramePlatform()
+	void ImGuiPlatformContextVulkan::BeginFramePlatform(Fusion::CommandList* InCommandList)
 	{
+		auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(InCommandList)->GetBuffer();
+		
+		VkClearValue ClearValue = {};
+
+		VkRenderPassBeginInfo RenderPassBeginInfo = {};
+		RenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		RenderPassBeginInfo.renderPass = m_RenderPass;
+		RenderPassBeginInfo.framebuffer = m_FrameBuffers[m_SwapChain->GetCurrentImage()];
+		RenderPassBeginInfo.renderArea.offset = { 0, 0 };
+		RenderPassBeginInfo.renderArea.extent = m_SwapChain->GetImageExtent();
+		RenderPassBeginInfo.clearValueCount = 1;
+		RenderPassBeginInfo.pClearValues = &ClearValue;
+		vkCmdBeginRenderPass(CmdList, &RenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 	}
@@ -98,6 +162,8 @@ namespace FusionEditor {
 		auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(InCommandList)->GetBuffer();
 
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), CmdList);
+
+		vkCmdEndRenderPass(CmdList);
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -118,6 +184,39 @@ namespace FusionEditor {
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 
+		vkDestroyRenderPass(Device->GetLogicalDevice(), m_RenderPass, nullptr);
+		for (auto Framebuffer : m_FrameBuffers)
+			vkDestroyFramebuffer(Device->GetLogicalDevice(), Framebuffer, nullptr);
+		m_FrameBuffers.clear();
+
 		vkDestroyDescriptorPool(Device->GetLogicalDevice(), m_FontDescriptorPool, nullptr);
+
+		m_SwapChain->UnregisterOnInvalidatedCallback(m_SwapChainCallbackHandle);
 	}
+
+	void ImGuiPlatformContextVulkan::OnSwapChainInvalidated(const Fusion::VulkanSwapChain& InSwapChain)
+	{
+		auto Device = Fusion::GraphicsContext::Get<Fusion::VulkanContext>()->GetDevice().As<Fusion::VulkanDevice>();
+
+		for (uint32_t Idx = 0; Idx < InSwapChain.GetImageCount(); Idx++)
+		{
+			vkDestroyFramebuffer(Device->GetLogicalDevice(), m_FrameBuffers[Idx], nullptr);
+
+			VkImageView AttachmentImageView = InSwapChain.GetImageView(Idx);
+			VkExtent2D ImageExtent = InSwapChain.GetImageExtent();
+
+			VkFramebufferCreateInfo FramebufferInfo = {};
+			FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			FramebufferInfo.flags = 0;
+			FramebufferInfo.renderPass = m_RenderPass;
+			FramebufferInfo.attachmentCount = 1;
+			FramebufferInfo.pAttachments = &AttachmentImageView;
+			FramebufferInfo.width = ImageExtent.width;
+			FramebufferInfo.height = ImageExtent.height;
+			FramebufferInfo.layers = 1;
+
+			vkCreateFramebuffer(Device->GetLogicalDevice(), &FramebufferInfo, nullptr, &m_FrameBuffers[Idx]);
+		}
+	}
+
 }

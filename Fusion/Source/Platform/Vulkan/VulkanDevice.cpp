@@ -5,7 +5,7 @@
 
 namespace Fusion {
 
-	static const std::vector<const char*> c_DeviceExtensions = { "VK_KHR_synchronization2" };
+	static const std::vector<const char*> c_DeviceExtensions = { "VK_KHR_synchronization2", "VK_KHR_dynamic_rendering" };
 
 	VulkanDevice::VulkanDevice(VkInstance InInstance, VkSurfaceKHR InSurface)
 	{
@@ -162,13 +162,14 @@ namespace Fusion {
 		QueueInfo.queueCount = 1;
 		QueueInfo.pQueuePriorities = &QueuePriority;
 
-		VkPhysicalDeviceSynchronization2Features Synchronization2 = {};
-		Synchronization2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
-		Synchronization2.synchronization2 = VK_TRUE;
+		VkPhysicalDeviceVulkan13Features Vulkan13Features = {};
+		Vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		Vulkan13Features.dynamicRendering = VK_TRUE;
+		Vulkan13Features.synchronization2 = VK_TRUE;
 
 		VkPhysicalDeviceFeatures2 DeviceFeatures2 = {};
 		DeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		DeviceFeatures2.pNext = &Synchronization2;
+		DeviceFeatures2.pNext = &Vulkan13Features;
 
 		VkDeviceCreateInfo DeviceInfo = {};
 		DeviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

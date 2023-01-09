@@ -2,7 +2,10 @@
 
 #include <memory>
 #include <functional>
-#include <vector>
+#include <unordered_map>
+#include <ranges>
+
+#include "Fusion/Core/UUID.hpp"
 
 namespace Fusion {
 
@@ -13,8 +16,9 @@ namespace Fusion {
 	class FunctionList
 	{
 	public:
+		using KeyType = UUID;
 		using FuncType = std::function<TFunction>;
-		using StorageType = std::vector<FuncType>;
+		using StorageType = std::unordered_map<KeyType, FuncType>;
 
 	public:
 		FunctionList() = default;
@@ -35,26 +39,22 @@ namespace Fusion {
 			return *this;
 		}
 
-		void AddFunction(const FuncType& InFunc)
+		KeyType AddFunction(const FuncType& InFunc)
 		{
-			m_Storage.push_back(InFunc);
+			KeyType Key = KeyType();
+			m_Storage[Key] = InFunc;
+			return Key;
 		}
 
-		void RemoveFunction(const FuncType& InFunc)
+		void RemoveFunction(const KeyType& InKey)
 		{
-			auto It = std::remove_if(m_Storage.begin(), m_Storage.end(), [&InFunc](const FuncType& OtherFunc)
-			{
-				return OtherFunc.target() == InFunc.target();
-			});
-
-			if (It != m_Storage.end())
-				m_Storage.erase(It);
+			m_Storage.erase(InKey);
 		}
 
 		template<typename... TArgs>
 		void Invoke(TArgs&&... InArgs)
 		{
-			for (const auto& Func : m_Storage)
+			for (const auto& Func : m_Storage | std::views::values)
 				Func(std::forward<TArgs>(InArgs)...);
 		}
 

@@ -17,6 +17,7 @@ namespace Fusion {
 		void EndFrame() override;
 
 		void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) override;
+		void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists, bool InShouldSignal) override;
 
 		Shared<CommandAllocator> GetCurrentCommandAllocator() const override { return m_CommandAllocators[m_CurrentFrame]; }
 		CommandList* GetCurrentCommandList() const override { return m_CommandAllocators[m_CurrentFrame]->GetCommandList(0); }

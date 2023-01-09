@@ -23,7 +23,7 @@ namespace Fusion {
 		AppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		AppInfo.pApplicationName = "Fusion Vulkan App";
 		AppInfo.pEngineName = "Fusion";
-		AppInfo.apiVersion = VK_API_VERSION_1_2;
+		AppInfo.apiVersion = VK_API_VERSION_1_3;
 
 		// Create Vulkan Instance
 		{

@@ -36,22 +36,41 @@ namespace Fusion {
 		Scissor.extent = m_ImageExtent;
 		vkCmdSetScissor(CmdList, 0, 1, &Scissor);
 
+		ImageTransitionInfo TransitionInfo = {};
+		TransitionInfo.Image = m_Images[m_CurrentImage];
+		TransitionInfo.OldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		TransitionInfo.NewLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		TransitionInfo.SrcAccessFlag = 0;
+		TransitionInfo.DstAccessFlag = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		TransitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		TransitionInfo.DstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+		TransitionImage(CmdList, TransitionInfo);
+
 		VkClearValue ClearValue = {};
 		ClearValue.color.float32[0] = 0.25f;
 		ClearValue.color.float32[1] = 0.0f;
 		ClearValue.color.float32[2] = 0.0f;
 		ClearValue.color.float32[3] = 1.0f;
 
-		VkRenderPassBeginInfo RenderPassBeginInfo = {};
-		RenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		RenderPassBeginInfo.renderPass = m_RenderPass;
-		RenderPassBeginInfo.framebuffer = m_FrameBuffers[m_CurrentImage];
-		RenderPassBeginInfo.renderArea.offset = { 0, 0 };
-		RenderPassBeginInfo.renderArea.extent = m_ImageExtent;
-		RenderPassBeginInfo.clearValueCount = 1;
-		RenderPassBeginInfo.pClearValues = &ClearValue;
+		VkRenderingAttachmentInfoKHR ColorAttachment = {};
+		ColorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+		ColorAttachment.imageView = m_ImageViews[m_CurrentImage];
+		ColorAttachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
+		ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		ColorAttachment.clearValue = ClearValue;
 
-		vkCmdBeginRenderPass(CmdList, &RenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		VkRenderingInfoKHR RenderingInfo = {};
+		RenderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+		RenderingInfo.renderArea.offset = { 0, 0 };
+		RenderingInfo.renderArea.extent = m_ImageExtent;
+		RenderingInfo.layerCount = 1;
+		RenderingInfo.viewMask = 0;
+		RenderingInfo.colorAttachmentCount = 1;
+		RenderingInfo.pColorAttachments = &ColorAttachment;
+		RenderingInfo.pDepthAttachment = nullptr;
+		evkCmdBeginRenderingKHR(CmdList, &RenderingInfo);
 	}
 
 	void VulkanSwapChain::Clear(CommandList* InCommandList) {}
@@ -79,7 +98,8 @@ namespace Fusion {
 
 	void VulkanSwapChain::Unbind(CommandList* InCommandList)
 	{
-		vkCmdEndRenderPass(dynamic_cast<VulkanCommandList*>(InCommandList)->GetBuffer());
+		auto CmdList = dynamic_cast<VulkanCommandList*>(InCommandList)->GetBuffer();
+		evkCmdEndRenderingKHR(CmdList);
 	}
 
 	void VulkanSwapChain::Resize(uint32_t InWidth, uint32_t InHeight)
@@ -108,6 +128,8 @@ namespace Fusion {
 			if (Format.format != VK_FORMAT_B8G8R8A8_UNORM)
 				Format = SurfaceProps.Formats[0]; // Just pick the first if the desired one isn't found
 		}
+
+		m_ImageFormat = Format.format;
 
 		// Find suitable present mode
 		VkPresentModeKHR PresentMode = SurfaceProps.PresentModes[0];
@@ -192,55 +214,13 @@ namespace Fusion {
 			}
 		}
 
-		VkAttachmentDescription AttachmentInfo = {};
-		AttachmentInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		AttachmentInfo.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		AttachmentInfo.format = Format.format;
-		AttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		AttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		AttachmentInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-
-		VkAttachmentReference ColorAttachmentReference = {};
-		ColorAttachmentReference.attachment = 0;
-		ColorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription SubPassInfo = {};
-		SubPassInfo.colorAttachmentCount = 1;
-		SubPassInfo.pColorAttachments = &ColorAttachmentReference;
-		SubPassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-		VkRenderPassCreateInfo RenderPassInfo = {};
-		RenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		RenderPassInfo.attachmentCount = 1;
-		RenderPassInfo.pAttachments = &AttachmentInfo;
-		RenderPassInfo.pSubpasses = &SubPassInfo;
-		RenderPassInfo.subpassCount = 1;
-
-		FUSION_CORE_VERIFY(vkCreateRenderPass(m_Device->GetLogicalDevice(), &RenderPassInfo, nullptr, &m_RenderPass) == VK_SUCCESS);
-
-		m_FrameBuffers.resize(m_ImageCount);
-		for (size_t Idx = 0; Idx < m_ImageCount; Idx++)
-		{
-			VkFramebufferCreateInfo FramebufferInfo = {};
-			FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			FramebufferInfo.renderPass = m_RenderPass;
-			FramebufferInfo.width = m_ImageExtent.width;
-			FramebufferInfo.height = m_ImageExtent.height;
-			FramebufferInfo.layers = 1;
-			FramebufferInfo.attachmentCount = 1;
-			FramebufferInfo.pAttachments = &m_ImageViews[Idx];
-			FUSION_CORE_VERIFY(vkCreateFramebuffer(m_Device->GetLogicalDevice(), &FramebufferInfo, nullptr, &m_FrameBuffers[Idx]) == VK_SUCCESS);
-		}
+		if (InWasInvalidated)
+			m_OnInvalidatedCallbacks.Invoke(*this);
 	}
 
 	void VulkanSwapChain::Invalidate()
 	{
 		m_Device->Wait();
-
-		for (auto& Framebuffer : m_FrameBuffers)
-			vkDestroyFramebuffer(m_Device->GetLogicalDevice(), Framebuffer, nullptr);
-
-		vkDestroyRenderPass(m_Device->GetLogicalDevice(), m_RenderPass, nullptr);
 
 		for (auto& View : m_ImageViews)
 			vkDestroyImageView(m_Device->GetLogicalDevice(), View, nullptr);
@@ -270,11 +250,6 @@ namespace Fusion {
 	{
 		// Ensure the queue isn't busy before we try to destroy the resources
 		vkQueueWaitIdle(m_Device->GetQueueInfo().Queue);
-
-		for (auto& Framebuffer : m_FrameBuffers)
-			vkDestroyFramebuffer(m_Device->GetLogicalDevice(), Framebuffer, nullptr);
-
-		vkDestroyRenderPass(m_Device->GetLogicalDevice(), m_RenderPass, nullptr);
 
 		for (auto& View : m_ImageViews)
 			vkDestroyImageView(m_Device->GetLogicalDevice(), View, nullptr);
