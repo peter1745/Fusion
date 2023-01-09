@@ -37,9 +37,9 @@ namespace FusionEditor {
 		if (m_ShouldCopyFromBuffer)
 		{
 			Fusion::ActorID SelectedActorID = 0;
-			Fusion::Byte* BufferStart = m_StagingBuffer->Map();
-			memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
-			m_StagingBuffer->Unmap(BufferStart);
+			//Fusion::Byte* BufferStart = m_StagingBuffer->Map();
+			//memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
+			//m_StagingBuffer->Unmap(BufferStart);
 			m_ShouldCopyFromBuffer = false;
 
 			auto Actor = m_World->FindActorWithID(SelectedActorID);

@@ -1,23 +1,23 @@
 #include "FusionPCH.hpp"
-#include "VulkanCommandList.hpp"
-#include "VulkanCommandAllocator.hpp"
-#include "VulkanGraphicsPipeline.hpp"
-#include "VulkanBuffer.hpp"
+#include "CommandBuffer.hpp"
+#include "CommandPool.hpp"
+#include "GraphicsPipeline.hpp"
+#include "Buffer.hpp"
 
 #include "Fusion/Renderer/CommonTypes.hpp"
 
 namespace Fusion {
 
-	VulkanCommandList::VulkanCommandList(VkCommandBuffer InCmdBuffer)
+	CommandBuffer::CommandBuffer(VkCommandBuffer InCmdBuffer)
 	    : m_CommandBuffer(InCmdBuffer)
 	{
 	}
 
-	void VulkanCommandList::Reset()
+	void CommandBuffer::Reset()
 	{
 	}
 
-	void VulkanCommandList::BeginRecording()
+	void CommandBuffer::BeginRecording()
 	{
 		VkCommandBufferBeginInfo BeginInfo = {};
 		BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -25,7 +25,7 @@ namespace Fusion {
 		vkBeginCommandBuffer(m_CommandBuffer, &BeginInfo);
 	}
 
-	void VulkanCommandList::SetViewports(const std::vector<Viewport>& InViewports)
+	void CommandBuffer::SetViewports(const std::vector<Viewport>& InViewports)
 	{
 		std::vector<VkViewport> Viewports(InViewports.size());
 		std::vector<VkRect2D> Scissors(InViewports.size());
@@ -47,43 +47,39 @@ namespace Fusion {
 		vkCmdSetScissor(m_CommandBuffer, 0, uint32_t(Scissors.size()), Scissors.data());
 	}
 
-	void VulkanCommandList::SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData)
+	void CommandBuffer::SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData)
 	{
-		VkPipelineLayout PipelineLayout = static_cast<VulkanGraphicsPipeline*>(InPipeline)->GetPipelineLayout();
+		VkPipelineLayout PipelineLayout = static_cast<GraphicsPipeline*>(InPipeline)->GetPipelineLayout();
 		vkCmdPushConstants(m_CommandBuffer, PipelineLayout, ShaderTypeToVkShaderStageFlags(InShaderStage), 0, InSize, InData);
 	}
 
-	void VulkanCommandList::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture)
+	/*void CommandBuffer::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture)
 	{
-	}
+	}*/
 
-	void VulkanCommandList::SetVertexBuffer(const VertexBufferView& InBufferView)
+	void CommandBuffer::SetVertexBuffer(const VertexBufferView& InBufferView)
 	{
-		VkBuffer Buffers[] = { InBufferView.VertexBuffer.As<VulkanBuffer>()->GetBuffer() };
+		VkBuffer Buffers[] = { InBufferView.VertexBuffer.As<Buffer>()->GetBuffer() };
 		VkDeviceSize Offsets[] = { 0 };
 		vkCmdBindVertexBuffers(m_CommandBuffer, 0, 1, Buffers, Offsets);
 	}
 
-	void VulkanCommandList::SetDescriptorHeaps(const std::vector<Shared<DescriptorHeap>>& InHeaps)
+	void CommandBuffer::DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation)
 	{
 	}
 
-	void VulkanCommandList::DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation)
+	void CommandBuffer::DrawIndexed(const IndexBufferView& InBufferView)
 	{
-	}
-
-	void VulkanCommandList::DrawIndexed(const IndexBufferView& InBufferView)
-	{
-		vkCmdBindIndexBuffer(m_CommandBuffer, InBufferView.IndexBuffer.As<VulkanBuffer>()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(m_CommandBuffer, InBufferView.IndexBuffer.As<Buffer>()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(m_CommandBuffer, InBufferView.IndexBuffer->GetSize() / GetFormatSize(InBufferView.IndexFormat), 1, 0, 0, 0);
 	}
 
-	void VulkanCommandList::EndRecording()
+	void CommandBuffer::EndRecording()
 	{
 		FUSION_CORE_VERIFY(vkEndCommandBuffer(m_CommandBuffer) == VK_SUCCESS);
 	}
 
-	void Fusion::VulkanCommandList::Release()
+	void CommandBuffer::Release()
 	{
 		if (m_CommandBuffer == VK_NULL_HANDLE)
 			return;

@@ -82,7 +82,6 @@ namespace FusionEditor {
 		if (!ImGui::BeginPopup("AddComponentPopupMenu"))
 			return;
 
-		RenderComponentMenuItem<SpriteComponent>("Sprite");
 		RenderComponentMenuItem<CameraComponent>("Camera");
 		RenderComponentMenuItem<MeshComponent>("Mesh");
 		RenderComponentMenuItem<PhysicsBodyComponent>("Physics Body");

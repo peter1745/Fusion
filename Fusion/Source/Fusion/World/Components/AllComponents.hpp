@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreComponents.hpp"
-#include "Components2D.hpp"
 
 namespace Fusion {
 
@@ -12,7 +11,6 @@ namespace Fusion {
 		ActorComponent,
 		RelationshipComponent,
 		TransformComponent,
-		SpriteComponent,
 		CameraComponent,
 		MeshComponent,
 		PhysicsBodyComponent,

@@ -1,8 +1,5 @@
 #pragma once
 
-//#include "VertexBuffer.hpp"
-//#include "IndexBuffer.hpp"
-
 #include "Buffer.hpp"
 
 #include <filesystem>

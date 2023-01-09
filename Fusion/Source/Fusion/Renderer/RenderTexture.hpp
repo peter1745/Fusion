@@ -2,10 +2,6 @@
 
 #include "Image.hpp"
 
-#include <glm/glm.hpp>
-
-#include <vector>
-
 namespace Fusion {
 
 	struct RenderTextureAttachment
@@ -28,29 +24,37 @@ namespace Fusion {
 	class RenderTexture : public SharedObject
 	{
 	public:
-		virtual ~RenderTexture() = default;
+		RenderTexture(const RenderTextureInfo& InCreateInfo);
 
-		virtual void Bind(CommandList* InCommandList) = 0;
-		virtual void Unbind(CommandList* InCommandList) = 0;
-		virtual void Clear() = 0;
+		void Bind(CommandBuffer* InCommandList);
+		void Unbind(CommandBuffer* InCommandList);
+		void Clear();
 
-		virtual void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize) = 0;
+		void Resize(uint32_t InAttachmentIndex, const ImageSize& InSize);
 
-		virtual uint32_t GetWidth() const = 0;
-		virtual uint32_t GetHeight() const = 0;
+		uint32_t GetWidth() const { return m_CreateInfo.Width; }
+		uint32_t GetHeight() const { return m_CreateInfo.Height; }
 
-		virtual Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const = 0;
+		Shared<Image2D> GetImage(uint32_t InAttachmentIndex) const { return m_Images[InAttachmentIndex]; }
+		VkImageView GetImageView(uint32_t InAttachmentIndex) const { return m_ImageViews[InAttachmentIndex]; }
 
-		virtual void TransitionImages(CommandList* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState) = 0;
+		void TransitionImages(CommandBuffer* InCommandList, EImageState InColorAttachmentState, EImageState InDepthStencilState);
 
-		virtual void Release() = 0;
+		void Release();
 
-		virtual void* GetColorTextureID(uint32_t InColorAttachmentIdx) const = 0;
+		void* GetColorTextureID(uint32_t InColorAttachmentIdx) const { return nullptr; }
 
-		virtual const RenderTextureInfo& GetInfo() const = 0;
+		const RenderTextureInfo& GetInfo() const { return m_CreateInfo; }
 
-	public:
-		static Shared<RenderTexture> Create(const RenderTextureInfo& InCreateInfo);
+	private:
+		void Invalidate();
+
+	private:
+		RenderTextureInfo m_CreateInfo;
+
+		std::vector<Shared<Image2D>> m_Images;
+		std::vector<VkImageView> m_ImageViews;
+		std::vector<VkClearValue> m_ClearValues;
 	};
 
 }

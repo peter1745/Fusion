@@ -6,7 +6,6 @@
 
 #include <Fusion/Renderer/WorldRenderer.hpp>
 #include <Fusion/Renderer/RenderTexture.hpp>
-#include <Fusion/Renderer/DescriptorHeap.hpp>
 
 namespace FusionEditor {
 
@@ -40,8 +39,6 @@ namespace FusionEditor {
 		bool m_IsHovered = false;
 
 		Fusion::Unique<ImGuiRenderTextureImage> m_ViewportImage = nullptr;
-
-		std::vector<Fusion::DescriptorHeapAllocation> m_ColorPickingRTVAllocations;
 
 	};
 

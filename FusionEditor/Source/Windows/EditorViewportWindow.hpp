@@ -5,7 +5,6 @@
 #include "Renderer/ViewportCamera.hpp"
 
 #include <Fusion/Events/KeyboardEvents.hpp>
-#include <Fusion/Renderer/StagingBuffer.hpp>
 
 namespace FusionEditor {
 
@@ -42,7 +41,7 @@ namespace FusionEditor {
 		EGizmoType m_ActiveGizmoType = EGizmoType::None;
 		EGizmoSpace m_GizmoSpace = EGizmoSpace::World;
 
-		Fusion::Unique<Fusion::StagingBuffer> m_StagingBuffer;
+		//Fusion::Unique<Fusion::StagingBuffer> m_StagingBuffer;
 		bool m_ShouldCopyFromBuffer = false;
 
 		Fusion::Shared<Fusion::World> m_BackupWorld = nullptr;

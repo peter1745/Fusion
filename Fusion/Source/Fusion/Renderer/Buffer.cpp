@@ -1,21 +1,53 @@
 #include "FusionPCH.hpp"
 #include "Buffer.hpp"
-
-#include "RenderSettings.hpp"
-
-#include "Platform/Vulkan/VulkanBuffer.hpp"
+#include "Device.hpp"
+#include "GraphicsContext.hpp"
 
 namespace Fusion {
 
-	Shared<Buffer> Buffer::Create(const BufferInfo& InCreateInfo)
+	Buffer::Buffer(const BufferInfo& InInfo)
+	    : m_Info(InInfo)
 	{
-		switch (RenderSettings::Get().API)
-		{
-		case ERendererAPI::None: return nullptr;
-		case ERendererAPI::Vulkan: return Shared<VulkanBuffer>::Create(InCreateInfo);
-		}
+		uint32_t QueueFamily = GraphicsContext::Get()->GetDevice()->GetQueueInfo().QueueFamily;
 
+		VkBufferCreateInfo BufferCreateInfo = {};
+		BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		BufferCreateInfo.pNext = nullptr;
+		BufferCreateInfo.flags = 0;
+		BufferCreateInfo.size = InInfo.Size;
+		BufferCreateInfo.usage = BufferUsageToVkBufferUsageFlags(InInfo.Usage);
+		BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		BufferCreateInfo.queueFamilyIndexCount = 1;
+		BufferCreateInfo.pQueueFamilyIndices = &QueueFamily;
+		m_Allocation = GraphicsContext::Get()->GetAllocator()->CreateBuffer(BufferCreateInfo, &m_Buffer);
+
+		if (InInfo.InitialData)
+		{
+			void* Memory = GraphicsContext::Get()->GetAllocator()->MapMemory(m_Allocation);
+			memcpy(Memory, InInfo.InitialData, InInfo.Size);
+			GraphicsContext::Get()->GetAllocator()->UnmapMemory(m_Allocation);
+		}
+	}
+
+	Buffer::~Buffer()
+	{
+	}
+
+	Byte* Buffer::Map()
+	{
 		return nullptr;
+	}
+
+	void Buffer::Unmap(Byte* InPtr)
+	{
+	}
+
+	/*void Buffer::Transition(CommandList* InCmdList, EBufferState InState)
+	{
+	}*/
+
+	void Buffer::SetData(CommandBuffer* InCmdList, const void* InData, const Shared<Buffer>& InUploadBuffer)
+	{
 	}
 
 }

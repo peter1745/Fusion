@@ -1,57 +1,43 @@
 #pragma once
 
-#include "Fusion/Core/Core.hpp"
-#include "Fusion/Core/Enum.hpp"
-#include "Fusion/Memory/Shared.hpp"
+#include "Common.hpp"
+#include "VulkanAllocator.hpp"
 
 namespace Fusion {
 
-	using EBufferState = Flags<>;
-
-	enum class EHeapType { Default, Upload, Readback };
-
-	namespace BufferStates
-	{
-		static constexpr EBufferState Common = (1 << 0);
-		static constexpr EBufferState Vertex = (1 << 1);
-		static constexpr EBufferState Constant = (1 << 2);
-		static constexpr EBufferState Index = (1 << 3);
-		static constexpr EBufferState UnorderedAccess = (1 << 4);
-		static constexpr EBufferState NonPixelShaderResource = (1 << 5);
-		static constexpr EBufferState IndirectArgument = (1 << 6);
-		static constexpr EBufferState CopyDestination = (1 << 7);
-		static constexpr EBufferState CopySource = (1 << 8);
-	}
-
 	struct BufferInfo
 	{
-		EHeapType HeapType;
-		EBufferState State;
+		EBufferUsage Usage;
 		uint64_t Size;
-		uint64_t Alignment = 1;
 
 		void* InitialData = nullptr;
 	};
 
-	class CommandList;
+	class CommandBuffer;
 
 	class Buffer : public SharedObject
 	{
 	public:
-		virtual ~Buffer() = default;
+		Buffer(const BufferInfo& InInfo);
+		~Buffer();
 
-		virtual Byte* Map() = 0;
-		virtual void Unmap(Byte* InPtr) = 0;
+		Byte* Map();
+		void Unmap(Byte* InPtr);
 
-		virtual void Transition(CommandList* InCmdList, EBufferState InState) = 0;
+		//void Transition(CommandList* InCmdList, EBufferState InState);
 
-		virtual void SetData(CommandList* InCmdList, const void* InData, const Shared<Buffer>& InUploadBuffer) = 0;
+		void SetData(CommandBuffer* InCmdList, const void* InData, const Shared<Buffer>& InUploadBuffer);
 
-		virtual const BufferInfo& GetInfo() const = 0;
-		virtual uint64_t GetSize() const = 0;
+		const BufferInfo& GetInfo() const { return m_Info; }
+		uint64_t GetSize() const { return m_Info.Size; }
 
-	public:
-		static Shared<Buffer> Create(const BufferInfo& InCreateInfo);
+		VkBuffer GetBuffer() const { return m_Buffer; }
+
+	private:
+		BufferInfo m_Info;
+
+		VkBuffer m_Buffer = VK_NULL_HANDLE;
+		VmaAllocation m_Allocation;
 	};
 
 }

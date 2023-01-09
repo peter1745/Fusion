@@ -7,18 +7,16 @@ namespace Fusion {
 		: m_Vertices(InVertices), m_Indices(InIndices)
 	{
 		BufferInfo VertexBufferInfo = {};
-		VertexBufferInfo.HeapType = EHeapType::Default;
-		VertexBufferInfo.State = BufferStates::Vertex;
+		VertexBufferInfo.Usage = BufferUsage::Vertex;
 		VertexBufferInfo.Size = InVertices.size() * sizeof(Vertex);
 		VertexBufferInfo.InitialData = m_Vertices.data();
-		m_VertexBuffer = Buffer::Create(VertexBufferInfo);
+		m_VertexBuffer = Shared<Buffer>::Create(VertexBufferInfo);
 
 		BufferInfo IndexBufferInfo = {};
-		IndexBufferInfo.HeapType = EHeapType::Default;
-		IndexBufferInfo.State = BufferStates::Index;
+		IndexBufferInfo.Usage = BufferUsage::Index;
 		IndexBufferInfo.Size = InIndices.size() * sizeof(Index);
 		IndexBufferInfo.InitialData = m_Indices.data();
-		m_IndexBuffer = Buffer::Create(IndexBufferInfo);
+		m_IndexBuffer = Shared<Buffer>::Create(IndexBufferInfo);
 	}
 
 	Mesh::~Mesh()

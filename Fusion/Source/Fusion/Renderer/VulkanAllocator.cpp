@@ -3,7 +3,7 @@
 
 namespace Fusion {
 
-	VulkanAllocator::VulkanAllocator(VkInstance InInstance, const Shared<VulkanDevice>& InDevice)
+	VulkanAllocator::VulkanAllocator(VkInstance InInstance, const Shared<Device>& InDevice)
 	{
 		VmaAllocatorCreateInfo AllocatorInfo = {};
 		AllocatorInfo.instance = InInstance;

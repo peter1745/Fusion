@@ -1,16 +1,18 @@
 #pragma once
 
-#include "CommonTypes.hpp"
-#include "CommandList.hpp"
+#include "Common.hpp"
+#include "Device.hpp"
+#include "CommandBuffer.hpp"
 
-#include "Fusion/Memory/Shared.hpp"
-
-#include <glm/glm.hpp>
+#include <VMA/vk_mem_alloc.h>
 
 namespace Fusion {
 
-
-	struct ImageSize { uint32_t Width; uint32_t Height; };
+	struct ImageSize
+	{
+		uint32_t Width;
+		uint32_t Height;
+	};
 
 	struct Image2DInfo
 	{
@@ -31,24 +33,37 @@ namespace Fusion {
 	class Image2D : public SharedObject
 	{
 	public:
-		virtual ~Image2D() = default;
+		Image2D(const Image2DInfo& InCreateInfo);
 
-		virtual const ImageSize& GetSize() const = 0;
+		virtual const ImageSize& GetSize() const { return m_CreateInfo.Size; }
 
-		virtual void Resize(const ImageSize& InSize) = 0;
+		virtual void Resize(const ImageSize& InSize)
+		{
+			m_CreateInfo.Size = InSize;
+			Invalidate();
+		}
 
-		// NOTE(Peter): For RenderTextures we will most likely transition the current images for ALL attachments at once
-		//				in one batch. Most of the time it will result in a slight optimization
-		virtual void Transition(CommandList* InCmdList, EImageState InState) = 0;
+		virtual void Transition(CommandBuffer* InCmdList, EImageState InState);
 
-		virtual EImageState GetState() const = 0;
+		virtual EImageState GetState() const { return m_State; }
 
-		virtual const Image2DInfo& GetInfo() const = 0;
+		virtual const Image2DInfo& GetInfo() const { return m_CreateInfo; }
 
-		virtual void Release() = 0;
+		void Release();
 
-	public:
-		static Shared<Image2D> Create(const Image2DInfo& InCreateInfo);
+		VkImage GetImage() { return m_Image; }
+
+	private:
+		void Invalidate();
+
+	private:
+		Image2DInfo m_CreateInfo;
+
+		VkImage m_Image = VK_NULL_HANDLE;
+		VmaAllocation m_Allocation;
+		EImageState m_State;
+
+		friend class RenderTexture;
 	};
 
 }

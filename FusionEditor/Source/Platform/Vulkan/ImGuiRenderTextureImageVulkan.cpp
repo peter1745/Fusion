@@ -2,8 +2,8 @@
 
 #include <Fusion/Renderer/Renderer.hpp>
 
-#include <Platform/Vulkan/VulkanContext.hpp>
-#include <Platform/Vulkan/VulkanRenderTexture.hpp>
+#include <Fusion/Renderer/GraphicsContext.hpp>
+#include <Fusion/Renderer/RenderTexture.hpp>
 
 #include "ImGui/backends/imgui_impl_vulkan.h"
 
@@ -12,7 +12,7 @@ namespace FusionEditor {
 	ImGuiRenderTextureImageVulkan::ImGuiRenderTextureImageVulkan(const std::vector<Fusion::Shared<Fusion::RenderTexture>>& InRenderTextures)
 	    : m_TargetTextures(InRenderTextures)
 	{
-		auto Device = Fusion::GraphicsContext::Get<Fusion::VulkanContext>()->GetDevice().As<Fusion::VulkanDevice>();
+		auto Device = Fusion::GraphicsContext::Get()->GetDevice();
 
 		VkSamplerCreateInfo SamplerInfo = {};
 		SamplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -34,7 +34,7 @@ namespace FusionEditor {
 
 		if (m_DescriptorSets[FrameIndex] == VK_NULL_HANDLE)
 		{
-			auto VulkanRT = m_TargetTextures[FrameIndex].As<Fusion::VulkanRenderTexture>();
+			auto VulkanRT = m_TargetTextures[FrameIndex].As<Fusion::RenderTexture>();
 			Fusion::EImageState State = VulkanRT->GetImage(0)->GetState();
 			VkImageView View = VulkanRT->GetImageView(0);
 			VkImageLayout Layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

@@ -11,19 +11,11 @@ namespace Fusion {
 		Pixel
 	};
 
-	enum class EBufferUsage
-	{
-		Static, // Represents a buffer that *can* be updated, but isn't expected to be updated every frame
-		Dynamic, // Represents a buffer that is expected to be updated every frame
-		Immutable // Represents a completely immutable buffer, the GPU can only read, and the CPU can't read or write
-	};
-
 	enum class EImageUsage
 	{
 		Texture,
 		Attachment
 	};
-
 
 	enum class EFormat
 	{
@@ -113,6 +105,16 @@ namespace Fusion {
 
 		FUSION_CORE_VERIFY(false);
 		return 0;
+	}
+
+	using EBufferUsage = Flags<>;
+
+	namespace BufferUsage
+	{
+		static constexpr EBufferUsage Vertex = (1 << 0);
+		static constexpr EBufferUsage Index = (1 << 1);
+		static constexpr EBufferUsage CopyDestination = (1 << 2);
+		static constexpr EBufferUsage CopySource = (1 << 3);
 	}
 
 }

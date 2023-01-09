@@ -30,14 +30,14 @@ namespace Fusion {
 		m_Window->Init();
 		m_Window->SetEventCallback(FUSION_BIND_FUNC(Application::EventCallback));
 
-		m_Context = GraphicsContext::Create();
+		m_Context = Shared<GraphicsContext>::Create();
 
 		SwapChainInfo SwapChainCreateInfo;
 		SwapChainCreateInfo.Width = m_Window->GetWidth();
 		SwapChainCreateInfo.Height = m_Window->GetHeight();
 		SwapChainCreateInfo.HasDepthBuffer = false;
 		SwapChainCreateInfo.RenderTargetClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		m_SwapChain = SwapChain::Create(m_Context, SwapChainCreateInfo);
+		m_SwapChain = Shared<SwapChain>::Create(m_Context, SwapChainCreateInfo);
 
 		m_Window->Maximize();
 

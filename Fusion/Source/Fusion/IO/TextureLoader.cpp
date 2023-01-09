@@ -5,7 +5,7 @@
 
 namespace Fusion {
 
-	Shared<Texture2D> TextureLoader::LoadFromFile(const std::filesystem::path& InFilePath)
+	/*Shared<Texture2D> TextureLoader::LoadFromFile(const std::filesystem::path& InFilePath)
 	{
 		int32_t ImageWidth = 0;
 		int32_t ImageHeight = 0;
@@ -26,6 +26,6 @@ namespace Fusion {
 		CreateInfo.Format = EFormat::RGBA8Unorm;
 
 		return Texture2D::Create(CreateInfo);
-	}
+	}*/
 
 }

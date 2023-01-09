@@ -1,9 +1,8 @@
 #pragma once
 
-#include "CommandList.hpp"
+#include "Common.hpp"
+#include "GraphicsContext.hpp"
 #include "Shader.hpp"
-
-#include <array>
 
 namespace Fusion {
 
@@ -12,10 +11,14 @@ namespace Fusion {
 		Triangles
 	};
 
-	enum class EWindingOrder { Clockwise, CounterClockwise };
+	enum class EWindingOrder
+	{
+		Clockwise,
+		CounterClockwise
+	};
 
 	static constexpr uint32_t AppendAlignedElement = 0xFFFFFFFF;
-	
+
 	struct RenderTargetBlendStateInfo
 	{
 		bool EnableBlending = false;
@@ -44,16 +47,23 @@ namespace Fusion {
 	class GraphicsPipeline : public SharedObject
 	{
 	public:
-		virtual ~GraphicsPipeline() = default;
+		GraphicsPipeline(const Shared<GraphicsContext>& InContext, const GraphicsPipelineInfo& InCreateInfo);
 
-		virtual void Bind(CommandList* InCmdList) = 0;
+		void Bind(CommandBuffer* InCmdList);
 
-		virtual const ResourceInfo& GetResourceInfo(const std::string& InName) const = 0;
+		const ResourceInfo& GetResourceInfo(const std::string& InName) const { return m_Resources.at(InName); }
+		const GraphicsPipelineInfo& GetInfo() const { return m_CreateInfo; }
 
-		virtual const GraphicsPipelineInfo& GetInfo() const = 0;
+		VkPipelineLayout GetPipelineLayout() const { return m_Layout; }
 
-	public:
-		static Unique<GraphicsPipeline> Create(const GraphicsPipelineInfo& InCreateInfo);
+	private:
+		GraphicsPipelineInfo m_CreateInfo;
+
+		VkPipelineLayout m_Layout;
+		VkPipeline m_Pipeline;
+
+		std::unordered_map<std::string, ResourceInfo> m_Resources;
+
 	};
 
 }

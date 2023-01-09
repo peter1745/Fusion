@@ -1,6 +1,7 @@
 #include "FusionPCH.hpp"
 #include "MeshAssetLoader.hpp"
 #include "Fusion/Serialization/YAMLCustomConverters.hpp"
+#include "Fusion/Renderer/GraphicsContext.hpp"
 
 namespace Fusion {
 

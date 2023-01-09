@@ -28,14 +28,14 @@ namespace FusionEditor {
 		InitPlatform(InWindow, InContext, InSwapChain);
 	}
 
-	void ImGuiPlatformContext::BeginFrame(Fusion::CommandList* InCommandList)
+	void ImGuiPlatformContext::BeginFrame(Fusion::CommandBuffer* InCommandList)
 	{
 		BeginFramePlatform(InCommandList);
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
 	}
 
-	void ImGuiPlatformContext::EndFrame(Fusion::CommandList* InCommandList)
+	void ImGuiPlatformContext::EndFrame(Fusion::CommandBuffer* InCommandList)
 	{
 		EndFramePlatform(InCommandList);
 	}

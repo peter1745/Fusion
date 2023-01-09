@@ -14,10 +14,6 @@ namespace FusionEditor {
 		if (ImGui::DragFloat3("Rotation", &RotationDegrees.x, 0.1f))
 			InComp->SetRotationEuler(glm::radians(RotationDegrees));
 	}
-
-	void ComponentUI<Fusion::SpriteComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::SpriteComponent* InComp)
-	{
-	}
 	
 	void ComponentUI<Fusion::CameraComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::CameraComponent* InComp)
 	{

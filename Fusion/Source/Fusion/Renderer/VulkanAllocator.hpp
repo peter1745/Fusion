@@ -2,7 +2,7 @@
 
 #include "Fusion/Core/UUID.hpp"
 
-#include "VulkanDevice.hpp"
+#include "Device.hpp"
 
 #include <VMA/vk_mem_alloc.h>
 
@@ -11,7 +11,7 @@ namespace Fusion {
 	class VulkanAllocator
 	{
 	public:
-		VulkanAllocator(VkInstance InInstance, const Shared<VulkanDevice>& InDevice);
+		VulkanAllocator(VkInstance InInstance, const Shared<Device>& InDevice);
 		~VulkanAllocator();
 
 		VmaAllocation CreateImage(const VkImageCreateInfo& InCreateInfo, VkImage* OutImage);

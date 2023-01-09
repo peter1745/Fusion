@@ -100,20 +100,6 @@ namespace Fusion {
 	};
 
 	template<>
-	struct ComponentSerializer<SpriteComponent>
-	{
-		inline static const std::string Name = "SpriteComponent";
-
-		static void Serialize([[maybe_unused]] WorldYAMLWriter& InWriter, [[maybe_unused]] const SpriteComponent* InComponent)
-		{
-		}
-
-		static void Deserialize([[maybe_unused]] const WorldYAMLReader& InReader, [[maybe_unused]] SpriteComponent& InComponent)
-		{
-		}
-	};
-
-	template<>
 	struct ComponentSerializer<PhysicsBodyComponent>
 	{
 		inline static const std::string Name = "PhysicsBodyComponent";

@@ -63,7 +63,6 @@ namespace FusionEditor::UI {
 
 	using UIEditableComponents = Fusion::ComponentGroup<
 		Fusion::TransformComponent,
-		Fusion::SpriteComponent,
 		Fusion::CameraComponent,
 		Fusion::MeshComponent,
 		Fusion::PhysicsBodyComponent,

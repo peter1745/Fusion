@@ -1,7 +1,10 @@
 #pragma once
 
-#include "Fusion/Core/Window.hpp"
+#include "Common.hpp"
 #include "GraphicsContext.hpp"
+#include "CommandBuffer.hpp"
+
+#include "Fusion/STL/FunctionList.hpp"
 
 namespace Fusion {
 
@@ -16,21 +19,63 @@ namespace Fusion {
 
 	class SwapChain : public SharedObject
 	{
+		using InvalidatedCallbacks = FunctionList<void(const SwapChain&)>;
 	public:
-		virtual ~SwapChain() = default;
+		SwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
+		~SwapChain() = default;
 
-		virtual void Bind(CommandList* InCommandList) = 0;
-		virtual void Clear(CommandList* InCommandList) = 0;
-		virtual void Unbind(CommandList* InCommandList) = 0;
+		void Bind(CommandBuffer* InCommandList);
+		void Clear(CommandBuffer* InCommandList);
+		void Present(VkSemaphore InFinishedSemaphore);
+		void Unbind(CommandBuffer* InCommandList);
 
-		virtual void Resize(uint32_t InWidth, uint32_t InHeight) = 0;
+		void Resize(uint32_t InWidth, uint32_t InHeight);
 
-		virtual uint32_t GetImageCount() const = 0;
+		bool AcquireNextImage(VkDevice InDevice, VkSemaphore InImageAvailableSemaphore);
 
-		virtual void Release() = 0;
+		uint32_t GetImageCount() const { return m_ImageCount; }
 
-	public:
-		static Shared<SwapChain> Create(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
+		void Release();
+
+		VkImageView GetImageView(uint32_t InImageIndex) const { return m_ImageViews[InImageIndex]; }
+		VkFormat GetImageFormat() const { return m_ImageFormat; }
+		VkExtent2D GetImageExtent() const { return m_ImageExtent; }
+
+		VkImage GetImage(uint32_t InImageIndex) const { return m_Images[InImageIndex]; }
+
+		uint32_t GetCurrentImage() const { return m_CurrentImage; }
+
+		InvalidatedCallbacks::KeyType RegisterOnInvalidatedCallback(const InvalidatedCallbacks::FuncType& InCallback)
+		{
+			return m_OnInvalidatedCallbacks.AddFunction(InCallback);
+		}
+
+		void UnregisterOnInvalidatedCallback(const InvalidatedCallbacks::KeyType& InKey)
+		{
+			m_OnInvalidatedCallbacks.RemoveFunction(InKey);
+		}
+
+	private:
+		void Create(bool InWasInvalidated);
+
+		void Invalidate();
+
+	private:
+		Shared<GraphicsContext> m_Context = nullptr;
+		SwapChainInfo m_CreateInfo;
+
+		VkExtent2D m_ImageExtent = {};
+		uint32_t m_ImageCount = 0;
+		uint32_t m_CurrentImage = 0;
+
+		VkFormat m_ImageFormat;
+
+		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
+
+		std::vector<VkImage> m_Images;
+		std::vector<VkImageView> m_ImageViews;
+
+		InvalidatedCallbacks m_OnInvalidatedCallbacks;
 	};
 
 }

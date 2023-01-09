@@ -139,7 +139,7 @@ namespace FusionEditor {
 		m_ImGuiContext = ImGuiPlatformContext::Create();
 		m_ImGuiContext->Init(GetWindow(), m_Context, m_SwapChain);
 
-		m_Renderer = Renderer::Create({ m_SwapChain });
+		m_Renderer = MakeUnique<Renderer>(m_Context, RendererInfo{ m_SwapChain });
 
 		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
 

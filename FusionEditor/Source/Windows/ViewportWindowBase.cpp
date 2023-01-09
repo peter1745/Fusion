@@ -31,11 +31,9 @@ namespace FusionEditor {
 		RenderTextureCreateInfo.ColorAttachments = { ColorAttachment, ColorPickingAttachment };
 		RenderTextureCreateInfo.DepthAttachment = { Fusion::EFormat::D24UnormS8UInt, Fusion::ImageFlags::AllowDepthStencil, Fusion::ImageStates::DepthWrite };
 
-		auto Heap = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>()->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV);
-
 		for (uint32_t Idx = 0; Idx < Fusion::Renderer::GetCurrent().GetFramesInFlight(); Idx++)
 		{
-			auto RenderTexture = Fusion::RenderTexture::Create(RenderTextureCreateInfo);
+			auto RenderTexture = Fusion::Shared<Fusion::RenderTexture>::Create(RenderTextureCreateInfo);
 			m_RenderTextures.push_back(RenderTexture);
 		}
 
@@ -69,7 +67,6 @@ namespace FusionEditor {
 
 	void ViewportWindowBase::OnUpdate([[maybe_unused]] float InDeltaTime)
 	{
-		auto Context = Fusion::GraphicsContext::Get<Fusion::GraphicsContext>();
 		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
 		
 		uint32_t ViewportWidth = m_RenderWidth;

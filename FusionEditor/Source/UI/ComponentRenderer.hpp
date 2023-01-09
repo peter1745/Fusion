@@ -2,7 +2,6 @@
 
 #include "Fusion/World/Actor.hpp"
 #include "Fusion/World/Components/CoreComponents.hpp"
-#include "Fusion/World/Components/Components2D.hpp"
 
 namespace FusionEditor {
 
@@ -16,15 +15,6 @@ namespace FusionEditor {
 		static constexpr std::string_view DisplayName = "Transform";
 
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp);
-	};
-
-	template<>
-	class ComponentUI<Fusion::SpriteComponent>
-	{
-	public:
-		static constexpr std::string_view DisplayName = "Sprite";
-
-		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::SpriteComponent* InComp);
 	};
 
 	template<>

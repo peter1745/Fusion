@@ -1,10 +1,10 @@
 #include "FusionPCH.hpp"
-#include "VulkanCommandAllocator.hpp"
-#include "VulkanContext.hpp"
+#include "CommandPool.hpp"
+#include "GraphicsContext.hpp"
 
 namespace Fusion {
 
-	VulkanCommandAllocator::VulkanCommandAllocator(const Shared<VulkanDevice>& InDevice, const CommandAllocatorInfo& InCreateInfo)
+	CommandPool::CommandPool(const Shared<Device>& InDevice, const CommandPoolInfo& InCreateInfo)
 	    : m_CreateInfo(InCreateInfo), m_Device(InDevice)
 	{
 		VkCommandPoolCreateInfo PoolInfo = {};
@@ -13,7 +13,7 @@ namespace Fusion {
 		PoolInfo.queueFamilyIndex = InDevice->GetQueueInfo().QueueFamily;
 		FUSION_CORE_VERIFY(vkCreateCommandPool(InDevice->GetLogicalDevice(), &PoolInfo, nullptr, &m_CommandPool) == VK_SUCCESS);
 
-		m_CommandLists.resize(InCreateInfo.InitialListCount);
+		m_CommandBuffers.resize(InCreateInfo.InitialListCount);
 		for (uint32_t Idx = 0; Idx < InCreateInfo.InitialListCount; Idx++)
 		{
 			VkCommandBufferAllocateInfo AllocInfo = {};
@@ -25,16 +25,16 @@ namespace Fusion {
 			VkCommandBuffer CmdBuffer = VK_NULL_HANDLE;
 			FUSION_CORE_VERIFY(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
 
-			m_CommandLists[Idx] = MakeUnique<VulkanCommandList>(CmdBuffer);
+			m_CommandBuffers[Idx] = MakeUnique<CommandBuffer>(CmdBuffer);
 		}
 	}
 
-	VulkanCommandAllocator::~VulkanCommandAllocator()
+	CommandPool::~CommandPool()
 	{
 		Release();
 	}
 
-	CommandList* VulkanCommandAllocator::AllocateCommandList()
+	CommandBuffer* CommandPool::AllocateCommandBuffer()
 	{
 		VkCommandBufferAllocateInfo AllocInfo = {};
 		AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -45,44 +45,44 @@ namespace Fusion {
 		VkCommandBuffer CmdBuffer = VK_NULL_HANDLE;
 		FUSION_CORE_VERIFY(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
 
-		auto& Result = m_CommandLists.emplace_back(MakeUnique<VulkanCommandList>(CmdBuffer));
+		auto& Result = m_CommandBuffers.emplace_back(MakeUnique<CommandBuffer>(CmdBuffer));
 		return Result.get();
 	}
 
-	std::vector<CommandList*> VulkanCommandAllocator::AllocateCommandLists(size_t InCount)
+	std::vector<CommandBuffer*> CommandPool::AllocateCommandBuffers(size_t InCount)
 	{
-		std::vector<CommandList*> Result;
+		std::vector<CommandBuffer*> Result;
 		Result.reserve(InCount);
 		for (size_t Idx = 0; Idx < InCount; Idx++)
-			Result.push_back(AllocateCommandList());
+			Result.push_back(AllocateCommandBuffer());
 		return Result;
 	}
 
-	void VulkanCommandAllocator::DestroyCommandList(CommandList* InCommandList)
+	void CommandPool::DestroyCommandBuffer(CommandBuffer* InCommandBuffer)
 	{
-		auto It = std::find_if(m_CommandLists.begin(), m_CommandLists.end(), [InCommandList](const auto& InOther) { return InOther.get() == InCommandList; });
-		FUSION_CORE_VERIFY(It != m_CommandLists.end(), "CommandList can only be destroyed by the pool that allocated it");
+		auto It = std::find_if(m_CommandBuffers.begin(), m_CommandBuffers.end(), [InCommandBuffer](const auto& InOther) { return InOther.get() == InCommandBuffer; });
+		FUSION_CORE_VERIFY(It != m_CommandBuffers.end(), "CommandBuffer can only be destroyed by the pool that allocated it");
 
 		VkCommandBuffer CmdBuffer = It->get()->GetBuffer();
 		vkFreeCommandBuffers(m_Device->GetLogicalDevice(), m_CommandPool, 1, &CmdBuffer);
 
-		m_CommandLists.erase(It);
+		m_CommandBuffers.erase(It);
 	}
 
-	void VulkanCommandAllocator::Reset()
+	void CommandPool::Reset()
 	{
 		vkResetCommandPool(m_Device->GetLogicalDevice(), m_CommandPool, 0);
 	}
 
-	void VulkanCommandAllocator::Release()
+	void CommandPool::Release()
 	{
 		if (!m_Device || m_CommandPool == VK_NULL_HANDLE)
 			return;
 
-		for (auto& CmdList : m_CommandLists)
+		for (auto& CmdList : m_CommandBuffers)
 			CmdList->Release();
 
-		m_CommandLists.clear();
+		m_CommandBuffers.clear();
 		vkDestroyCommandPool(m_Device->GetLogicalDevice(), m_CommandPool, nullptr);
 
 		m_CommandPool = VK_NULL_HANDLE;

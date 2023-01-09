@@ -9,6 +9,7 @@ namespace FusionEditor {
 	
 	// NOTE(Peter): Viewport camera shamelessly stolen from Hazel. Thanks Yan and Karim ;)
 
+	// NOTE(Peter): Stole glms perspective function in order to invert height
 	static glm::mat4 PerspectiveFOV(float fov, float width, float height, float zNear, float zFar)
 	{
 		float rad = fov;

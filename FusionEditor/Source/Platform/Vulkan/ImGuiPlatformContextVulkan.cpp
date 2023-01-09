@@ -1,8 +1,7 @@
 #include "ImGuiPlatformContextVulkan.hpp"
 
+#include <Fusion/Renderer/GraphicsContext.hpp>
 #include <Fusion/Renderer/Renderer.hpp>
-
-#include <Platform/Vulkan/VulkanContext.hpp>
 
 #include <ImGui/imgui.h>
 #include <ImGui/backends/imgui_impl_glfw.h>
@@ -14,14 +13,12 @@ namespace FusionEditor {
 
 	void ImGuiPlatformContextVulkan::InitPlatform(const Fusion::Unique<Fusion::Window>& InWindow, const Fusion::Shared<Fusion::GraphicsContext>& InContext, const Fusion::Shared<Fusion::SwapChain>& InSwapChain)
 	{
-		m_SwapChain = InSwapChain.As<Fusion::VulkanSwapChain>();
+		m_SwapChain = InSwapChain.As<Fusion::SwapChain>();
 
-		auto VkContext = InContext.As<Fusion::VulkanContext>();
 		auto* NativeWindow = static_cast<GLFWwindow*>(InWindow->GetWindowHandle());
 		ImGui_ImplGlfw_InitForVulkan(NativeWindow, true);
 
-		auto Device = VkContext->GetDevice().As<Fusion::VulkanDevice>();
-		const auto& QueueInfo = Device->GetQueueInfo();
+		const auto& QueueInfo = InContext->GetDevice()->GetQueueInfo();
 
 		VkDescriptorPoolSize PoolSizes[] = {
 			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -43,7 +40,7 @@ namespace FusionEditor {
 		DescriptorPoolInfo.maxSets = 1000 * IM_ARRAYSIZE(PoolSizes);
 		DescriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(IM_ARRAYSIZE(PoolSizes));
 		DescriptorPoolInfo.pPoolSizes = PoolSizes;
-		FUSION_CORE_VERIFY(vkCreateDescriptorPool(Device->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_FontDescriptorPool) == VK_SUCCESS);
+		FUSION_CORE_VERIFY(vkCreateDescriptorPool(InContext->GetDevice()->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_FontDescriptorPool) == VK_SUCCESS);
 
 		VkAttachmentDescription ColorAttachmentDesc = {};
 		ColorAttachmentDesc.flags = 0;
@@ -83,18 +80,18 @@ namespace FusionEditor {
 		RenderPassInfo.pSubpasses = &SubpassDesc;
 		RenderPassInfo.dependencyCount = 1;
 		RenderPassInfo.pDependencies = &SubpassDependency;
-		vkCreateRenderPass(Device->GetLogicalDevice(), &RenderPassInfo, nullptr, &m_RenderPass);
+		vkCreateRenderPass(InContext->GetDevice()->GetLogicalDevice(), &RenderPassInfo, nullptr, &m_RenderPass);
 
 		ImGui_ImplVulkan_InitInfo ImGuiInitInfo = {};
-		ImGuiInitInfo.Instance = VkContext->GetInstance();
-		ImGuiInitInfo.PhysicalDevice = Device->GetPhysicalDevice();
-		ImGuiInitInfo.Device = Device->GetLogicalDevice();
+		ImGuiInitInfo.Instance = InContext->GetInstance();
+		ImGuiInitInfo.PhysicalDevice = InContext->GetDevice()->GetPhysicalDevice();
+		ImGuiInitInfo.Device = InContext->GetDevice()->GetLogicalDevice();
 		ImGuiInitInfo.QueueFamily = QueueInfo.QueueFamily;
 		ImGuiInitInfo.Queue = QueueInfo.Queue;
 		ImGuiInitInfo.PipelineCache = nullptr;
 		ImGuiInitInfo.DescriptorPool = m_FontDescriptorPool;
 		ImGuiInitInfo.Subpass = 0;
-		ImGuiInitInfo.MinImageCount = Device->GetSurfaceProperties(VkContext->GetSurface()).Capabilities.minImageCount;
+		ImGuiInitInfo.MinImageCount = InContext->GetDevice()->GetSurfaceProperties(InContext->GetSurface()).Capabilities.minImageCount;
 		ImGuiInitInfo.ImageCount = m_SwapChain->GetImageCount();
 		ImGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGuiInitInfo.Allocator = nullptr;
@@ -102,9 +99,9 @@ namespace FusionEditor {
 
 		// Upload Fonts
 		{
-			auto CommandAllocator = VkContext->GetTemporaryCommandAllocator();
-			auto CommandList = CommandAllocator->AllocateCommandList();
-			auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(CommandList)->GetBuffer();
+			auto CommandAllocator = InContext->GetTemporaryCommandAllocator();
+			auto CommandList = CommandAllocator->AllocateCommandBuffer();
+			auto CmdList = dynamic_cast<Fusion::CommandBuffer*>(CommandList)->GetBuffer();
 
 			vkResetCommandBuffer(CmdList, 0);
 
@@ -122,11 +119,11 @@ namespace FusionEditor {
 			SubmitInfo.pCommandBuffers = &CmdList;
 			vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
 
-			VkContext->GetDevice()->Wait();
+			InContext->GetDevice()->Wait();
 
 			ImGui_ImplVulkan_DestroyFontUploadObjects();
 
-			CommandAllocator->DestroyCommandList(CommandList);
+			CommandAllocator->DestroyCommandBuffer(CommandList);
 		}
 
 		m_FrameBuffers.resize(m_SwapChain->GetImageCount(), VK_NULL_HANDLE);
@@ -136,9 +133,9 @@ namespace FusionEditor {
 		m_SwapChainCallbackHandle = m_SwapChain->RegisterOnInvalidatedCallback(FUSION_BIND_FUNC(ImGuiPlatformContextVulkan::OnSwapChainInvalidated));
 	}
 
-	void ImGuiPlatformContextVulkan::BeginFramePlatform(Fusion::CommandList* InCommandList)
+	void ImGuiPlatformContextVulkan::BeginFramePlatform(Fusion::CommandBuffer* InCommandList)
 	{
-		auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(InCommandList)->GetBuffer();
+		auto CmdList = dynamic_cast<Fusion::CommandBuffer*>(InCommandList)->GetBuffer();
 		
 		VkClearValue ClearValue = {};
 
@@ -156,14 +153,11 @@ namespace FusionEditor {
 		ImGui_ImplGlfw_NewFrame();
 	}
 
-	void ImGuiPlatformContextVulkan::EndFramePlatform(Fusion::CommandList* InCommandList)
+	void ImGuiPlatformContextVulkan::EndFramePlatform(Fusion::CommandBuffer* InCommandList)
 	{
-		auto Ctx = Fusion::GraphicsContext::Get<Fusion::VulkanContext>();
-		auto CmdList = dynamic_cast<Fusion::VulkanCommandList*>(InCommandList)->GetBuffer();
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), InCommandList->GetBuffer());
 
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), CmdList);
-
-		vkCmdEndRenderPass(CmdList);
+		vkCmdEndRenderPass(InCommandList->GetBuffer());
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -176,8 +170,7 @@ namespace FusionEditor {
 
 	void ImGuiPlatformContextVulkan::ShutdownPlatform()
 	{
-		auto Ctx = Fusion::GraphicsContext::Get<Fusion::VulkanContext>();
-		auto Device = Ctx->GetDevice().As<Fusion::VulkanDevice>();
+		auto Device = Fusion::GraphicsContext::Get()->GetDevice();
 
 		vkQueueWaitIdle(Device->GetQueueInfo().Queue);
 
@@ -194,9 +187,9 @@ namespace FusionEditor {
 		m_SwapChain->UnregisterOnInvalidatedCallback(m_SwapChainCallbackHandle);
 	}
 
-	void ImGuiPlatformContextVulkan::OnSwapChainInvalidated(const Fusion::VulkanSwapChain& InSwapChain)
+	void ImGuiPlatformContextVulkan::OnSwapChainInvalidated(const Fusion::SwapChain& InSwapChain)
 	{
-		auto Device = Fusion::GraphicsContext::Get<Fusion::VulkanContext>()->GetDevice().As<Fusion::VulkanDevice>();
+		auto Device = Fusion::GraphicsContext::Get()->GetDevice().As<Fusion::Device>();
 
 		for (uint32_t Idx = 0; Idx < InSwapChain.GetImageCount(); Idx++)
 		{

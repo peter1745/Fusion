@@ -1,19 +1,33 @@
 #pragma once
 
-#include "Texture.hpp"
-
-#include <filesystem>
-#include <glm/glm.hpp>
+#include "Common.hpp"
+#include "ShaderCompiler.hpp"
 
 namespace Fusion {
 
 	class Shader : public SharedObject
 	{
 	public:
-		virtual ~Shader() = default;
+		explicit Shader(const Shared<Device>& InDevice, const CompiledShaderData& InData);
 
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
+		void Bind();
+		void Unbind();
+
+		auto GetByteCode(EShaderType InModuleType)
+		{
+			if (m_CompiledData.ModuleByteCodes.find(InModuleType) == m_CompiledData.ModuleByteCodes.end())
+				return std::vector<uint32_t>();
+
+			return m_CompiledData.ModuleByteCodes[InModuleType];
+		}
+
+		const auto& GetReflectedModules() const { return m_CompiledData.ReflectionData; }
+
+		const auto& GetShaderModules() const { return m_ShaderModules; }
+
+	private:
+		CompiledShaderData m_CompiledData;
+		std::unordered_map<EShaderType, VkShaderModule> m_ShaderModules;
 	};
 
 }

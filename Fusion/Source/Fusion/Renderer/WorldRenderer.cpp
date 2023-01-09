@@ -10,23 +10,23 @@
 
 namespace Fusion {
 
-	Shared<Texture2D> Texture;
+	//Shared<Texture2D> Texture;
 	Unique<ShaderCompiler> Compiler;
 
 	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
 	    : m_World(InWorld)
 	{
-		Compiler = ShaderCompiler::Create();
+		Compiler = MakeUnique<ShaderCompiler>();
 
 		GraphicsPipelineInfo PipelineInfo = {};
-		PipelineInfo.PipelineShader = Compiler->CreateShader("Resources/Shaders/FusionPBR.glsl");
+		PipelineInfo.PipelineShader = Compiler->CreateShader(GraphicsContext::Get()->GetDevice(), "Resources/Shaders/FusionPBR.glsl");
 		PipelineInfo.PrimitiveTopology = EPrimitiveTopology::Triangles;
 		PipelineInfo.WindingOrder = EWindingOrder::CounterClockwise;
 		PipelineInfo.RenderTargetCount = 2;
 		PipelineInfo.RenderTargetFormats[0] = EFormat::RGBA8Unorm;
 		PipelineInfo.RenderTargetFormats[1] = EFormat::RG32UInt;
 		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
-		m_Pipeline = GraphicsPipeline::Create(PipelineInfo);
+		m_Pipeline = MakeUnique<GraphicsPipeline>(GraphicsContext::Get(), PipelineInfo);
 
 		//BufferInfo TransformDataBufferInfo = {};
 		//TransformDataBufferInfo.HeapType = EHeapType::Default;

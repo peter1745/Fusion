@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Device.hpp"
+#include "Fusion/Renderer/Renderer.hpp"
+
+#include "GraphicsContext.hpp"
 #include "SwapChain.hpp"
-#include "CommandList.hpp"
 
 namespace Fusion {
 
@@ -14,13 +15,13 @@ namespace Fusion {
 	class CommandQueue
 	{
 	public:
-		typedef void (*CommandFunc)(void*, CommandList*);
+		typedef void (*CommandFunc)(void*, CommandBuffer*);
 
 		CommandQueue();
 		~CommandQueue();
 
 		void* AllocateCommand(CommandFunc InFunc, uint32_t InSize);
-		void Execute(CommandList* InCmdList);
+		void Execute(CommandBuffer* InCmdList);
 
 	private:
 		uint8_t* m_CommandBuffer;
@@ -38,30 +39,48 @@ namespace Fusion {
 	{
 	public:
 		using ResourceDestroyQueue = std::vector<ResourceDestroyInfo>;
+	public:
+		Renderer(const Shared<GraphicsContext>& InContext, const RendererInfo& InInfo);
+		~Renderer() = default;
+
+		void BeginFrame();
+		void EndFrame();
+
+		void ExecuteCommandLists(const std::vector<CommandBuffer*>& InCommandLists);
+		void ExecuteCommandLists(const std::vector<CommandBuffer*>& InCommandLists, bool InShouldSignal);
+
+		Shared<CommandPool> GetCurrentCommandAllocator() const { return m_CommandAllocators[m_CurrentFrame]; }
+		CommandBuffer* GetCurrentCommandList() const { return m_CommandAllocators[m_CurrentFrame]->GetCommandBuffer(0); }
+
+		[[nodiscard]] uint32_t GetFramesInFlight() const { return m_FramesInFlight; }
+		[[nodiscard]] uint32_t GetCurrentFrame() const { return m_CurrentFrame; }
+
+		void SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc)
+		{
+			auto& DestroyInfo = m_DestroyQueue.emplace_back();
+			DestroyInfo.FrameIndex = (m_CurrentFrame + InFrameOffset) % m_FramesInFlight;
+			DestroyInfo.DestroyFunc = InFunc;
+		}
+
+		void Release();
 
 	public:
-		virtual ~Renderer() = default;
-
-		virtual void BeginFrame() = 0;
-		virtual void EndFrame() = 0;
-
-		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists) = 0;
-		virtual void ExecuteCommandLists(const std::vector<CommandList*>& InCommandLists, bool InShouldSignal) = 0;
-
-		virtual Shared<CommandAllocator> GetCurrentCommandAllocator() const = 0;
-		virtual CommandList* GetCurrentCommandList() const = 0;
-
-		virtual uint32_t GetFramesInFlight() const = 0;
-		virtual uint32_t GetCurrentFrame() const = 0;
-
-		virtual void SubmitResourceForDestruction(uint32_t InFrameOffset, const std::function<void()>& InFunc) = 0;
-
-		virtual void Release() = 0;
-
-	public:
-		static Unique<Renderer> Create(const RendererInfo& InInfo);
-
 		static Renderer& GetCurrent();
+
+	private:
+		Shared<GraphicsContext> m_Context = nullptr;
+		RendererInfo m_Info;
+
+		uint32_t m_CurrentFrame = 0;
+		uint32_t m_FramesInFlight = 3;
+
+		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
+		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkFence> m_ImageFences;
+
+		std::vector<Shared<CommandPool>> m_CommandAllocators;
+
+		ResourceDestroyQueue m_DestroyQueue;
 	};
 
 }
