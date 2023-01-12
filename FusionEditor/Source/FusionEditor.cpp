@@ -10,6 +10,7 @@
 #include "Windows/WorldOutlinerWindow.hpp"
 #include "Windows/ActorDetailsWindow.hpp"
 #include "Windows/ContentBrowserWindow.hpp"
+#include "Windows/AssetSystem/AssetListWindow.hpp"
 
 #include "UI/UILibrary.hpp"
 
@@ -216,6 +217,7 @@ namespace FusionEditor {
 		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
 		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
+		m_WindowManager->RegisterWindow<AssetListWindow>(false, "Assets");
 
 		m_AssetImporterWindows[EAssetType::Mesh] = m_WindowManager->RegisterWindow<MeshImporterWindow>(false);
 	}

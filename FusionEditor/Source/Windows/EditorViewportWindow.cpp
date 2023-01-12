@@ -5,6 +5,7 @@
 #include "WindowManager.hpp"
 #include "WorldOutlinerWindow.hpp"
 
+#include <Fusion/Core/Application.hpp>
 #include <Fusion/Renderer/GraphicsContext.hpp>
 #include <Fusion/Renderer/Renderer.hpp>
 #include <Fusion/IO/Mouse.hpp>
@@ -24,10 +25,10 @@ namespace FusionEditor {
 		m_SelectionManager->AddSelectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorSelected));
 		m_SelectionManager->AddDeselectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorDeselected));
 
-		//Fusion::StagingBufferInfo StagingBufferCreateInfo = {};
-		//StagingBufferCreateInfo.Format = Fusion::EFormat::RG32UInt;
-		//StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
-		//m_StagingBuffer = Fusion::StagingBuffer::Create(StagingBufferCreateInfo);
+		Fusion::BufferInfo StagingBufferCreateInfo = {};
+		StagingBufferCreateInfo.Usage = Fusion::BufferUsage::CopyDestination;
+		StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
+		m_StagingBuffer = Fusion::MakeUnique<Fusion::Buffer>(StagingBufferCreateInfo);
 	}
 
 	void EditorViewportWindow::OnUpdate(float InDeltaTime)
@@ -37,9 +38,9 @@ namespace FusionEditor {
 		if (m_ShouldCopyFromBuffer)
 		{
 			Fusion::ActorID SelectedActorID = 0;
-			//Fusion::Byte* BufferStart = m_StagingBuffer->Map();
-			//memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
-			//m_StagingBuffer->Unmap(BufferStart);
+			Fusion::Byte* BufferStart = (Fusion::Byte*)m_StagingBuffer->Map();
+			memcpy(&SelectedActorID, BufferStart, sizeof(Fusion::ActorID));
+			m_StagingBuffer->Unmap(BufferStart);
 			m_ShouldCopyFromBuffer = false;
 
 			auto Actor = m_World->FindActorWithID(SelectedActorID);
@@ -48,6 +49,29 @@ namespace FusionEditor {
 
 			if (Actor)
 				m_SelectionManager->Select(SelectedActorID, Actor);
+		}
+
+		auto* CmdList = Fusion::Renderer::GetCurrent().GetCurrentCommandList();
+		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
+
+		auto MousePos = Fusion::Mouse::Get().GetPosition();
+		MousePos.x -= m_MinRenderBoundX;
+		MousePos.y -= m_MinRenderBoundY;
+
+		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
+		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
+
+		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
+		{
+			if (MousePos.x > 0 && MousePos.y > 0)
+			{
+				FUSION_CORE_INFO("Clicked inside viewport: {}, {}", MousePos.x, MousePos.y);
+
+				auto ColorPickingImage = m_RenderTextures[FrameIndex]->GetImage(1);
+				ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySource);
+				ColorPickingImage->CopyTo(CmdList, { int32_t(MousePos.x), int32_t(MousePos.y), 1, 1 }, m_StagingBuffer.get());
+				m_ShouldCopyFromBuffer = true;
+			}
 		}
 
 		m_Camera.SetActive(IsMouseInside() && IsTabActive());
@@ -64,18 +88,18 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderContents()
 	{
-		if (ImGui::Button("Create Physics Actors"))
+		/*if (ImGui::Button("Create Physics Actors"))
 		{
-			for (int32_t X = -25; X < 25; X++)
+			for (int32_t X = -15; X < 15; X++)
 			{
-				for (int32_t Z = -25; Z < 25; Z++)
+				for (int32_t Z = -15; Z < 15; Z++)
 				{
 					auto NewActor = m_World->CreateActor(fmt::format("Actor-{}-{}", X * 2, Z * 2));
 					auto* ActorTransform = NewActor->FindComponent<Fusion::TransformComponent>();
 					ActorTransform->Location = { X * 3, 20, Z * 3 };
 					NewActor->AddComponent<Fusion::PhysicsBodyComponent>();
 					NewActor->AddComponent<Fusion::SphereShapeComponent>();
-					NewActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(68537410238160412);
+					NewActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(2315594818467439);
 				}
 			}
 
@@ -85,7 +109,7 @@ namespace FusionEditor {
 			ActorTransform->Scale = { 100, 10, 100 };
 			GroundActor->AddComponent<Fusion::PhysicsBodyComponent>()->Mass = 0.0f;
 			GroundActor->AddComponent<Fusion::BoxShapeComponent>()->HalfSize = { 50.0f, 5.0f, 50.0f };
-			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(23188905328565712);
+			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(45758489989359767);
 		}
 
 		if (m_World->GetState() & Fusion::WorldStates::None)
@@ -104,7 +128,7 @@ namespace FusionEditor {
 				m_World->Restore(m_BackupWorld);
 				m_BackupWorld = nullptr;
 			}
-		}
+		}*/
 
 		ViewportWindowBase::RenderContents();
 
@@ -169,36 +193,9 @@ namespace FusionEditor {
 
 	void EditorViewportWindow::RenderWorld()
 	{
-		auto* CmdList = Fusion::Renderer::GetCurrent().GetCurrentCommandList();
-		
-		uint32_t FrameIndex = Fusion::Renderer::GetCurrent().GetCurrentFrame();
-		
 		m_WorldRenderer->Begin(m_Camera, m_Camera.GetViewMatrix());
 		m_WorldRenderer->Render();
 		m_WorldRenderer->End();
-		
-		auto MousePos = Fusion::Mouse::Get().GetPosition();
-		MousePos.x -= m_MinRenderBoundX;
-		MousePos.y -= m_MinRenderBoundY;
-		
-		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
-		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
-		
-		if ((MouseXInside && MouseYInside) && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
-		{
-			/*Fusion::Shared<Fusion::Image2D> ColorPickingImage = m_RenderTexture->GetImage(1, FrameIndex);
-			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySrc);
-		
-			Fusion::CopyRegionInfo CopyRegion = {};
-			CopyRegion.Left = MousePos.x;
-			CopyRegion.Top = MousePos.y;
-			CopyRegion.Right = MousePos.x + 1;
-			CopyRegion.Bottom = MousePos.y + 1;
-			m_StagingBuffer->CopyFrom(CmdList, ColorPickingImage, CopyRegion);
-			m_ShouldCopyFromBuffer = true;
-		
-			ColorPickingImage->Transition(CmdList, Fusion::ImageStates::RenderTarget);*/
-		}
 	}
 
 	void EditorViewportWindow::OnResize(uint32_t InWidth, uint32_t InHeight)

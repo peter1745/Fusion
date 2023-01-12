@@ -20,12 +20,14 @@ struct VertexOutput
 };
 
 layout(location = 0) out VertexOutput Out;
+layout(location = 2) out flat uvec2 OutActorID;
 
 void main()
 {
     gl_Position = InTransformData.ViewProjectionMatrix * InTransformData.TransformMatrix * vec4(InPosition, 1.0);
     Out.Normal = InNormal;
     Out.TexCoord = InTexCoord;
+    OutActorID = InTransformData.ActorID;
 }
 
 #endif
@@ -39,13 +41,16 @@ struct PixelInput
 };
 
 layout(location = 0) in PixelInput InData;
+layout(location = 2) in flat uvec2 InActorID;
 
 layout(location = 0) out vec4 OutColor;
+layout(location = 1) out uvec2 OutActorID;
 
 void main()
 {
-    //vec3 NormalColor = (normalize(InData.Normal) * 0.5) + 0.5;
-    OutColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec3 NormalColor = (normalize(InData.Normal) * 0.5) + 0.5;
+    OutColor = vec4(NormalColor, 1.0);
+    OutActorID = InActorID;
 }
 
 #endif

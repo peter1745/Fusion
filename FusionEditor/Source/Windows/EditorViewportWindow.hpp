@@ -41,7 +41,7 @@ namespace FusionEditor {
 		EGizmoType m_ActiveGizmoType = EGizmoType::None;
 		EGizmoSpace m_GizmoSpace = EGizmoSpace::World;
 
-		//Fusion::Unique<Fusion::StagingBuffer> m_StagingBuffer;
+		Fusion::Unique<Fusion::Buffer> m_StagingBuffer;
 		bool m_ShouldCopyFromBuffer = false;
 
 		Fusion::Shared<Fusion::World> m_BackupWorld = nullptr;

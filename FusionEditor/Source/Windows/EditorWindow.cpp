@@ -1,6 +1,8 @@
 #include "EditorWindow.hpp"
 #include "UI/UILibrary.hpp"
 
+#include <Fusion/IO/Mouse.hpp>
+
 namespace FusionEditor {
 
 	EditorWindow::EditorWindow(const std::string& InTitle, uint32_t InInitialWidth /*= 0*/, uint32_t InInitialHeight /*= 0*/)
@@ -13,16 +15,15 @@ namespace FusionEditor {
 		if (GImGui->CurrentWindow == nullptr)
 			return;
 
-		ImVec2 WindowPos = ImGui::GetWindowPos();
-		m_MinBound = ImGui::GetWindowContentRegionMin();
-		m_MinBound.x -= WindowPos.x;
-		m_MinBound.y += WindowPos.y;
+		auto ViewportOffset = ImGui::GetCursorPos();
+		auto WindowSize = ImGui::GetWindowSize();
 
-		m_MaxBound = ImGui::GetWindowContentRegionMax();
-		m_MaxBound.x -= WindowPos.x;
-		m_MaxBound.y += WindowPos.y;
+		m_MinBound = ImGui::GetWindowPos();
+		m_MinBound.x -= ViewportOffset.x;
+		m_MinBound.y -= ViewportOffset.y;
 
-		// FIXME(Peter): Min bound Y is too far down?
+		m_MaxBound = { m_MinBound.x + WindowSize.x, m_MinBound.y + WindowSize.y };
+
 		m_IsMouseInside = UI::IsMouseHoveringRect(m_MinBound, m_MaxBound);
 	}
 

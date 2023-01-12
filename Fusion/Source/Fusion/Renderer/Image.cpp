@@ -20,24 +20,36 @@ namespace Fusion {
 		if (m_State == InState)
 			return;
 
-		VkImageMemoryBarrier Barrier = {};
-		Barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		Barrier.oldLayout = ImageStatesToVkImageLayout(m_State);
-		Barrier.newLayout = ImageStatesToVkImageLayout(InState);
-		Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		Barrier.image = m_Image;
-		Barrier.subresourceRange.aspectMask = IsDepthFormat(m_CreateInfo.Format) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_COLOR_BIT;
-		Barrier.subresourceRange.baseMipLevel = 0;
-		Barrier.subresourceRange.levelCount = 1;
-		Barrier.subresourceRange.baseArrayLayer = 0;
-		Barrier.subresourceRange.layerCount = 1;
-		Barrier.srcAccessMask = 0;
-		Barrier.dstAccessMask = 0;
-
-		vkCmdPipelineBarrier(InCmdList->GetBuffer(), 0, 0, 0, 0, nullptr, 0, nullptr, 1, &Barrier);
+		ImageTransitionInfo TransitionInfo = {};
+		TransitionInfo.Image = m_Image;
+		TransitionInfo.OldLayout = ImageStatesToVkImageLayout(m_State);
+		TransitionInfo.NewLayout = ImageStatesToVkImageLayout(InState);
+		TransitionInfo.SrcAccessFlag = 0;
+		TransitionInfo.DstAccessFlag = 0;
+		TransitionInfo.SrcStage = 0;
+		TransitionInfo.DstStage = 0;
+		TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+		TransitionImage(InCmdList->GetBuffer(), TransitionInfo);
 
 		m_State = InState;
+	}
+
+	void Image2D::CopyTo(CommandBuffer* InCmdList, const ImageRegion& InRegion, Buffer* InBuffer)
+	{
+		VkBufferImageCopy CopyRegion;
+		CopyRegion.bufferOffset = 0;
+		CopyRegion.bufferRowLength = 0;
+		CopyRegion.bufferImageHeight = 0;
+		CopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		CopyRegion.imageSubresource.layerCount = 1;
+		CopyRegion.imageSubresource.baseArrayLayer = 0;
+		CopyRegion.imageSubresource.mipLevel = 0;
+		CopyRegion.imageOffset = { InRegion.X, InRegion.Y, 0 };
+		CopyRegion.imageExtent.width = InRegion.Width;
+		CopyRegion.imageExtent.height = InRegion.Height;
+		CopyRegion.imageExtent.depth = 1;
+
+		vkCmdCopyImageToBuffer(InCmdList->GetBuffer(), m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, InBuffer->GetBuffer(), 1, &CopyRegion);
 	}
 
 	void Image2D::Invalidate()

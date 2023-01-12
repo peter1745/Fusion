@@ -32,7 +32,7 @@ namespace Fusion {
 	{
 		VkImageUsageFlags Result = 0;
 
-		if (InUsage == EImageUsage::Attachment)
+		if (InUsage & ImageUsages::Attachment)
 		{
 			if (IsDepthFormat(InFormat))
 				Result |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -43,6 +43,9 @@ namespace Fusion {
 		{
 			Result = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		}
+
+		if (InUsage & ImageUsages::CopySource) Result |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		if (InUsage & ImageUsages::CopyDestination) Result |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		Result |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
@@ -78,6 +81,8 @@ namespace Fusion {
 		if (InStates & ImageStates::DepthWrite) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
 		if (InStates & ImageStates::DepthRead) return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		if (InStates & ImageStates::PixelShaderResource) return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		if (InStates & ImageStates::CopySource) return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		if (InStates & ImageStates::CopyDestination) return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
 		return VK_IMAGE_LAYOUT_UNDEFINED;
 	}

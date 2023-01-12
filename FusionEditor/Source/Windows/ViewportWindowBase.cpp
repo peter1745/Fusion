@@ -6,6 +6,8 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <ImGui/imgui_internal.h>
+
 namespace FusionEditor {
 
 	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld)
@@ -24,6 +26,7 @@ namespace FusionEditor {
 		ColorPickingAttachment.Flags = Fusion::ImageFlags::AllowRenderTarget;
 		ColorPickingAttachment.InitialState = Fusion::ImageStates::RenderTarget;
 		ColorPickingAttachment.ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		ColorPickingAttachment.IsMappable = true;
 
 		Fusion::RenderTextureInfo RenderTextureCreateInfo;
 		RenderTextureCreateInfo.Width = 300U;
@@ -86,7 +89,7 @@ namespace FusionEditor {
 		ImVec2 MaxBound = ImGui::GetContentRegionMax();
 		
 		m_MinRenderBoundX = MinBound.x;
-		m_MinRenderBoundY = MinBound.y;
+		m_MinRenderBoundY = ImGui::GetCursorStartPos().y + ImGui::GetCurrentWindow()->TitleBarHeight();
 		m_RenderWidth = MaxBound.x - MinBound.x;
 		m_RenderHeight = glm::max(0.0f, MaxBound.y - MinBound.y);
 

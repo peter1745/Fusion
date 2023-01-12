@@ -3,6 +3,7 @@
 #include "Common.hpp"
 #include "Device.hpp"
 #include "CommandBuffer.hpp"
+#include "Buffer.hpp"
 
 #include <VMA/vk_mem_alloc.h>
 
@@ -28,6 +29,16 @@ namespace Fusion {
 
 		uint32_t Channels = 0;
 		Byte* InitialData = nullptr;
+
+		bool IsMappable = false;
+	};
+
+	struct ImageRegion
+	{
+		int32_t X;
+		int32_t Y;
+		int32_t Width;
+		int32_t Height;
 	};
 
 	class Image2D : public SharedObject
@@ -35,19 +46,21 @@ namespace Fusion {
 	public:
 		Image2D(const Image2DInfo& InCreateInfo);
 
-		virtual const ImageSize& GetSize() const { return m_CreateInfo.Size; }
+		const ImageSize& GetSize() const { return m_CreateInfo.Size; }
 
-		virtual void Resize(const ImageSize& InSize)
+		void Resize(const ImageSize& InSize)
 		{
 			m_CreateInfo.Size = InSize;
 			Invalidate();
 		}
 
-		virtual void Transition(CommandBuffer* InCmdList, EImageState InState);
+		void Transition(CommandBuffer* InCmdList, EImageState InState);
 
-		virtual EImageState GetState() const { return m_State; }
+		void CopyTo(CommandBuffer* InCmdList, const ImageRegion& InRegion, Buffer* InBuffer);
 
-		virtual const Image2DInfo& GetInfo() const { return m_CreateInfo; }
+		EImageState GetState() const { return m_State; }
+
+		const Image2DInfo& GetInfo() const { return m_CreateInfo; }
 
 		void Release();
 

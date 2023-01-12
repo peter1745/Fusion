@@ -11,11 +11,16 @@ namespace Fusion {
 		Pixel
 	};
 
-	enum class EImageUsage
-	{
-		Texture,
-		Attachment
-	};
+	using EImageUsage = Flags<>;
+
+	namespace ImageUsages {
+
+		static constexpr EImageUsage Texture = (1 << 0);
+		static constexpr EImageUsage Attachment = (1 << 1);
+		static constexpr EImageUsage CopySource = (1 << 2);
+		static constexpr EImageUsage CopyDestination = (1 << 3);
+
+	}
 
 	enum class EFormat
 	{
@@ -48,16 +53,11 @@ namespace Fusion {
 		static constexpr EImageState RenderTarget = (1 << 0);
 		static constexpr EImageState DepthWrite = (1 << 1);
 		static constexpr EImageState DepthRead = (1 << 2);
-		static constexpr EImageState UnorderedAccess = (1 << 3);
-		static constexpr EImageState NonPixelShaderResource = (1 << 4);
-		static constexpr EImageState PixelShaderResource = (1 << 5);
-		static constexpr EImageState IndirectArgument = (1 << 6);
-		static constexpr EImageState CopyDst = (1 << 7);
-		static constexpr EImageState CopySrc = (1 << 8);
-		static constexpr EImageState ResolveDst = (1 << 9);
-		static constexpr EImageState ResolveSrc = (1 << 10);
-		static constexpr EImageState ShadingRateSrc = (1 << 11);
-		static constexpr EImageState Undefined = (1 << 12);
+		static constexpr EImageState PixelShaderResource = (1 << 3);
+		static constexpr EImageState ColorAttachmentOptimal = (1 << 4);
+		static constexpr EImageState CopySource = (1 << 5);
+		static constexpr EImageState CopyDestination = (1 << 6);
+		static constexpr EImageState Undefined = (1 << 7);
 	};
 
 	namespace ImageFlags

@@ -32,6 +32,8 @@ namespace Fusion {
 			TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 
 			TransitionImage(InCommandList->GetBuffer(), TransitionInfo);
+
+			m_Images[Idx]->m_State = ImageStates::ColorAttachmentOptimal;
 		}
 
 		if (IsDepthFormat(m_CreateInfo.DepthAttachment.Format))
@@ -101,6 +103,8 @@ namespace Fusion {
 			TransitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 			TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 			TransitionImage(InCommandList->GetBuffer(), TransitionInfo);
+
+			m_Images[Idx]->m_State = ImageStates::PixelShaderResource;
 		}
 	}
 
@@ -140,11 +144,14 @@ namespace Fusion {
 
 			Image2DInfo ImageInfo = {};
 			ImageInfo.Size = { m_CreateInfo.Width, m_CreateInfo.Height };
-			ImageInfo.Usage = EImageUsage::Attachment;
+			ImageInfo.Usage = ImageUsages::Attachment;
 			ImageInfo.Format = AttachmentInfo.Format;
 			ImageInfo.Flags = AttachmentInfo.Flags;
 			ImageInfo.InitialState = ImageStates::Undefined;
 			ImageInfo.ClearColor = AttachmentInfo.ClearColor;
+
+			if (AttachmentInfo.IsMappable)
+				ImageInfo.Usage |= ImageUsages::CopySource;
 
 			Shared<Image2D> Image = Shared<Image2D>::Create(ImageInfo);
 
@@ -173,7 +180,7 @@ namespace Fusion {
 		{
 			Image2DInfo ImageInfo = {};
 			ImageInfo.Size = { m_CreateInfo.Width, m_CreateInfo.Height };
-			ImageInfo.Usage = EImageUsage::Attachment;
+			ImageInfo.Usage = ImageUsages::Attachment;
 			ImageInfo.Format = m_CreateInfo.DepthAttachment.Format;
 			ImageInfo.Flags = m_CreateInfo.DepthAttachment.Flags;
 			ImageInfo.InitialState = ImageStates::Undefined;
@@ -196,10 +203,7 @@ namespace Fusion {
 
 			m_Images.push_back(Image);
 
-			m_ClearValues[AttachmentCount - 1].color.float32[0] = m_CreateInfo.DepthAttachment.ClearColor.r;
-			m_ClearValues[AttachmentCount - 1].color.float32[1] = m_CreateInfo.DepthAttachment.ClearColor.g;
-			m_ClearValues[AttachmentCount - 1].color.float32[2] = m_CreateInfo.DepthAttachment.ClearColor.b;
-			m_ClearValues[AttachmentCount - 1].color.float32[3] = m_CreateInfo.DepthAttachment.ClearColor.a;
+			m_ClearValues[AttachmentCount - 1].depthStencil.depth = 1.0f;
 		}
 	}
 

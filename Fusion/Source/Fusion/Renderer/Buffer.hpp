@@ -21,7 +21,7 @@ namespace Fusion {
 		Buffer(const BufferInfo& InInfo);
 		~Buffer();
 
-		Byte* Map();
+		void* Map();
 		void Unmap(Byte* InPtr);
 
 		//void Transition(CommandList* InCmdList, EBufferState InState);

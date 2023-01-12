@@ -9,7 +9,8 @@ namespace Fusion {
 		EFormat Format;
 		EImageFlag Flags;
 		EImageState InitialState;
-		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		glm::vec4 ClearColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		bool IsMappable = false;
 	};
 
 	struct RenderTextureInfo

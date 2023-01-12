@@ -136,10 +136,10 @@ namespace Fusion {
 		VkPipelineDepthStencilStateCreateInfo DepthStencilStateInfo = {};
 		DepthStencilStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		DepthStencilStateInfo.flags = 0;
-		DepthStencilStateInfo.depthTestEnable = VK_FALSE;// IsDepthFormat(InCreateInfo.DepthStencilFormat);
+		DepthStencilStateInfo.depthTestEnable = IsDepthFormat(InCreateInfo.DepthStencilFormat);
 		DepthStencilStateInfo.depthWriteEnable = VK_TRUE;
-		DepthStencilStateInfo.depthCompareOp = VK_COMPARE_OP_GREATER;
-		DepthStencilStateInfo.depthBoundsTestEnable = VK_TRUE;
+		DepthStencilStateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		DepthStencilStateInfo.depthBoundsTestEnable = VK_FALSE;
 		DepthStencilStateInfo.stencilTestEnable = VK_FALSE;
 		DepthStencilStateInfo.front.writeMask = 0xFF;
 		DepthStencilStateInfo.front.compareMask = 0xFF;

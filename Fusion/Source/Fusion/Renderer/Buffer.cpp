@@ -33,13 +33,14 @@ namespace Fusion {
 	{
 	}
 
-	Byte* Buffer::Map()
+	void* Buffer::Map()
 	{
-		return nullptr;
+		return GraphicsContext::Get()->GetAllocator()->MapMemory(m_Allocation);
 	}
 
 	void Buffer::Unmap(Byte* InPtr)
 	{
+		GraphicsContext::Get()->GetAllocator()->UnmapMemory(m_Allocation);
 	}
 
 	/*void Buffer::Transition(CommandList* InCmdList, EBufferState InState)
