@@ -1,4 +1,5 @@
 #include "FusionEditor.hpp"
+
 #include <Fusion/EntryPoint.hpp>
 #include <Fusion/Memory/Shared.hpp>
 #include <Fusion/Renderer/RenderSettings.hpp>
@@ -27,6 +28,7 @@
 #include <NFD-Extended/nfd.hpp>
 
 #include <GLFW/glfw3.h>
+
 namespace FusionEditor {
 
 	static void TestSignedVolumeProjection()
@@ -214,7 +216,7 @@ namespace FusionEditor {
 		m_WindowManager->RegisterWindow<WorldOutlinerWindow>(true, m_World, m_ActorSelectionManager);
 		m_WindowManager->RegisterWindow<ActorDetailsWindow>(true, m_ActorSelectionManager);
 		m_WindowManager->RegisterWindow<EditorViewportWindow>(true, m_World, m_ActorSelectionManager);
-		//m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
+		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 		m_WindowManager->RegisterWindow<AssetListWindow>(false, "Assets");
 

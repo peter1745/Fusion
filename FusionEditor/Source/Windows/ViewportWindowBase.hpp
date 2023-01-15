@@ -19,6 +19,9 @@ namespace FusionEditor {
 
 		virtual constexpr EMenuBarLocation GetMenuBarLocation() const override { return EMenuBarLocation::View; }
 
+		float GetRenderWidth() const { return m_RenderWidth; }
+		float GetRenderHeight() const { return m_RenderHeight; }
+
 	protected:
 		virtual void RenderContents() override;
 

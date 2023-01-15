@@ -4,6 +4,7 @@
 
 #include "WindowManager.hpp"
 #include "WorldOutlinerWindow.hpp"
+#include "GameViewportWindow.hpp"
 
 #include "Fusion/World/World.hpp"
 #include "Fusion/World/Components/AllComponents.hpp"
@@ -82,7 +83,11 @@ namespace FusionEditor {
 		if (!ImGui::BeginPopup("AddComponentPopupMenu"))
 			return;
 
-		RenderComponentMenuItem<CameraComponent>("Camera");
+		RenderComponentMenuItem<CameraComponent>("Camera", [](auto* InCameraComp)
+		{
+			auto GameViewport = WindowManager::Get()->GetWindowOfType<GameViewportWindow>();
+			InCameraComp->CameraInstance = WorldCamera(uint32_t(GameViewport->GetRenderWidth()), uint32_t(GameViewport->GetRenderHeight()));
+		});
 		RenderComponentMenuItem<MeshComponent>("Mesh");
 		RenderComponentMenuItem<PhysicsBodyComponent>("Physics Body");
 		RenderComponentMenuItem<SphereShapeComponent>("Sphere Shape");

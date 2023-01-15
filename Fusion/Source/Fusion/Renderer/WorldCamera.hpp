@@ -7,6 +7,14 @@ namespace Fusion {
 	class WorldCamera : public Camera
 	{
 	public:
+		WorldCamera() = default;
+
+		WorldCamera(uint32_t InWidth, uint32_t InHeight)
+		    : m_Width(InWidth), m_Height(InHeight)
+		{
+			RecalculateProjectionMatrix();
+		}
+
 		float GetNearPlane() const { return m_NearPlane; }
 		void SetNearPlane(float InNearPlane)
 		{
