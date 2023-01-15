@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Fusion/Core/Core.hpp"
 #include "Fusion/Core/Assert.hpp"
-#include "Fusion/STL/Flags.hpp"
+#include "Fusion/STL/EnumBitmask.hpp"
 
 namespace Fusion {
 
@@ -11,16 +12,14 @@ namespace Fusion {
 		Pixel
 	};
 
-	using EImageUsage = Flags<>;
-
-	namespace ImageUsages {
-
-		static constexpr EImageUsage Texture = (1 << 0);
-		static constexpr EImageUsage Attachment = (1 << 1);
-		static constexpr EImageUsage CopySource = (1 << 2);
-		static constexpr EImageUsage CopyDestination = (1 << 3);
-
-	}
+	enum class EImageUsage
+	{
+		Texture = Shift1(0),
+		Attachment = Shift1(1),
+		CopySource = Shift1(2),
+		CopyDestination = Shift1(3),
+		ScopedBitmaskMark
+	};
 
 	enum class EFormat
 	{
@@ -45,26 +44,25 @@ namespace Fusion {
 		return InFormat == EFormat::D24UnormS8UInt;
 	}
 
-	using EImageFlag = Flags<>;
-	using EImageState = Flags<>;
-
-	namespace ImageStates
+	enum class EImageFlag
 	{
-		static constexpr EImageState RenderTarget = (1 << 0);
-		static constexpr EImageState DepthWrite = (1 << 1);
-		static constexpr EImageState DepthRead = (1 << 2);
-		static constexpr EImageState PixelShaderResource = (1 << 3);
-		static constexpr EImageState ColorAttachmentOptimal = (1 << 4);
-		static constexpr EImageState CopySource = (1 << 5);
-		static constexpr EImageState CopyDestination = (1 << 6);
-		static constexpr EImageState Undefined = (1 << 7);
+		AllowRenderTarget = Shift1(0),
+		AllowDepthStencil = Shift1(1),
+		ScopedBitmaskMark
 	};
 
-	namespace ImageFlags
+	enum class EImageState
 	{
-		static constexpr EImageFlag AllowRenderTarget = (1 << 0);
-		static constexpr EImageFlag AllowDepthStencil = (1 << 1);
-	}
+		RenderTarget = Shift1(0),
+		DepthWrite = Shift1(1),
+		DepthRead = Shift1(2),
+		PixelShaderResource = Shift1(3),
+		ColorAttachmentOptimal = Shift1(4),
+		CopySource = Shift1(5),
+		CopyDestination = Shift1(6),
+		Undefined = Shift1(7),
+		ScopedBitmaskMark
+	};
 
 	enum class EShaderVisibility
 	{
@@ -107,14 +105,13 @@ namespace Fusion {
 		return 0;
 	}
 
-	using EBufferUsage = Flags<>;
-
-	namespace BufferUsage
+	enum class EBufferUsage
 	{
-		static constexpr EBufferUsage Vertex = (1 << 0);
-		static constexpr EBufferUsage Index = (1 << 1);
-		static constexpr EBufferUsage CopyDestination = (1 << 2);
-		static constexpr EBufferUsage CopySource = (1 << 3);
-	}
+		Vertex = Shift1(0),
+		Index = Shift1(1),
+		CopyDestination = Shift1(2),
+		CopySource = Shift1(3),
+		ScopedBitmaskMark
+	};
 
 }

@@ -26,7 +26,7 @@ namespace FusionEditor {
 		m_SelectionManager->AddDeselectionCallback(FUSION_BIND_FUNC(EditorViewportWindow::OnActorDeselected));
 
 		Fusion::BufferInfo StagingBufferCreateInfo = {};
-		StagingBufferCreateInfo.Usage = Fusion::BufferUsage::CopyDestination;
+		StagingBufferCreateInfo.Usage = Fusion::EBufferUsage::CopyDestination;
 		StagingBufferCreateInfo.Size = sizeof(Fusion::ActorID);
 		m_StagingBuffer = Fusion::MakeUnique<Fusion::Buffer>(StagingBufferCreateInfo);
 	}
@@ -65,7 +65,7 @@ namespace FusionEditor {
 				Fusion::LogInfo("Fusion Editor", "Clicked inside viewport: {}, {}", MousePos.x, MousePos.y);
 
 				auto ColorPickingImage = m_RenderTextures[FrameIndex]->GetImage(1);
-				ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySource);
+				ColorPickingImage->Transition(CmdList, Fusion::EImageState::CopySource);
 				ColorPickingImage->CopyTo(CmdList, { int32_t(MousePos.x), int32_t(MousePos.y), 1, 1 }, m_StagingBuffer.get());
 				m_ShouldCopyFromBuffer = true;
 			}

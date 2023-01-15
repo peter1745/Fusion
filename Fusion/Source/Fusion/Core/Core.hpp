@@ -27,4 +27,7 @@ namespace Fusion {
 	template<typename T, typename... TArgs>
 	Unique<T> MakeUnique(TArgs&&... InArgs) { return std::make_unique<T>(std::forward<TArgs>(InArgs)...); }
 
+	template<typename T>
+	constexpr T Shift1(T InShift) { return T(1) << InShift; }
+
 }

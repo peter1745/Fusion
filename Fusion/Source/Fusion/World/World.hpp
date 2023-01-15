@@ -3,7 +3,7 @@
 #include "Actor.hpp"
 #include "Components/CoreComponents.hpp"
 
-#include "Fusion/STL/Flags.hpp"
+#include "Fusion/STL/EnumBitmask.hpp"
 
 #include <Fission/World/DynamicsWorld.hpp>
 
@@ -12,13 +12,12 @@
 
 namespace Fusion {
 
-	using EWorldState = Flags<uint32_t>;
-
-	namespace WorldStates
+	enum class EWorldState
 	{
-		static constexpr EWorldState None = (1 << 0);
-		static constexpr EWorldState Simulating = (1 << 1);
-	}
+		None = Shift1(0),
+		Simulating = Shift1(1),
+		ScopedBitmaskMark
+	};
 
 	class World : public SharedObject
 	{
@@ -136,7 +135,7 @@ namespace Fusion {
 	private:
 		std::string m_Name = "Empty World";
 
-		EWorldState m_State = WorldStates::None;
+		EWorldState m_State = EWorldState::None;
 
 		entt::registry m_Registry;
 		std::unordered_map<ActorID, entt::entity> m_ActorIDMap;

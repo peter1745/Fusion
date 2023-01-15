@@ -45,7 +45,7 @@ namespace Fusion {
 
 	void World::StartSimulation()
 	{
-		m_State = WorldStates::Simulating;
+		m_State = EWorldState::Simulating;
 
 		m_PhysicsWorld.Initialize(5000);
 
@@ -82,7 +82,7 @@ namespace Fusion {
 
 	void World::Simulate(float InDeltaTime)
 	{
-		if (!(m_State & WorldStates::Simulating))
+		if (!(m_State & EWorldState::Simulating))
 			return;
 
 		m_PhysicsWorld.Simulate(InDeltaTime);

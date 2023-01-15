@@ -32,7 +32,7 @@ namespace Fusion {
 	{
 		VkImageUsageFlags Result = 0;
 
-		if (InUsage & ImageUsages::Attachment)
+		if ((InUsage & EImageUsage::Attachment) != 0)
 		{
 			if (IsDepthFormat(InFormat))
 				Result |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -44,8 +44,8 @@ namespace Fusion {
 			Result = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		}
 
-		if (InUsage & ImageUsages::CopySource) Result |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-		if (InUsage & ImageUsages::CopyDestination) Result |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		if ((InUsage & EImageUsage::CopySource) != 0) Result |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		if ((InUsage & EImageUsage::CopyDestination) != 0) Result |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		Result |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
@@ -67,22 +67,22 @@ namespace Fusion {
 	{
 		uint32_t Result = 0;
 
-		if (InUsage & BufferUsage::Vertex) Result |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		if (InUsage & BufferUsage::Index) Result |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		if (InUsage & BufferUsage::CopyDestination) Result |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-		if (InUsage & BufferUsage::CopySource) Result |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		if ((InUsage & EBufferUsage::Vertex) != 0) Result |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		if ((InUsage & EBufferUsage::Index) != 0) Result |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+		if ((InUsage & EBufferUsage::CopyDestination) != 0) Result |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		if ((InUsage & EBufferUsage::CopySource) != 0) Result |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
 		return static_cast<VkBufferUsageFlags>(Result);
 	}
 
 	static constexpr VkImageLayout ImageStatesToVkImageLayout(EImageState InStates)
 	{
-		if (InStates & ImageStates::RenderTarget) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-		if (InStates & ImageStates::DepthWrite) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-		if (InStates & ImageStates::DepthRead) return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		if (InStates & ImageStates::PixelShaderResource) return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		if (InStates & ImageStates::CopySource) return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		if (InStates & ImageStates::CopyDestination) return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		if ((InStates & EImageState::RenderTarget) != 0) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+		if ((InStates & EImageState::DepthWrite) != 0) return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+		if ((InStates & EImageState::DepthRead) != 0) return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		if ((InStates & EImageState::PixelShaderResource) != 0) return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		if ((InStates & EImageState::CopySource) != 0) return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		if ((InStates & EImageState::CopyDestination) != 0) return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
 		return VK_IMAGE_LAYOUT_UNDEFINED;
 	}

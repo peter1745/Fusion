@@ -33,7 +33,7 @@ namespace Fusion {
 
 			TransitionImage(InCommandList->GetBuffer(), TransitionInfo);
 
-			m_Images[Idx]->m_State = ImageStates::ColorAttachmentOptimal;
+			m_Images[Idx]->m_State = EImageState::ColorAttachmentOptimal;
 		}
 
 		if (IsDepthFormat(m_CreateInfo.DepthAttachment.Format))
@@ -104,7 +104,7 @@ namespace Fusion {
 			TransitionInfo.AspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 			TransitionImage(InCommandList->GetBuffer(), TransitionInfo);
 
-			m_Images[Idx]->m_State = ImageStates::PixelShaderResource;
+			m_Images[Idx]->m_State = EImageState::PixelShaderResource;
 		}
 	}
 
@@ -144,14 +144,14 @@ namespace Fusion {
 
 			Image2DInfo ImageInfo = {};
 			ImageInfo.Size = { m_CreateInfo.Width, m_CreateInfo.Height };
-			ImageInfo.Usage = ImageUsages::Attachment;
+			ImageInfo.Usage = EImageUsage::Attachment;
 			ImageInfo.Format = AttachmentInfo.Format;
 			ImageInfo.Flags = AttachmentInfo.Flags;
-			ImageInfo.InitialState = ImageStates::Undefined;
+			ImageInfo.InitialState = EImageState::Undefined;
 			ImageInfo.ClearColor = AttachmentInfo.ClearColor;
 
 			if (AttachmentInfo.IsMappable)
-				ImageInfo.Usage |= ImageUsages::CopySource;
+				ImageInfo.Usage |= EImageUsage::CopySource;
 
 			Shared<Image2D> Image = Shared<Image2D>::Create(ImageInfo);
 
@@ -180,10 +180,10 @@ namespace Fusion {
 		{
 			Image2DInfo ImageInfo = {};
 			ImageInfo.Size = { m_CreateInfo.Width, m_CreateInfo.Height };
-			ImageInfo.Usage = ImageUsages::Attachment;
+			ImageInfo.Usage = EImageUsage::Attachment;
 			ImageInfo.Format = m_CreateInfo.DepthAttachment.Format;
 			ImageInfo.Flags = m_CreateInfo.DepthAttachment.Flags;
-			ImageInfo.InitialState = ImageStates::Undefined;
+			ImageInfo.InitialState = EImageState::Undefined;
 			ImageInfo.ClearColor = m_CreateInfo.DepthAttachment.ClearColor;
 
 			Shared<Image2D> Image = Shared<Image2D>::Create(ImageInfo);
