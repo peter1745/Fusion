@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Fusion/IO/Logging.hpp"
+#include "Fusion/Core/Core.hpp"
 #include "Fusion/Renderer/CommonTypes.hpp"
 
 #include <vulkan/vulkan.h>

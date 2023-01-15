@@ -1,5 +1,6 @@
 #include "FusionPCH.hpp"
 #include "Window.hpp"
+#include "Fusion/Core/Assert.hpp"
 #include "Fusion/IO/Mouse.hpp"
 #include "Fusion/IO/Keyboard.hpp"
 #include "Fusion/IO/GLFWKeyMappings.hpp"
@@ -30,12 +31,12 @@ namespace Fusion {
 
 	void Window::Init()
 	{
-		FUSION_CORE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
+		CoreVerify(glfwInit(), "Failed to initialize GLFW!");
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		m_NativeWindow = glfwCreateWindow(int(m_WindowData.Specification.Width), int(m_WindowData.Specification.Height), m_WindowData.Specification.Title.c_str(), NULL, NULL);
-		FUSION_CORE_VERIFY(m_NativeWindow, "Failed to create GLFW window!");
+		CoreVerify(m_NativeWindow, "Failed to create GLFW window!");
 
 		glfwSetWindowUserPointer(m_NativeWindow, &m_WindowData);
 

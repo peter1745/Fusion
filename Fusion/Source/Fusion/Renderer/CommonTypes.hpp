@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Fusion/Core/Enum.hpp"
 #include "Fusion/Core/Assert.hpp"
+#include "Fusion/STL/Flags.hpp"
 
 namespace Fusion {
 
@@ -103,7 +103,7 @@ namespace Fusion {
 		case EFormat::R32SInt: return 1 * sizeof(int32_t);
 		}
 
-		FUSION_CORE_VERIFY(false);
+		CoreVerify(false);
 		return 0;
 	}
 

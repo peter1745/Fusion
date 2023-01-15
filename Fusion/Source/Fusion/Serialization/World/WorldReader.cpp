@@ -7,7 +7,8 @@ namespace Fusion {
 	WorldYAMLReader::WorldYAMLReader(const std::filesystem::path& InFilePath)
 	{
 		std::ifstream StreamIn(InFilePath);
-		FUSION_CORE_VERIFY(StreamIn);
+		CoreVerify(StreamIn.good());
+
 		std::stringstream StreamBuffer;
 		StreamBuffer << StreamIn.rdbuf();
 
@@ -17,7 +18,7 @@ namespace Fusion {
 		}
 		catch (YAML::ParserException InException)
 		{
-			FUSION_CORE_ERROR("Failed to load world file '{}' Error: {}", InFilePath.string(), InException.what());
+			LogError("Fusion", "Failed to load world file '{}' Error: {}", InFilePath.string(), InException.what());
 		}
 
 		StreamIn.close();
@@ -30,12 +31,12 @@ namespace Fusion {
 
 		if (!m_RootNode["World"])
 		{
-			FUSION_CORE_ERROR("Can't load world file, no 'World' entry found!");
+			LogError("Fusion", "Can't load world file, no 'World' entry found!");
 			return;
 		}
 
 		InWorld->SetName(m_RootNode["World"].as<std::string>("Empty World"));
-		FUSION_CORE_INFO("Deserializing World '{}'", InWorld->GetName());
+		LogInfo("Fusion", "Deserializing World '{}'", InWorld->GetName());
 
 		auto ActorList = m_RootNode["Actors"];
 		if (ActorList)

@@ -18,7 +18,7 @@ namespace Fusion {
 	Application::Application(const ApplicationSpecification& InSpecification, void* InUserData)
 	    : m_Specification(InSpecification)
 	{
-		FUSION_CORE_VERIFY(s_Application == nullptr);
+		CoreVerify(s_Application == nullptr);
 		s_Application = this;
 
 		WindowSpecification WindowSpec = {};
@@ -65,9 +65,7 @@ namespace Fusion {
 
 			ExecuteMainThreadQueue();
 
-			//m_Renderer->Begin();
 			OnUpdate(m_TimeStep);
-			//m_Renderer->End();
 
 			TimePoint time = std::chrono::high_resolution_clock::now();
 			m_FrameTime = std::chrono::duration_cast<std::chrono::duration<float>>(time - m_LastFrameTime).count();
@@ -98,7 +96,8 @@ namespace Fusion {
 	void Application::EventCallback(Event& InEvent)
 	{
 		EventDispatcher Dispatcher(InEvent);
-		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent) {
+		Dispatcher.Dispatch<WindowCloseEvent>([this]([[maybe_unused]] WindowCloseEvent& InCloseEvent)
+		{
 			m_Running = false;
 			return true;
 		});

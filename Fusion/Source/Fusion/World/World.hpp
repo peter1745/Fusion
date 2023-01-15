@@ -3,7 +3,7 @@
 #include "Actor.hpp"
 #include "Components/CoreComponents.hpp"
 
-#include "Fusion/Core/Enum.hpp"
+#include "Fusion/STL/Flags.hpp"
 
 #include <Fission/World/DynamicsWorld.hpp>
 
@@ -12,7 +12,7 @@
 
 namespace Fusion {
 
-	using EWorldState = Flags<>;
+	using EWorldState = Flags<uint32_t>;
 
 	namespace WorldStates
 	{
@@ -48,7 +48,7 @@ namespace Fusion {
 		{
 			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
 			{
-				FUSION_CORE_WARN("Tried to add component to an invalid actor!");
+				LogSystem::GetLogger("Fusion")->Warn("Tried to add component to an invalid actor!");
 				return nullptr;
 			}
 
@@ -60,7 +60,7 @@ namespace Fusion {
 		{
 			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
 			{
-				FUSION_CORE_WARN("Tried to add component to an invalid actor!");
+				LogSystem::GetLogger("Fusion")->Warn("Tried to add component to an invalid actor!");
 				return nullptr;
 			}
 
@@ -72,7 +72,7 @@ namespace Fusion {
 		{
 			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
 			{
-				FUSION_CORE_WARN("Tried to add component to an invalid actor!");
+				LogSystem::GetLogger("Fusion")->Warn("Tried to add component to an invalid actor!");
 				return nullptr;
 			}
 
@@ -84,7 +84,7 @@ namespace Fusion {
 		{
 			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
 			{
-				FUSION_CORE_WARN("Tried to add component to an invalid actor!");
+				LogSystem::GetLogger("Fusion")->Warn("Tried to add component to an invalid actor!");
 				return nullptr;
 			}
 
@@ -96,7 +96,7 @@ namespace Fusion {
 		{
 			if (m_ActorIDMap.find(InActorID) == m_ActorIDMap.end())
 			{
-				FUSION_CORE_WARN("Tried to remove component from an invalid actor!");
+				LogSystem::GetLogger("Fusion")->Warn("Tried to remove component from an invalid actor!");
 				return;
 			}
 

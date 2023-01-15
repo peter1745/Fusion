@@ -51,7 +51,7 @@ namespace Fusion {
 			InstanceInfo.ppEnabledLayerNames = s_ValidationLayers.data();
 #endif
 
-			FUSION_CORE_VERIFY(vkCreateInstance(&InstanceInfo, nullptr, &m_Instance) == VK_SUCCESS);
+			CoreVerify(vkCreateInstance(&InstanceInfo, nullptr, &m_Instance) == VK_SUCCESS);
 		}
 
 		// Create Window Surface via GLFW

@@ -23,7 +23,7 @@ namespace Fusion {
 
 		CommandBuffer* GetCommandBuffer(size_t InIndex) const
 		{
-			FUSION_CORE_VERIFY(InIndex < m_CommandBuffers.size());
+			CoreVerify(InIndex < m_CommandBuffers.size());
 			return m_CommandBuffers[InIndex].get();
 		}
 

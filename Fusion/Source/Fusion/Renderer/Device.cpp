@@ -62,8 +62,8 @@ namespace Fusion {
 			VkPhysicalDeviceProperties DeviceProperties;
 			vkGetPhysicalDeviceProperties(PhysicalDevice, &DeviceProperties);
 
-			FUSION_CORE_INFO("GPU: {} ({})", DeviceProperties.deviceName, DeviceProperties.deviceID);
-			FUSION_CORE_INFO("\tDriver Version: {}", DeviceProperties.driverVersion);
+			LogInfo("Fusion", "GPU: {} ({})", DeviceProperties.deviceName, DeviceProperties.deviceID);
+			LogInfo("Fusion", "\tDriver Version: {}", DeviceProperties.driverVersion);
 
 			VkPhysicalDeviceFeatures DeviceFeatures;
 			vkGetPhysicalDeviceFeatures(PhysicalDevice, &DeviceFeatures);
@@ -75,37 +75,37 @@ namespace Fusion {
 			{
 			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
 			{
-				FUSION_CORE_INFO("\tType: Integrated");
+				LogInfo("Fusion", "\tType: Integrated");
 				Score += 3;
 				break;
 			}
 			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
 			{
-				FUSION_CORE_INFO("\tType: Discrete");
+				LogInfo("Fusion", "\tType: Discrete");
 				Score += 4;
 				break;
 			}
 			case VK_PHYSICAL_DEVICE_TYPE_CPU:
 			{
-				FUSION_CORE_INFO("\tType: CPU");
+				LogInfo("Fusion", "\tType: CPU");
 				Score += 2;
 				break;
 			}
 			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
 			{
-				FUSION_CORE_INFO("\tType: Virtual");
+				LogInfo("Fusion", "\tType: Virtual");
 				Score += 1;
 				break;
 			}
 			case VK_PHYSICAL_DEVICE_TYPE_OTHER:
 			{
-				FUSION_CORE_INFO("\tType: Unknown");
+				LogInfo("Fusion", "\tType: Unknown");
 				Score = 0;
 				break;
 			}
 			case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM:
 			{
-				FUSION_CORE_VERIFY(false);
+				CoreVerify(false);
 				break;
 			}
 			}
@@ -121,7 +121,7 @@ namespace Fusion {
 				}
 			}
 
-			FUSION_CORE_INFO("\tScore: {}", DeviceProperties.deviceName, Score);
+			LogInfo("Fusion", "\tScore: {}", DeviceProperties.deviceName, Score);
 
 			if (Score > MaxScore)
 			{
@@ -130,7 +130,7 @@ namespace Fusion {
 			}
 		}
 
-		FUSION_CORE_VERIFY(MaxScore != 0, "Found no suitable GPU");
+		CoreVerify(MaxScore != 0, "Found no suitable GPU");
 
 		// Found suitable GPU, now determine Graphics + Present Queue
 		auto DeviceQueues = GetQueues(m_PhysicalDevice, InSurface);
@@ -145,12 +145,12 @@ namespace Fusion {
 			}
 		}
 
-		FUSION_CORE_VERIFY(m_Queue.IsValid(), "Failed to find suitable queue!");
+		CoreVerify(m_Queue.IsValid(), "Failed to find suitable queue!");
 
 		// Print GPU info
 		VkPhysicalDeviceProperties DeviceProperties;
 		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &DeviceProperties);
-		FUSION_CORE_INFO("Selected GPU: {} (ID={})", DeviceProperties.deviceName, DeviceProperties.deviceID);
+		LogInfo("Fusion", "Selected GPU: {} (ID={})", DeviceProperties.deviceName, DeviceProperties.deviceID);
 	}
 
 	void Device::CreateLogicalDevice()
@@ -183,7 +183,7 @@ namespace Fusion {
 		DeviceInfo.ppEnabledExtensionNames = RequiredExtensions.data();
 		DeviceInfo.enabledExtensionCount = RequiredExtensions.size();
 
-		FUSION_CORE_VERIFY(vkCreateDevice(m_PhysicalDevice, &DeviceInfo, nullptr, &m_Device) == VK_SUCCESS);
+		CoreVerify(vkCreateDevice(m_PhysicalDevice, &DeviceInfo, nullptr, &m_Device) == VK_SUCCESS);
 		vkGetDeviceQueue(m_Device, m_Queue.QueueFamily, 0, &m_Queue.Queue);
 	}
 

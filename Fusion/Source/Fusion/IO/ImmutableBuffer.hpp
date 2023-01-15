@@ -52,7 +52,7 @@ namespace Fusion {
 		template<typename T>
 		void Write(const T& InValue)
 		{
-			FUSION_CORE_VERIFY(m_Data && m_Offset + sizeof(T) <= m_Size);
+			CoreVerify(m_Data && m_Offset + sizeof(T) <= m_Size);
 			memcpy(m_Data + m_Offset, &InValue, sizeof(T));
 			m_Offset += sizeof(T);
 		}

@@ -20,7 +20,7 @@ namespace Fusion {
 		/*template<typename TLoader>
 		static void RegisterLoader(EAssetType InType)
 		{
-			FUSION_CORE_VERIFY(s_RegisteredLoaders.find(InType) != s_RegisteredLoaders.end());
+			CoreVerify(s_RegisteredLoaders.find(InType) != s_RegisteredLoaders.end());
 			s_RegisteredLoaders[InType] = MakeUnique<TLoader>();
 		}*/
 

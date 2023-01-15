@@ -76,7 +76,7 @@ namespace Fusion {
 
 	void CommandBuffer::EndRecording()
 	{
-		FUSION_CORE_VERIFY(vkEndCommandBuffer(m_CommandBuffer) == VK_SUCCESS);
+		CoreVerify(vkEndCommandBuffer(m_CommandBuffer) == VK_SUCCESS);
 	}
 
 	void CommandBuffer::Release()

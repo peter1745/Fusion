@@ -30,20 +30,20 @@ namespace Fusion {
 
 		if (!ErrorMessage.empty())
 		{
-			FUSION_CORE_ERROR("Error generated while loading mesh '{}'!", InFilePath.string());
-			FUSION_CORE_ERROR("Error: {}", ErrorMessage);
+			LogError("Fusion", "Error generated while loading mesh '{}'!", InFilePath.string());
+			LogError("Fusion", "Error: {}", ErrorMessage);
 			return false;
 		}
 
 		if (!WarningMessage.empty())
 		{
-			FUSION_CORE_WARN("Warning generated while loading mesh '{}'!", InFilePath.string());
-			FUSION_CORE_WARN("Warning: {}", WarningMessage);
+			LogWarn("Fusion", "Warning generated while loading mesh '{}'!", InFilePath.string());
+			LogWarn("Fusion", "Warning: {}", WarningMessage);
 		}
 
 		if (!Loaded)
 		{
-			FUSION_CORE_ERROR("Failed to load glTF file '{}'!", InFilePath.string());
+			LogError("Fusion", "Failed to load glTF file '{}'!", InFilePath.string());
 			return false;
 		}
 

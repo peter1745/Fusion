@@ -2,7 +2,7 @@
 
 #include "EditorWindow.hpp"
 
-#include "Fusion/Core/TypeInfo.hpp"
+#include "Fusion/STL/DemangledTypeName.hpp"
 #include "Fusion/IO/Logging.hpp"
 #include "Fusion/Memory/Shared.hpp"
 
@@ -29,7 +29,7 @@ namespace FusionEditor {
 		{
 			if (m_Windows.find(InWindowID) == m_Windows.end())
 			{
-				FUSION_CLIENT_WARN("Tried to open a window using an invalid ID!");
+				Fusion::LogWarn("Fusion Editor", "Tried to open a window using an invalid ID!");
 				return;
 			}
 
@@ -40,7 +40,7 @@ namespace FusionEditor {
 		{
 			if (m_Windows.find(InWindowID) == m_Windows.end())
 			{
-				FUSION_CLIENT_WARN("Tried to open a window using an invalid ID!");
+				Fusion::LogWarn("Fusion Editor", "Tried to open a window using an invalid ID!");
 				return;
 			}
 
@@ -51,11 +51,11 @@ namespace FusionEditor {
 		requires std::derived_from<TWindow, EditorWindow>&& std::constructible_from<TWindow, TWindowParams...>
 		Fusion::Shared<TWindow> RegisterWindow(bool InOpenByDefault, TWindowParams&&... InParams)
 		{
-			uint32_t WindowID = Fusion::TypeInfo<TWindow>().HashCode();
+			uint32_t WindowID = Fusion::DemangledTypeName<TWindow>().HashCode();
 
 			if (m_Windows.find(WindowID) != m_Windows.end())
 			{
-				FUSION_CLIENT_ERROR("Tried to register a window of type '{}' which is already registered!", Fusion::TypeInfo<TWindow>().Name());
+				Fusion::LogError("Fusion Editor", "Tried to register a window of type '{}' which is already registered!", Fusion::DemangledTypeName<TWindow>().Name());
 				return nullptr;
 			}
 
@@ -77,11 +77,11 @@ namespace FusionEditor {
 		requires std::derived_from<TWindow, EditorWindow>
 		Fusion::Shared<TWindow> GetWindowOfType() const
 		{
-			uint32_t WindowID = Fusion::TypeInfo<TWindow>().HashCode();
+			uint32_t WindowID = Fusion::DemangledTypeName<TWindow>().HashCode();
 
 			if (m_Windows.find(WindowID) == m_Windows.end())
 			{
-				FUSION_CLIENT_ERROR("Failed to find window of type '{}'!", Fusion::TypeInfo<TWindow>().Name());
+				Fusion::LogError("Fusion Editor", "Failed to find window of type '{}'!", Fusion::DemangledTypeName<TWindow>().Name());
 				return nullptr;
 			}
 

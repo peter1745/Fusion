@@ -5,9 +5,8 @@
 #include <ostream>
 #include <utility>
 
-namespace Fusion
-{
-	template <class T = std::uint32_t, T D = T{ 0 } >
+namespace Fusion {
+	template <class T = std::uint32_t, T D = T { 0 }>
 	struct Flags
 	{
 	public:
@@ -15,19 +14,19 @@ namespace Fusion
 
 	public:
 		constexpr Flags()
-			: m_Value(D) {}
+		    : m_Value(D) {}
 		constexpr Flags(const ValueT& value)
-			: m_Value(value) {}
+		    : m_Value(value) {}
 		constexpr Flags(ValueT&& value)
-			: m_Value(std::move(value)) {}
+		    : m_Value(std::move(value)) {}
 		template <class U, T E>
 		constexpr Flags(const Flags<U, E>& flags)
-			: m_Value(flags.m_Value)
+		    : m_Value(flags.m_Value)
 		{
 		}
 		template <class U, T E>
 		constexpr Flags(Flags<U, E>&& flags)
-			: m_Value(std::move(flags.m_Value))
+		    : m_Value(std::move(flags.m_Value))
 		{
 		}
 
@@ -54,7 +53,7 @@ namespace Fusion
 			return *this;
 		}
 
-		constexpr         operator ValueT& () { return m_Value; }
+		constexpr operator ValueT&() { return m_Value; }
 		constexpr ValueT& getValue() { return m_Value; }
 
 		friend constexpr Flags operator~(const Flags& flags) { return ~flags.m_Value; }

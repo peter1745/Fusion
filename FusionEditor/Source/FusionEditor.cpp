@@ -53,7 +53,7 @@ namespace FusionEditor {
 			for (size_t Idx = 0; Idx < 4; Idx++)
 				V += Pts[Idx] * Lambdas[Idx];
 
-			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
+			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
 		}
 
 		{
@@ -67,7 +67,7 @@ namespace FusionEditor {
 			for (size_t Idx = 0; Idx < 4; Idx++)
 				V += Pts[Idx] * Lambdas[Idx];
 
-			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
+			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
 		}
 
 		{
@@ -81,7 +81,7 @@ namespace FusionEditor {
 			for (size_t Idx = 0; Idx < 4; Idx++)
 				V += Pts[Idx] * Lambdas[Idx];
 
-			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
+			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
 		}
 
 		{
@@ -95,7 +95,7 @@ namespace FusionEditor {
 			for (size_t Idx = 0; Idx < 4; Idx++)
 				V += Pts[Idx] * Lambdas[Idx];
 
-			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
+			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
 		}
 
 		{
@@ -110,13 +110,15 @@ namespace FusionEditor {
 			for (size_t Idx = 0; Idx < 4; Idx++)
 				V += Pts[Idx] * Lambdas[Idx];
 
-			FUSION_CLIENT_INFO("Lambdas: {}, V: {}", Lambdas, V);
+			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
 		}
 	}
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 	    : Application(specification, this)
 	{
+		LogSystem::CreateLogger("Fusion Editor", "%^[%T] %n: %v%$")->Info("Initialized Editor Logger.");
+
 		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(GetWindow()->GetWindowHandle());
 		glfwSetDropCallback(NativeWindow, [](GLFWwindow* InNativeWindow, int32_t InPathCount, const char** InFilePaths) {
 			Fusion::WindowData* Data = static_cast<Fusion::WindowData*>(glfwGetWindowUserPointer(InNativeWindow));
@@ -127,6 +129,9 @@ namespace FusionEditor {
 
 		switch (RenderSettings::Get().API)
 		{
+		case ERendererAPI::None:
+			SetTitle("Fusion Editor");
+			break;
 		case ERendererAPI::Vulkan:
 			SetTitle("Fusion Editor (Vulkan)");
 			break;
@@ -142,7 +147,7 @@ namespace FusionEditor {
 
 		m_Renderer = MakeUnique<Renderer>(m_Context, RendererInfo{ m_SwapChain });
 
-		FUSION_CORE_VERIFY(NFD::Init() == NFD_OKAY);
+		CoreVerify(NFD::Init() == NFD_OKAY);
 
 		m_World = Shared<World>::Create("Empty World");
 		m_WindowManager = MakeUnique<WindowManager>();
@@ -150,10 +155,6 @@ namespace FusionEditor {
 		m_ActorSelectionManager = ActorSelectionManager::Create();
 
 		InitWindows();
-
-		// TODO(Peter): We shouldn't do this even for D3D12 (Not sure why we were)
-		//m_Context->GetCurrentCommandList()->EndRecording();
-		//m_Context->ExecuteCommandLists({ m_Context->GetCurrentCommandList() });
 	}
 
 	void FusionEditorApp::OnUpdate(float DeltaTime)
@@ -161,8 +162,6 @@ namespace FusionEditor {
 		m_World->Simulate(DeltaTime);
 
 		m_Renderer->BeginFrame();
-
-		//m_Context->GetCurrentCommandList()->SetDescriptorHeaps({ m_Context->GetDescriptorHeap(Fusion::EDescriptorHeapType::SRV_CBV_UAV) });
 
 		m_WindowManager->OnUpdate(DeltaTime);
 		m_WindowManager->OnRender();
@@ -200,7 +199,7 @@ namespace FusionEditor {
 
 		if (!ContentBrowser->IsMouseInside())
 		{
-			FUSION_CLIENT_WARN("Tried dropping asset outside of the content browser window!");
+			Fusion::LogWarn("Fusion Editor", "Tried dropping asset outside of the content browser window!");
 			return;
 		}
 
@@ -295,7 +294,7 @@ namespace FusionEditor {
 					}
 					case NFD_ERROR:
 					{
-						FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+						Fusion::LogError("Fusion Editor", "NFD-Extended threw an error: {}", NFD::GetError());
 						break;
 					}
 					}
@@ -320,7 +319,7 @@ namespace FusionEditor {
 					}
 					case NFD_ERROR:
 					{
-						FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+						Fusion::LogError("Fusion Editor", "NFD-Extended threw an error: {}", NFD::GetError());
 						break;
 					}
 					}
@@ -346,7 +345,7 @@ namespace FusionEditor {
 					}
 					case NFD_ERROR:
 					{
-						FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+						Fusion::LogError("Fusion Editor", "NFD-Extended threw an error: {}", NFD::GetError());
 						break;
 					}
 					}
@@ -424,7 +423,7 @@ namespace FusionEditor {
 			Fusion::ImmutableBuffer Buffer;
 			if (!Fusion::FileIO::ReadFile(FilePath, Buffer))
 			{
-				FUSION_CORE_ERROR("Failed to load asset file {}", FilePath);
+				Fusion::LogError("Fusion Editor", "Failed to load asset file {}", FilePath);
 				continue;
 			}
 
@@ -477,7 +476,7 @@ namespace FusionEditor {
 				}
 				case NFD_ERROR:
 				{
-					FUSION_CORE_ERROR("NFD-Extended threw an error: {}", NFD::GetError());
+					Fusion::LogError("Fusion Editor", "NFD-Extended threw an error: {}", NFD::GetError());
 					break;
 				}
 				}

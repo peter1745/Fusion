@@ -12,7 +12,7 @@ namespace Fusion {
 
 		if (m_Storage.find(AssetPtr->Handle) == m_Storage.end())
 		{
-			FUSION_CORE_WARN("Notified about an asset ({}) that isn't managed by this storage instance!", AssetPtr->Handle);
+			LogWarn("Fusion", "Notified about an asset ({}) that isn't managed by this storage instance!", AssetPtr->Handle);
 			return;
 		}
 

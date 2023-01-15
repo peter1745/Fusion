@@ -24,7 +24,7 @@ namespace Fusion {
 
 		Fusion::AssetHandle Handle = Buffer.Read<Fusion::AssetHandle>();
 		EAssetType Type = Handle.GetType();
-		FUSION_CORE_VERIFY(s_RegisteredLoaders.find(Type) != s_RegisteredLoaders.end());
+		CoreVerify(s_RegisteredLoaders.find(Type) != s_RegisteredLoaders.end());
 
 		AssetContainer<Asset> Result = s_RegisteredLoaders.at(Type)->LoadAsset(Buffer);
 		Result->Handle = Handle;

@@ -13,7 +13,7 @@ namespace FusionEditor {
 	Fusion::EAssetType AssetUtils::GetTypeFromExtension(const std::filesystem::path& InFilePath)
 	{
 		auto It = s_AssetExtensionMap.find(InFilePath.extension().string());
-		FUSION_CORE_VERIFY(It != s_AssetExtensionMap.end());
+		Fusion::CoreVerify(It != s_AssetExtensionMap.end());
 		return It->second;
 	}
 

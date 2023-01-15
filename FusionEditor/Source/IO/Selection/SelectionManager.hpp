@@ -20,7 +20,7 @@ namespace FusionEditor {
 			if (m_SelectionMap.find(InKey) != m_SelectionMap.end())
 			{
 				// Already selected
-				FUSION_CLIENT_WARN("Attempting to select object with a key that's already in use: {}", InKey);
+				Fusion::LogWarn("Fusion Editor", "Attempting to select object with a key that's already in use: {}", InKey);
 				return;
 			}
 
@@ -45,7 +45,7 @@ namespace FusionEditor {
 			if (m_SelectionMap.find(InKey) == m_SelectionMap.end())
 			{
 				// Already selected
-				FUSION_CLIENT_WARN("Attempting to deselect object with a key that hasn't been selected: {}", InKey);
+				Fusion::LogWarn("Fusion Editor", "Attempting to deselect object with a key that hasn't been selected: {}", InKey);
 				return;
 			}
 

@@ -19,14 +19,14 @@ namespace Fusion {
 		template<typename TValueType>
 		TValueType Read(const std::string& InName) const
 		{
-			FUSION_CORE_VERIFY(m_CurrentComponentNode);
+			CoreVerify(static_cast<bool>(m_CurrentComponentNode));
 			return m_CurrentComponentNode[InName].as<TValueType>();
 		}
 
 		template<typename TValueType>
 		TValueType Read(const std::string& InName, const TValueType& InFallback) const
 		{
-			FUSION_CORE_VERIFY(m_CurrentComponentNode);
+			CoreVerify(static_cast<bool>(m_CurrentComponentNode));
 			return m_CurrentComponentNode[InName].as<TValueType>(InFallback);
 		}
 

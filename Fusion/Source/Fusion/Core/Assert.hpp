@@ -3,27 +3,38 @@
 #include "Fusion/IO/Logging.hpp"
 
 #if defined(FUSION_PLATFORM_WINDOWS)
-#define FUSION_DEBUG_BREAK __debugbreak()
+	#define FUSION_DEBUG_BREAK __debugbreak()
 #else
-#include <signal.h>
-#define FUSION_DEBUG_BREAK raise(SIGABRT)
+	#include <signal.h>
+	#define FUSION_DEBUG_BREAK raise(SIGABRT)
 #endif
 
 #define FUSION_ENABLE_VERIFY 1
 
+namespace Fusion {
+
 #if FUSION_ENABLE_VERIFY
 
-#ifdef FUSION_PLATFORM_WINDOWS
-	#define FUSION_CORE_VERIFY_MESSAGE_INTERNAL(...) ::Fusion::Logging::PrintVerifyMessage(true, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
-	#define FUSION_CLIENT_VERIFY_MESSAGE_INTERNAL(...) ::Fusion::Logging::PrintVerifyMessage(false, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
+	template<typename... TArgs>
+	inline void CoreVerify(bool InCondition, TArgs&&... InArgs)
+	{
+		if (InCondition)
+			return;
+
+		if constexpr (sizeof...(InArgs) > 0)
+			LogFatal("Fusion", "Verify Failed: {}", fmt::format(std::forward<TArgs>(InArgs)...));
+		else
+			LogFatal("Fusion", "Verify Failed");
+
+		FUSION_DEBUG_BREAK;
+	}
+
 #else
-	#define FUSION_CORE_VERIFY_MESSAGE_INTERNAL(...) ::Fusion::Logging::PrintVerifyMessage(true, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
-	#define FUSION_CLIENT_VERIFY_MESSAGE_INTERNAL(...) ::Fusion::Logging::PrintVerifyMessage(false, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
+	template <typename... TArgs>
+	inline void CoreVerify(bool InCondition, TArgs&&... InArgs)
+	{
+	}
+
 #endif
 
-	#define FUSION_CORE_VERIFY(condition, ...) { if (!(condition)) { FUSION_CORE_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); FUSION_DEBUG_BREAK; } }
-	#define FUSION_CLIENT_VERIFY(condition, ...) { if (!(condition)) { FUSION_CLIENT_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); FUSION_DEBUG_BREAK; } }
-#else
-	#define FUSION_CORE_VERIFY(condition, ...)
-	#define FUSION_CLIENT_VERIFY(condition, ...)
-#endif
+}

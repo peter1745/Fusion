@@ -77,7 +77,7 @@ namespace Fusion {
 		{
 			if (It->FrameIndex == m_CurrentFrame)
 			{
-				FUSION_CORE_VERIFY(It->DestroyFunc, "DestroyFunc isn't valid!");
+				CoreVerify(static_cast<bool>(It->DestroyFunc), "DestroyFunc isn't valid!");
 				It->DestroyFunc();
 				It = m_DestroyQueue.erase(It);
 			}
@@ -130,7 +130,7 @@ namespace Fusion {
 			SubmitInfo.pSignalSemaphores = SignalSemaphores;
 
 			const auto& QueueInfo = m_Context->GetDevice().As<Device>()->GetQueueInfo();
-			FUSION_CORE_VERIFY(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, m_ImageFences[m_CurrentFrame]) == VK_SUCCESS);
+			CoreVerify(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, m_ImageFences[m_CurrentFrame]) == VK_SUCCESS);
 		}
 
 		m_Info.TargetSwapChain->Present(m_RenderFinishedSemaphores[m_CurrentFrame]);
@@ -177,7 +177,7 @@ namespace Fusion {
 		VkFence Fence = InShouldSignal ? m_ImageFences[m_CurrentFrame] : VK_NULL_HANDLE;
 
 		const auto& QueueInfo = m_Context->GetDevice()->GetQueueInfo();
-		FUSION_CORE_VERIFY(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, Fence) == VK_SUCCESS);
+		CoreVerify(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, Fence) == VK_SUCCESS);
 	}
 
 	void Renderer::Release()

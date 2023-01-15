@@ -14,7 +14,6 @@
 #include <memory>
 
 #include "Fusion/IO/Logging.hpp"
-#include "Assert.hpp"
 #include "Fusion/Memory/Shared.hpp"
 
 #define FUSION_BIND_FUNC(Func) [this](auto&&... InArgs) -> decltype(auto) { return this->Func(std::forward<decltype(InArgs)>(InArgs)...); }

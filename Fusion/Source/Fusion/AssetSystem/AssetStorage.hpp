@@ -44,7 +44,7 @@ namespace Fusion {
 			{
 				if (m_Databanks.find(InHandle) == m_Databanks.end())
 				{
-					FUSION_CORE_ERROR("Failed to find asset bank using handle {}", InHandle);
+					LogSystem::GetLogger("Fusion")->Error("Failed to find asset bank using handle {}", InHandle);
 					return nullptr;
 				}
 
@@ -53,7 +53,7 @@ namespace Fusion {
 
 				if (!NewAsset)
 				{
-					FUSION_CORE_ERROR("Failed to load asset {}", Databank.FilePath.string());
+					LogSystem::GetLogger("Fusion")->Error("Failed to load asset {}", Databank.FilePath.string());
 					return nullptr;
 				}
 

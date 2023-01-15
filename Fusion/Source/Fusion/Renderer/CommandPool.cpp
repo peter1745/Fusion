@@ -11,7 +11,7 @@ namespace Fusion {
 		PoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		PoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		PoolInfo.queueFamilyIndex = InDevice->GetQueueInfo().QueueFamily;
-		FUSION_CORE_VERIFY(vkCreateCommandPool(InDevice->GetLogicalDevice(), &PoolInfo, nullptr, &m_CommandPool) == VK_SUCCESS);
+		CoreVerify(vkCreateCommandPool(InDevice->GetLogicalDevice(), &PoolInfo, nullptr, &m_CommandPool) == VK_SUCCESS);
 
 		m_CommandBuffers.resize(InCreateInfo.InitialListCount);
 		for (uint32_t Idx = 0; Idx < InCreateInfo.InitialListCount; Idx++)
@@ -23,7 +23,7 @@ namespace Fusion {
 			AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
 			VkCommandBuffer CmdBuffer = VK_NULL_HANDLE;
-			FUSION_CORE_VERIFY(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
+			CoreVerify(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
 
 			m_CommandBuffers[Idx] = MakeUnique<CommandBuffer>(CmdBuffer);
 		}
@@ -43,7 +43,7 @@ namespace Fusion {
 		AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
 		VkCommandBuffer CmdBuffer = VK_NULL_HANDLE;
-		FUSION_CORE_VERIFY(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
+		CoreVerify(vkAllocateCommandBuffers(m_Device->GetLogicalDevice(), &AllocInfo, &CmdBuffer) == VK_SUCCESS);
 
 		auto& Result = m_CommandBuffers.emplace_back(MakeUnique<CommandBuffer>(CmdBuffer));
 		return Result.get();
@@ -61,7 +61,7 @@ namespace Fusion {
 	void CommandPool::DestroyCommandBuffer(CommandBuffer* InCommandBuffer)
 	{
 		auto It = std::find_if(m_CommandBuffers.begin(), m_CommandBuffers.end(), [InCommandBuffer](const auto& InOther) { return InOther.get() == InCommandBuffer; });
-		FUSION_CORE_VERIFY(It != m_CommandBuffers.end(), "CommandBuffer can only be destroyed by the pool that allocated it");
+		CoreVerify(It != m_CommandBuffers.end(), "CommandBuffer can only be destroyed by the pool that allocated it");
 
 		VkCommandBuffer CmdBuffer = It->get()->GetBuffer();
 		vkFreeCommandBuffers(m_Device->GetLogicalDevice(), m_CommandPool, 1, &CmdBuffer);

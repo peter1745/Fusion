@@ -43,8 +43,6 @@ namespace Fusion {
 
 		void Release();
 
-		void* GetColorTextureID(uint32_t InColorAttachmentIdx) const { return nullptr; }
-
 		const RenderTextureInfo& GetInfo() const { return m_CreateInfo; }
 
 	private:

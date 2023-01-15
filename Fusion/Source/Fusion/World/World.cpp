@@ -159,7 +159,7 @@ namespace Fusion {
 
 	void World::DestroyActor(ActorID InActorID)
 	{
-		FUSION_CORE_VERIFY(m_ActorIDMap.find(InActorID) != m_ActorIDMap.end());
+		CoreVerify(m_ActorIDMap.find(InActorID) != m_ActorIDMap.end());
 
 		m_Registry.destroy(m_ActorIDMap.at(InActorID));
 		m_Actors.erase(InActorID);

@@ -14,7 +14,7 @@ namespace Fusion {
 
 		if (Data == nullptr || ImageWidth == 0 || ImageHeight == 0 || ImageChannels == 0)
 		{
-			FUSION_CORE_INFO("Failed to load texture '{}'!", InFilePath.string());
+			LogSystem::GetLogger("Fusion")->Info("Failed to load texture '{}'!", InFilePath.string());
 			return nullptr;
 		}
 

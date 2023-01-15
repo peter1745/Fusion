@@ -48,7 +48,7 @@ namespace Fusion {
 		Asset() = default;
 		virtual ~Asset() = default;
 
-		virtual EAssetType GetType() const { FUSION_CORE_VERIFY(false); return static_cast<EAssetType>(-1); }
+		virtual EAssetType GetType() const { CoreVerify(false); return static_cast<EAssetType>(-1); }
 
 	public:
 		AssetHandle Handle;

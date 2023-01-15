@@ -6,11 +6,11 @@ namespace Fusion {
 
 	int Main(int ArgC, char** ArgV)
 	{
-		Logging::Initalize();
+		LogSystem::Initalize();
 		Application* app = CreateApplication(ArgC, ArgV);
 		app->Run();
 		delete app;
-		Logging::Shutdown();
+		LogSystem::Shutdown();
 		return 0;
 	}
 

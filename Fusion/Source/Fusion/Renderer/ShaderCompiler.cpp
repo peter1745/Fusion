@@ -133,7 +133,7 @@ namespace Fusion {
 		}
 		}
 
-		FUSION_CORE_VERIFY(false);
+		CoreVerify(false);
 		return EFormat::Unknown;
 	}
 
@@ -162,60 +162,60 @@ namespace Fusion {
 		{
 			const auto& ModuleReflectionInfo = OutData.ReflectionData.at(InShaderType);
 
-			FUSION_CORE_INFO("Input Parameters:");
+			LogInfo("Fusion", "Input Parameters:");
 			for (const auto& InputParam : ModuleReflectionInfo.InputParameters)
 			{
-				FUSION_CORE_INFO("\tName: {}", InputParam.Name);
-				FUSION_CORE_INFO("\tLocation: {}", InputParam.Location);
-				FUSION_CORE_INFO("\t--------------------");
+				LogInfo("Fusion", "\tName: {}", InputParam.Name);
+				LogInfo("Fusion", "\tLocation: {}", InputParam.Location);
+				LogInfo("Fusion", "\t--------------------");
 			}
 
-			FUSION_CORE_INFO("Push Constants:");
+			LogInfo("Fusion", "Push Constants:");
 			for (const auto& PushConstant : ModuleReflectionInfo.PushConstants)
 			{
-				FUSION_CORE_INFO("\tName: {}", PushConstant.Name);
-				FUSION_CORE_INFO("\tSize: {}", PushConstant.Size);
-				FUSION_CORE_INFO("\tUniforms:");
+				LogInfo("Fusion", "\tName: {}", PushConstant.Name);
+				LogInfo("Fusion", "\tSize: {}", PushConstant.Size);
+				LogInfo("Fusion", "\tUniforms:");
 
 				for (const auto& Uniform : PushConstant.Uniforms)
 				{
-					FUSION_CORE_INFO("\t\tName: {}", Uniform.Name);
-					FUSION_CORE_INFO("\t\tOffset: {}", Uniform.Offset);
-					FUSION_CORE_INFO("\t\tSize: {}", Uniform.Size);
-					FUSION_CORE_INFO("\t--------------------");
+					LogInfo("Fusion", "\t\tName: {}", Uniform.Name);
+					LogInfo("Fusion", "\t\tOffset: {}", Uniform.Offset);
+					LogInfo("Fusion", "\t\tSize: {}", Uniform.Size);
+					LogInfo("Fusion", "\t--------------------");
 				}
 
-				FUSION_CORE_INFO("\t--------------------");
+				LogInfo("Fusion", "\t--------------------");
 			}
 
-			/*FUSION_CORE_INFO("Resources:");
+			/*LogInfo(""Fusion", Resources:");
 			for (const auto& ResourceInfo : ModuleReflectionInfo.Resources)
 			{
-				FUSION_CORE_INFO("\tName: {}", ResourceInfo.Name);
-				FUSION_CORE_INFO("\tType: {}", s_ShaderInputTypeNames.at(static_cast<D3D_SHADER_INPUT_TYPE>(ResourceInfo.Type)));
-				FUSION_CORE_INFO("\tBinding Point: {}", ResourceInfo.BindingPoint);
-				FUSION_CORE_INFO("\tBinding Count: {}", ResourceInfo.BindingCount);
-				FUSION_CORE_INFO("\t--------------------");
+				LogInfo("\"Fusion", tName: {}", ResourceInfo.Name);
+				LogInfo("\"Fusion", tType: {}", s_ShaderInputTypeNames.at(static_cast<D3D_SHADER_INPUT_TYPE>(ResourceInfo.Type)));
+				LogInfo("\"Fusion", tBinding Point: {}", ResourceInfo.BindingPoint);
+				LogInfo("\"Fusion", tBinding Count: {}", ResourceInfo.BindingCount);
+				LogInfo("\"Fusion", t--------------------");
 			}*/
 
-			FUSION_CORE_INFO("Output Parameters:");
+			LogInfo("Fusion", "Output Parameters:");
 			for (const auto& OutputParam : ModuleReflectionInfo.OutputParameters)
 			{
-				FUSION_CORE_INFO("\tName: {}", OutputParam.Name);
-				FUSION_CORE_INFO("\tLocation: {}", OutputParam.Location);
-				FUSION_CORE_INFO("\t--------------------");
+				LogInfo("Fusion", "\tName: {}", OutputParam.Name);
+				LogInfo("Fusion", "\tLocation: {}", OutputParam.Location);
+				LogInfo("Fusion", "\t--------------------");
 			}
 		}
 	}
 
 	shaderc::SpvCompilationResult ShaderCompiler::TryCompileModule(const std::filesystem::path& InFilePath, EShaderType InShaderType)
 	{
-		FUSION_CORE_INFO("Compiling {} shader from {} for Vulkan", s_ShaderNames.at(InShaderType), InFilePath.string());
+		LogInfo("Fusion", "Compiling {} shader from {} for Vulkan", s_ShaderNames.at(InShaderType), InFilePath.string());
 
 		std::string Source = "";
 		if (!FileIO::ReadFileText(InFilePath, Source))
 		{
-			FUSION_CORE_ERROR("Failed! File not found.");
+			LogError("Fusion", "Failed! File not found.");
 			return shaderc::SpvCompilationResult(nullptr);
 		}
 
@@ -251,14 +251,14 @@ namespace Fusion {
 		shaderc::SpvCompilationResult Module = Compiler.CompileGlslToSpv(Source, ShaderKind, ShaderName.c_str(), Options);
 
 		if (Module.GetCompilationStatus() != shaderc_compilation_status_success)
-			FUSION_CORE_ERROR("Failed! Error: {}", Module.GetErrorMessage());
+			LogError("Fusion", "Failed! Error: {}", Module.GetErrorMessage());
 
 		return Module;
 	}
 
 	void ShaderCompiler::ReflectShader(const std::vector<uint32_t>& InByteCode, VulkanModuleReflectionData& OutReflectionData)
 	{
-		FUSION_CORE_INFO("Reflecting for Vulkan");
+		LogInfo("Fusion", "Reflecting for Vulkan");
 
 		spirv_cross::CompilerGLSL Compiler(InByteCode);
 
@@ -293,7 +293,7 @@ namespace Fusion {
 
 		for (const auto& BufferResource : Resources.uniform_buffers)
 		{
-			FUSION_CORE_INFO(BufferResource.name);
+			LogInfo("Fusion", BufferResource.name);
 		}
 
 		for (const auto& PushConstantResource : Resources.push_constant_buffers)

@@ -1,5 +1,6 @@
 #include "ImGuiPlatformContextVulkan.hpp"
 
+#include <Fusion/Core/Assert.hpp>
 #include <Fusion/Renderer/GraphicsContext.hpp>
 #include <Fusion/Renderer/Renderer.hpp>
 
@@ -40,7 +41,7 @@ namespace FusionEditor {
 		DescriptorPoolInfo.maxSets = 1000 * IM_ARRAYSIZE(PoolSizes);
 		DescriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(IM_ARRAYSIZE(PoolSizes));
 		DescriptorPoolInfo.pPoolSizes = PoolSizes;
-		FUSION_CORE_VERIFY(vkCreateDescriptorPool(InContext->GetDevice()->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_FontDescriptorPool) == VK_SUCCESS);
+		Fusion::CoreVerify(vkCreateDescriptorPool(InContext->GetDevice()->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_FontDescriptorPool) == VK_SUCCESS);
 
 		VkAttachmentDescription ColorAttachmentDesc = {};
 		ColorAttachmentDesc.flags = 0;

@@ -12,7 +12,7 @@ namespace Fusion {
 		case EShaderType::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
 		}
 
-		FUSION_CORE_VERIFY(false);
+		CoreVerify(false);
 		return static_cast<VkShaderStageFlags>(-1);
 	}
 
@@ -24,7 +24,7 @@ namespace Fusion {
 		case EShaderType::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
 		}
 
-		FUSION_CORE_VERIFY(false);
+		CoreVerify(false);
 		return static_cast<VkShaderStageFlagBits>(-1);
 	}
 
@@ -35,7 +35,7 @@ namespace Fusion {
 		case EPrimitiveTopology::Triangles: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		}
 
-		FUSION_CORE_VERIFY(false);
+		CoreVerify(false);
 		return static_cast<VkPrimitiveTopology>(-1);
 	}
 

@@ -58,14 +58,11 @@ namespace FusionEditor {
 		MousePos.x -= m_MinRenderBoundX;
 		MousePos.y -= m_MinRenderBoundY;
 
-		const bool MouseXInside = MousePos.x > m_MinRenderBoundX && MousePos.x < m_RenderWidth;
-		const bool MouseYInside = MousePos.y > m_MinRenderBoundY && MousePos.y < m_RenderHeight;
-
 		if (IsMouseInside() && IsTabActive() && Fusion::Mouse::Get().IsButtonPressed(Fusion::EMouseButton::Left))
 		{
 			if (MousePos.x > 0 && MousePos.y > 0)
 			{
-				FUSION_CORE_INFO("Clicked inside viewport: {}, {}", MousePos.x, MousePos.y);
+				Fusion::LogInfo("Fusion Editor", "Clicked inside viewport: {}, {}", MousePos.x, MousePos.y);
 
 				auto ColorPickingImage = m_RenderTextures[FrameIndex]->GetImage(1);
 				ColorPickingImage->Transition(CmdList, Fusion::ImageStates::CopySource);
@@ -81,13 +78,15 @@ namespace FusionEditor {
 	void EditorViewportWindow::OnEvent(Fusion::Event& InEvent)
 	{
 		Fusion::EventDispatcher Dispatcher(InEvent);
-		Dispatcher.Dispatch<Fusion::KeyPressedEvent>([this](auto& InKeyEvent) {
+		Dispatcher.Dispatch<Fusion::KeyPressedEvent>([this](auto& InKeyEvent)
+		{
 			return OnKeyPressed(InKeyEvent);
 		});
 	}
 
 	void EditorViewportWindow::RenderContents()
 	{
+		// TODO(Peter): I'll re-add this code when I start work on Fission again
 		/*if (ImGui::Button("Create Physics Actors"))
 		{
 			for (int32_t X = -15; X < 15; X++)

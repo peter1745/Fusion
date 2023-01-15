@@ -87,7 +87,7 @@ namespace Fusion {
 		}
 		else if (Result != VK_SUCCESS)
 		{
-			FUSION_CORE_VERIFY(false, "Error trying to present to the screen.");
+			CoreVerify(false, "Error trying to present to the screen.");
 		}
 	}
 
@@ -180,14 +180,14 @@ namespace Fusion {
 		SwapchainInfo.clipped = VK_TRUE;
 		SwapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		FUSION_CORE_VERIFY(vkCreateSwapchainKHR(m_Context->GetDevice()->GetLogicalDevice(), &SwapchainInfo, nullptr, &m_SwapChain) == VK_SUCCESS);
+		CoreVerify(vkCreateSwapchainKHR(m_Context->GetDevice()->GetLogicalDevice(), &SwapchainInfo, nullptr, &m_SwapChain) == VK_SUCCESS);
 
 		// Get SwapChain images and create image views
 		{
-			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Context->GetDevice()->GetLogicalDevice(), m_SwapChain, &m_ImageCount, nullptr) == VK_SUCCESS);
+			CoreVerify(vkGetSwapchainImagesKHR(m_Context->GetDevice()->GetLogicalDevice(), m_SwapChain, &m_ImageCount, nullptr) == VK_SUCCESS);
 			m_Images.resize(m_ImageCount);
 			m_ImageViews.resize(m_ImageCount);
-			FUSION_CORE_VERIFY(vkGetSwapchainImagesKHR(m_Context->GetDevice()->GetLogicalDevice(), m_SwapChain, &m_ImageCount, m_Images.data()) == VK_SUCCESS);
+			CoreVerify(vkGetSwapchainImagesKHR(m_Context->GetDevice()->GetLogicalDevice(), m_SwapChain, &m_ImageCount, m_Images.data()) == VK_SUCCESS);
 
 			for (uint32_t Idx = 0; Idx < m_ImageCount; Idx++)
 			{
@@ -203,7 +203,7 @@ namespace Fusion {
 				ImageViewInfo.subresourceRange.layerCount = 1;
 				ImageViewInfo.subresourceRange.baseArrayLayer = 0;
 
-				FUSION_CORE_VERIFY(vkCreateImageView(m_Context->GetDevice()->GetLogicalDevice(), &ImageViewInfo, nullptr, &m_ImageViews[Idx]) == VK_SUCCESS);
+				CoreVerify(vkCreateImageView(m_Context->GetDevice()->GetLogicalDevice(), &ImageViewInfo, nullptr, &m_ImageViews[Idx]) == VK_SUCCESS);
 			}
 		}
 
@@ -235,7 +235,7 @@ namespace Fusion {
 			return false;
 		}
 
-		FUSION_CORE_VERIFY(Result == VK_SUCCESS);
+		CoreVerify(Result == VK_SUCCESS);
 		return true;
 	}
 

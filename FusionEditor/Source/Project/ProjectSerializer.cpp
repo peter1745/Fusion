@@ -25,12 +25,12 @@ namespace FusionEditor {
 	std::shared_ptr<Project> ProjectSerializer::Deserialize(const std::filesystem::path& InFilePath)
 	{
 		std::ifstream StreamIn(InFilePath);
-		FUSION_CLIENT_VERIFY(StreamIn);
+		Fusion::CoreVerify(StreamIn.good());
 		std::stringstream StringBuffer;
 		StringBuffer << StreamIn.rdbuf();
 
 		YAML::Node RootNode = YAML::Load(StringBuffer);
-		FUSION_CLIENT_VERIFY(RootNode);
+		Fusion::CoreVerify(static_cast<bool>(RootNode));
 
 		std::shared_ptr<Project> NewProject = std::make_shared<Project>();
 		NewProject->Name = RootNode["Project"].as<std::string>();
