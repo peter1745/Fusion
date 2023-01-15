@@ -2,7 +2,8 @@
 
 #include "Fusion/Core/Core.hpp"
 #include "Fusion/Core/Assert.hpp"
-#include "Fusion/STL/EnumBitmask.hpp"
+
+#include <FTL/EnumBitmask.hpp>
 
 namespace Fusion {
 

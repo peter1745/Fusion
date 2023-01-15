@@ -12,12 +12,15 @@ project "Fusion"
         "Source/**.hpp",
         "Source/**.h",
 
+        "%{wks.location}/FusionTemplateLibrary/Source/**.hpp",
+
         "%{wks.location}/ThirdParty/stb_image/include/stb_image/stb_image.cpp",
     }
 
     includedirs {
         "Source/",
         "%{wks.location}/Fission/Source",
+        "%{wks.location}/FusionTemplateLibrary/Source",
         "%{IncludeDirs.glad}",
         "%{IncludeDirs.shaderc}",
         "%{IncludeDirs.SPIRV_Cross}",

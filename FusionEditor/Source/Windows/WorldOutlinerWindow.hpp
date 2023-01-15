@@ -4,7 +4,8 @@
 #include "IO/Selection/SelectionManager.hpp"
 
 #include "Fusion/World/World.hpp"
-#include "Fusion/STL/FunctionList.hpp"
+
+#include <FTL/FunctionList.hpp>
 
 namespace FusionEditor {
 

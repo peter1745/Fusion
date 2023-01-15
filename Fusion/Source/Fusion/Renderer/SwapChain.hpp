@@ -4,7 +4,7 @@
 #include "GraphicsContext.hpp"
 #include "CommandBuffer.hpp"
 
-#include "Fusion/STL/FunctionList.hpp"
+#include <FTL/FunctionList.hpp>
 
 namespace Fusion {
 
@@ -19,7 +19,7 @@ namespace Fusion {
 
 	class SwapChain : public SharedObject
 	{
-		using InvalidatedCallbacks = FunctionList<void(const SwapChain&)>;
+		using InvalidatedCallbacks = FTL::FunctionList<void(const SwapChain&)>;
 	public:
 		SwapChain(const Shared<GraphicsContext>& InContext, const SwapChainInfo& InCreateInfo);
 		~SwapChain() = default;

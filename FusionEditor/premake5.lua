@@ -30,6 +30,7 @@ project "FusionEditor"
         "%{wks.location}/FusionEditor/Source",
         "%{wks.location}/Fusion/Source",
         "%{wks.location}/Fission/Source",
+        "%{wks.location}/FusionTemplateLibrary/Source",
         "%{IncludeDirs.VulkanMemoryAllocator}",
         "%{IncludeDirs.GLFW}",
         "%{IncludeDirs.glm}",

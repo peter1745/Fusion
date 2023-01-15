@@ -3,7 +3,7 @@
 #include "Actor.hpp"
 #include "Components/CoreComponents.hpp"
 
-#include "Fusion/STL/EnumBitmask.hpp"
+#include <FTL/EnumBitmask.hpp>
 
 #include <Fission/World/DynamicsWorld.hpp>
 

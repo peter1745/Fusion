@@ -117,7 +117,7 @@ namespace FusionEditor {
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 	    : Application(specification, this)
 	{
-		LogSystem::CreateLogger("Fusion Editor", "%^[%T] %n: %v%$")->Info("Initialized Editor Logger.");
+		LogSystem::CreateLogger("Fusion Editor")->Info("Initialized Editor Logger.");
 
 		GLFWwindow* NativeWindow = static_cast<GLFWwindow*>(GetWindow()->GetWindowHandle());
 		glfwSetDropCallback(NativeWindow, [](GLFWwindow* InNativeWindow, int32_t InPathCount, const char** InFilePaths) {

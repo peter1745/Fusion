@@ -7,3 +7,6 @@
 [submodule "ThirdParty/ImGui/ImGui"]
 	path = ThirdParty/ImGui/ImGui
 	url = https://github.com/peter1745/imgui
+[submodule "FusionTemplateLibrary"]
+	path = FusionTemplateLibrary
+	url = https://github.com/peter1745/FusionTemplateLibrary

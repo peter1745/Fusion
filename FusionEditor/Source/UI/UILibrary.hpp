@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Fusion/STL/InitializerList.hpp"
 #include "Fusion/World/Components/AllComponents.hpp"
 #include "Fusion/Renderer/RenderTexture.hpp"
+
+#include <FTL/InitializerList.hpp>
 
 #include <string_view>
 #include <spdlog/fmt/fmt.h>
@@ -36,7 +37,7 @@ namespace FusionEditor::UI {
 	void EndDisabled();
 
 	template<typename TEnum>
-	static bool Dropdown(std::string_view InLabel, TEnum* InSelectedValue, const Fusion::InitializerList<std::string_view>& InOptionLabels)
+	static bool Dropdown(std::string_view InLabel, TEnum* InSelectedValue, const FTL::InitializerList<std::string_view>& InOptionLabels)
 	{
 		size_t SelectedIndex = static_cast<size_t>(*InSelectedValue);
 		std::string_view PreviewText = InOptionLabels[SelectedIndex];

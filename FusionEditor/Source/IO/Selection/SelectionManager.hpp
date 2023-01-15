@@ -2,16 +2,16 @@
 
 #include <Fusion/Core/UUID.hpp>
 #include <Fusion/Memory/Shared.hpp>
-#include <Fusion/STL/Concepts.hpp>
-#include <Fusion/STL/FunctionList.hpp>
-
 #include <Fusion/World/Actor.hpp>
+
+#include <FTL/Concepts.hpp>
+#include <FTL/FunctionList.hpp>
 
 #include <unordered_map>
 
 namespace FusionEditor {
 
-	template<Fusion::Comparable TSelection, Fusion::Hashable TKey = Fusion::UUID>
+	template <FTL::Comparable TSelection, FTL::Hashable TKey = FTL::UUID>
 	class SelectionManager : public Fusion::SharedObject
 	{
 	public:
@@ -88,8 +88,8 @@ namespace FusionEditor {
 
 	private:
 		std::unordered_map<TKey, TSelection> m_SelectionMap;
-		Fusion::FunctionList<void(const TSelection&)> m_OnSelectedCallbacks;
-		Fusion::FunctionList<void(const TSelection&)> m_OnDeselectedCallbacks;
+		FTL::FunctionList<void(const TSelection&)> m_OnSelectedCallbacks;
+		FTL::FunctionList<void(const TSelection&)> m_OnDeselectedCallbacks;
 	};
 
 	using ActorSelectionManager = Fusion::Shared<SelectionManager<Fusion::SharedActor>>;

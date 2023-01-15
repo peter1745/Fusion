@@ -2,9 +2,10 @@
 
 #include "EditorWindow.hpp"
 
-#include "Fusion/STL/DemangledTypeName.hpp"
 #include "Fusion/IO/Logging.hpp"
 #include "Fusion/Memory/Shared.hpp"
+
+#include <FTL/DemangledTypeName.hpp>
 
 #include <unordered_map>
 #include <concepts>
@@ -51,11 +52,11 @@ namespace FusionEditor {
 		requires std::derived_from<TWindow, EditorWindow>&& std::constructible_from<TWindow, TWindowParams...>
 		Fusion::Shared<TWindow> RegisterWindow(bool InOpenByDefault, TWindowParams&&... InParams)
 		{
-			uint32_t WindowID = Fusion::DemangledTypeName<TWindow>().HashCode();
+			uint32_t WindowID = FTL::DemangledTypeName<TWindow>().HashCode();
 
 			if (m_Windows.find(WindowID) != m_Windows.end())
 			{
-				Fusion::LogError("Fusion Editor", "Tried to register a window of type '{}' which is already registered!", Fusion::DemangledTypeName<TWindow>().Name());
+				Fusion::LogError("Fusion Editor", "Tried to register a window of type '{}' which is already registered!", FTL::DemangledTypeName<TWindow>().Name());
 				return nullptr;
 			}
 
@@ -77,11 +78,11 @@ namespace FusionEditor {
 		requires std::derived_from<TWindow, EditorWindow>
 		Fusion::Shared<TWindow> GetWindowOfType() const
 		{
-			uint32_t WindowID = Fusion::DemangledTypeName<TWindow>().HashCode();
+			uint32_t WindowID = FTL::DemangledTypeName<TWindow>().HashCode();
 
 			if (m_Windows.find(WindowID) == m_Windows.end())
 			{
-				Fusion::LogError("Fusion Editor", "Failed to find window of type '{}'!", Fusion::DemangledTypeName<TWindow>().Name());
+				Fusion::LogError("Fusion Editor", "Failed to find window of type '{}'!", FTL::DemangledTypeName<TWindow>().Name());
 				return nullptr;
 			}
 

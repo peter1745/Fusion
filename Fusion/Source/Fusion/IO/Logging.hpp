@@ -50,7 +50,7 @@ namespace Fusion {
 		static void Initalize();
 		static void Shutdown();
 
-		static Logger* CreateLogger(const std::string& InName, std::string InPattern = "%^[%T] [%l] %n: %v%$", ELogLevel InLevel = ELogLevel::Trace);
+		static Logger* CreateLogger(const std::string& InName, std::string InPattern = "%^[%T] %n: %v%$", ELogLevel InLevel = ELogLevel::Trace);
 		static Logger* GetLogger(const std::string& InName);
 		static Logger* GetOrCreateLogger(const std::string& InName);
 	};
