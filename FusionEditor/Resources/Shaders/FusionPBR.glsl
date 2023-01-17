@@ -46,10 +46,11 @@ layout(location = 2) in flat uvec2 InActorID;
 layout(location = 0) out vec4 OutColor;
 layout(location = 1) out uvec2 OutActorID;
 
+layout(set = 0, binding = 0) uniform sampler2D InTexture;
+
 void main()
 {
-    vec3 NormalColor = (normalize(InData.Normal) * 0.5) + 0.5;
-    OutColor = vec4(NormalColor, 1.0);
+    OutColor = texture(InTexture, InData.TexCoord);
     OutActorID = InActorID;
 }
 

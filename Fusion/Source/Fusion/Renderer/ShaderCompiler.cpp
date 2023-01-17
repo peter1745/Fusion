@@ -6,21 +6,22 @@
 
 #include <spirv_cross/spirv_glsl.hpp>
 
+#include <ranges>
+
 namespace Fusion {
 
-	static std::unordered_map<EShaderType, const char*> s_ShaderNames = {
-		{ EShaderType::Vertex, "vertex" },
-		{ EShaderType::Pixel, "pixel" }
+	static std::unordered_map<EShaderStage, const char*> s_ShaderNames = {
+		{ EShaderStage::Vertex, "Vertex" },
+		{ EShaderStage::Pixel, "Pixel" }
 	};
 
-	static std::unordered_map<EShaderType, shaderc_shader_kind> s_ShaderTypeToShaderCShaderKind = {
-		{ EShaderType::Vertex, shaderc_vertex_shader },
-		{ EShaderType::Pixel, shaderc_fragment_shader }
+	static std::unordered_map<EShaderStage, shaderc_shader_kind> s_ShaderTypeToShaderCShaderKind = {
+		{ EShaderStage::Vertex, shaderc_vertex_shader },
+		{ EShaderStage::Pixel, shaderc_fragment_shader }
 	};
 
-	static std::unordered_map<EShaderType, const char*> s_ShaderEntryPoints = {
-		{ EShaderType::Vertex, "VertexMain" },
-		{ EShaderType::Pixel, "PixelMain" }
+	static std::unordered_map<EShaderResourceType, const char*> s_ShaderResourceTypeNames = {
+		{ EShaderResourceType::CombinedImageSampler, "CombinedImageSampler" }
 	};
 
 	static std::unordered_map<spirv_cross::SPIRType::BaseType, std::string> s_SPIRTypeName = {
@@ -141,13 +142,15 @@ namespace Fusion {
 	{
 		CompiledShaderData ShaderData = {};
 
-		TryCompileAndReflectModule(InFilePath, EShaderType::Vertex, ShaderData);
-		TryCompileAndReflectModule(InFilePath, EShaderType::Pixel, ShaderData);
+		TryCompileAndReflectModule(InFilePath, EShaderStage::Vertex, ShaderData);
+		TryCompileAndReflectModule(InFilePath, EShaderStage::Pixel, ShaderData);
+
+		PrintReflectionData(ShaderData);
 
 		return Shared<Shader>::Create(InDevice, ShaderData);
 	}
 
-	void ShaderCompiler::TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, CompiledShaderData& OutData)
+	void ShaderCompiler::TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType, CompiledShaderData& OutData)
 	{
 		shaderc::SpvCompilationResult Result = TryCompileModule(InFilePath, InShaderType);
 
@@ -156,59 +159,10 @@ namespace Fusion {
 
 		OutData.ModuleByteCodes[InShaderType] = std::vector<uint32_t>(Result.begin(), Result.end());
 
-		ReflectShader(OutData.ModuleByteCodes[InShaderType], OutData.ReflectionData[InShaderType]);
-
-		if (OutData.ReflectionData.find(InShaderType) != OutData.ReflectionData.end())
-		{
-			const auto& ModuleReflectionInfo = OutData.ReflectionData.at(InShaderType);
-
-			LogInfo("Fusion", "Input Parameters:");
-			for (const auto& InputParam : ModuleReflectionInfo.InputParameters)
-			{
-				LogInfo("Fusion", "\tName: {}", InputParam.Name);
-				LogInfo("Fusion", "\tLocation: {}", InputParam.Location);
-				LogInfo("Fusion", "\t--------------------");
-			}
-
-			LogInfo("Fusion", "Push Constants:");
-			for (const auto& PushConstant : ModuleReflectionInfo.PushConstants)
-			{
-				LogInfo("Fusion", "\tName: {}", PushConstant.Name);
-				LogInfo("Fusion", "\tSize: {}", PushConstant.Size);
-				LogInfo("Fusion", "\tUniforms:");
-
-				for (const auto& Uniform : PushConstant.Uniforms)
-				{
-					LogInfo("Fusion", "\t\tName: {}", Uniform.Name);
-					LogInfo("Fusion", "\t\tOffset: {}", Uniform.Offset);
-					LogInfo("Fusion", "\t\tSize: {}", Uniform.Size);
-					LogInfo("Fusion", "\t--------------------");
-				}
-
-				LogInfo("Fusion", "\t--------------------");
-			}
-
-			/*LogInfo(""Fusion", Resources:");
-			for (const auto& ResourceInfo : ModuleReflectionInfo.Resources)
-			{
-				LogInfo("\"Fusion", tName: {}", ResourceInfo.Name);
-				LogInfo("\"Fusion", tType: {}", s_ShaderInputTypeNames.at(static_cast<D3D_SHADER_INPUT_TYPE>(ResourceInfo.Type)));
-				LogInfo("\"Fusion", tBinding Point: {}", ResourceInfo.BindingPoint);
-				LogInfo("\"Fusion", tBinding Count: {}", ResourceInfo.BindingCount);
-				LogInfo("\"Fusion", t--------------------");
-			}*/
-
-			LogInfo("Fusion", "Output Parameters:");
-			for (const auto& OutputParam : ModuleReflectionInfo.OutputParameters)
-			{
-				LogInfo("Fusion", "\tName: {}", OutputParam.Name);
-				LogInfo("Fusion", "\tLocation: {}", OutputParam.Location);
-				LogInfo("Fusion", "\t--------------------");
-			}
-		}
+		ReflectShader(InShaderType, OutData);
 	}
 
-	shaderc::SpvCompilationResult ShaderCompiler::TryCompileModule(const std::filesystem::path& InFilePath, EShaderType InShaderType)
+	shaderc::SpvCompilationResult ShaderCompiler::TryCompileModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType)
 	{
 		LogInfo("Fusion", "Compiling {} shader from {} for Vulkan", s_ShaderNames.at(InShaderType), InFilePath.string());
 
@@ -232,12 +186,12 @@ namespace Fusion {
 
 		switch (InShaderType)
 		{
-		case EShaderType::Vertex:
+		case EShaderStage::Vertex:
 		{
 			Options.AddMacroDefinition("FUSION_COMPILE_VERTEX");
 			break;
 		}
-		case EShaderType::Pixel:
+		case EShaderStage::Pixel:
 		{
 			Options.AddMacroDefinition("FUSION_COMPILE_PIXEL");
 			break;
@@ -256,11 +210,11 @@ namespace Fusion {
 		return Module;
 	}
 
-	void ShaderCompiler::ReflectShader(const std::vector<uint32_t>& InByteCode, VulkanModuleReflectionData& OutReflectionData)
+	void ShaderCompiler::ReflectShader(EShaderStage InStage, CompiledShaderData& InCompiledData)
 	{
 		LogInfo("Fusion", "Reflecting for Vulkan");
 
-		spirv_cross::CompilerGLSL Compiler(InByteCode);
+		spirv_cross::CompilerGLSL Compiler(InCompiledData.ModuleByteCodes.at(InStage));
 
 		spirv_cross::ShaderResources Resources = Compiler.get_shader_resources();
 
@@ -274,9 +228,10 @@ namespace Fusion {
 
 				for (uint32_t MemberIdx = 0; MemberIdx < MemberCount; MemberIdx++)
 				{
-					auto& InputParam = OutReflectionData.InputParameters.emplace_back();
+					auto& InputParam = InCompiledData.InputParameters.emplace_back();
 
 					const auto& MemberType = Compiler.get_type(Type.member_types[MemberIdx]);
+					InputParam.Stage = InStage;
 					InputParam.Name = Compiler.get_member_name(Type.self, MemberIdx);
 					InputParam.Location = MemberIdx;
 					InputParam.Format = GetResourceFormat(MemberType);
@@ -284,23 +239,52 @@ namespace Fusion {
 			}
 			else
 			{
-				auto& InputParam = OutReflectionData.InputParameters.emplace_back();
+				auto& InputParam = InCompiledData.InputParameters.emplace_back();
+				InputParam.Stage = InStage;
 				InputParam.Name = InputResource.name;
 				InputParam.Location = Compiler.get_decoration(InputResource.id, spv::DecorationLocation);
 				InputParam.Format = GetResourceFormat(Type);
 			}
 		}
 
-		for (const auto& BufferResource : Resources.uniform_buffers)
+		for (const auto& SamplerResource : Resources.sampled_images)
 		{
-			LogInfo("Fusion", BufferResource.name);
+			uint32_t DescriptorSetIndex = Compiler.get_decoration(SamplerResource.id, spv::DecorationDescriptorSet);
+
+			if (DescriptorSetIndex >= InCompiledData.DescriptorSets.size())
+				InCompiledData.DescriptorSets.resize(DescriptorSetIndex + 1);
+
+			auto& DescriptorSet = InCompiledData.DescriptorSets[DescriptorSetIndex];
+			DescriptorSet.Index = DescriptorSetIndex;
+			
+			const auto& BaseType = Compiler.get_type(SamplerResource.base_type_id);
+
+			uint32_t Binding = Compiler.get_decoration(SamplerResource.id, spv::DecorationBinding);
+
+			if (DescriptorSet.Resources.find(Binding) != DescriptorSet.Resources.end())
+			{
+				// Binding already exists, just update the stage
+				auto& Resource = DescriptorSet.Resources[Binding];
+				Resource.Stages |= InStage;
+			}
+			else
+			{
+				SamplerShaderResource Resource = {};
+				Resource.Stages = InStage;
+				Resource.Type = EShaderResourceType::CombinedImageSampler;
+				Resource.Name = SamplerResource.name;
+				Resource.Binding = Binding;
+				Resource.Dimensions = BaseType.image.dim;
+				DescriptorSet.Resources[Binding] = Resource;
+			}
 		}
 
 		for (const auto& PushConstantResource : Resources.push_constant_buffers)
 		{
-			auto& PushConstant = OutReflectionData.PushConstants.emplace_back();
+			auto& PushConstant = InCompiledData.PushConstants.emplace_back();
 			const auto& BufferType = Compiler.get_type(PushConstantResource.base_type_id);
 
+			PushConstant.Stages = InStage;
 			PushConstant.Size = Compiler.get_declared_struct_size(BufferType);
 
 			auto MemberCount = uint32_t(BufferType.member_types.size());
@@ -327,9 +311,10 @@ namespace Fusion {
 
 				for (uint32_t MemberIdx = 0; MemberIdx < MemberCount; MemberIdx++)
 				{
-					auto& OutputParam = OutReflectionData.OutputParameters.emplace_back();
+					auto& OutputParam = InCompiledData.OutputParameters.emplace_back();
 
 					const auto& MemberType = Compiler.get_type(Type.member_types[MemberIdx]);
+					OutputParam.Stage = InStage;
 					OutputParam.Name = Compiler.get_member_name(Type.self, MemberIdx);
 					OutputParam.Location = MemberIdx;
 					OutputParam.Format = GetResourceFormat(MemberType);
@@ -337,11 +322,86 @@ namespace Fusion {
 			}
 			else
 			{
-				auto& OutputParam = OutReflectionData.OutputParameters.emplace_back();
+				auto& OutputParam = InCompiledData.OutputParameters.emplace_back();
+				OutputParam.Stage = InStage;
 				OutputParam.Name = OutputResource.name;
 				OutputParam.Location = Compiler.get_decoration(OutputResource.id, spv::DecorationLocation);
 				OutputParam.Format = GetResourceFormat(Type);
 			}
 		}
 	}
+
+	void ShaderCompiler::PrintReflectionData(const CompiledShaderData& InShaderData) const
+	{
+		LogInfo("Fusion", "Input Parameters:");
+		for (const auto& InputParam : InShaderData.InputParameters)
+		{
+			LogInfo("Fusion", "\tStage: {}", s_ShaderNames.at(InputParam.Stage));
+			LogInfo("Fusion", "\tName: {}", InputParam.Name);
+			LogInfo("Fusion", "\tLocation: {}", InputParam.Location);
+			LogInfo("Fusion", "\t--------------------");
+		}
+
+		LogInfo("Fusion", "Push Constants:");
+		for (const auto& PushConstant : InShaderData.PushConstants)
+		{
+			LogInfo("Fusion", "\tName: {}", PushConstant.Name);
+			LogInfo("Fusion", "\tSize: {}", PushConstant.Size);
+			LogInfo("Fusion", "\tUniforms:");
+
+			for (const auto& Uniform : PushConstant.Uniforms)
+			{
+				LogInfo("Fusion", "\t\tName: {}", Uniform.Name);
+				LogInfo("Fusion", "\t\tOffset: {}", Uniform.Offset);
+				LogInfo("Fusion", "\t\tSize: {}", Uniform.Size);
+				LogInfo("Fusion", "\t--------------------");
+			}
+
+			LogInfo("Fusion", "\t--------------------");
+		}
+
+		LogInfo("Fusion", "Descriptor Sets:");
+		for (const auto& DescriptorSet : InShaderData.DescriptorSets)
+		{
+			LogInfo("Fusion", "\tIndex: {}", DescriptorSet.Index);
+			LogInfo("Fusion", "\tResources:");
+
+			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			{
+				LogInfo("Fusion", "\t\tName: {}", Resource.Name);
+
+				LogInfo("Fusion", "\t\tShader Stages:");
+
+				if ((Resource.Stages & EShaderStage::Vertex) != 0) LogInfo("Fusion", "\t\t\t- Vertex");
+				if ((Resource.Stages & EShaderStage::Pixel) != 0) LogInfo("Fusion", "\t\t\t- Pixel");
+
+				LogInfo("Fusion", "\t\tType: {}", s_ShaderResourceTypeNames.at(Resource.Type));
+				LogInfo("Fusion", "\t\tBinding: {}", Resource.Binding);
+
+				switch (Resource.Type)
+				{
+				case EShaderResourceType::CombinedImageSampler:
+				{
+					const auto& SamplerResource = (const SamplerShaderResource&)Resource;
+					LogInfo("Fusion", "\t\tDimensions: {}", SamplerResource.Dimensions);
+					break;
+				}
+				}
+
+				LogInfo("Fusion", "\t--------------------");
+			}
+
+			LogInfo("Fusion", "\t--------------------");
+		}
+
+		LogInfo("Fusion", "Output Parameters:");
+		for (const auto& OutputParam : InShaderData.OutputParameters)
+		{
+			LogInfo("Fusion", "\tStage: {}", s_ShaderNames.at(OutputParam.Stage));
+			LogInfo("Fusion", "\tName: {}", OutputParam.Name);
+			LogInfo("Fusion", "\tLocation: {}", OutputParam.Location);
+			LogInfo("Fusion", "\t--------------------");
+		}
+	}
+
 }

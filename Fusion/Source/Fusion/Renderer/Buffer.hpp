@@ -22,7 +22,7 @@ namespace Fusion {
 		~Buffer();
 
 		void* Map();
-		void Unmap(Byte* InPtr);
+		void Unmap();
 
 		//void Transition(CommandList* InCmdList, EBufferState InState);
 

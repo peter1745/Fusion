@@ -39,11 +39,8 @@ namespace Fusion {
 			else
 				Result |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		}
-		else
-		{
-			Result = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		}
 
+		if ((InUsage & EImageUsage::Texture) != 0) Result |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		if ((InUsage & EImageUsage::CopySource) != 0) Result |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		if ((InUsage & EImageUsage::CopyDestination) != 0) Result |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
@@ -52,12 +49,12 @@ namespace Fusion {
 		return Result;
 	}
 
-	static constexpr VkShaderStageFlags ShaderTypeToVkShaderStageFlags(EShaderType InShaderStage)
+	static constexpr VkShaderStageFlags ShaderTypeToVkShaderStageFlags(EShaderStage InShaderStage)
 	{
 		switch (InShaderStage)
 		{
-		case EShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-		case EShaderType::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
+		case EShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+		case EShaderStage::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
 		}
 
 		return VK_SHADER_STAGE_ALL;

@@ -52,6 +52,24 @@ namespace Fusion {
 		vkCmdCopyImageToBuffer(InCmdList->GetBuffer(), m_Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, InBuffer->GetBuffer(), 1, &CopyRegion);
 	}
 
+	void Image2D::CopyFrom(CommandBuffer* InCmdList, const ImageRegion& InRegion, Buffer* InBuffer)
+	{
+		VkBufferImageCopy CopyRegion;
+		CopyRegion.bufferOffset = 0;
+		CopyRegion.bufferRowLength = 0;
+		CopyRegion.bufferImageHeight = 0;
+		CopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		CopyRegion.imageSubresource.layerCount = 1;
+		CopyRegion.imageSubresource.baseArrayLayer = 0;
+		CopyRegion.imageSubresource.mipLevel = 0;
+		CopyRegion.imageOffset = { InRegion.X, InRegion.Y, 0 };
+		CopyRegion.imageExtent.width = InRegion.Width;
+		CopyRegion.imageExtent.height = InRegion.Height;
+		CopyRegion.imageExtent.depth = 1;
+
+		vkCmdCopyBufferToImage(InCmdList->GetBuffer(), InBuffer->GetBuffer(), m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &CopyRegion);
+	}
+
 	void Image2D::Invalidate()
 	{
 		VkImageCreateInfo ImageCreateInfo = {};

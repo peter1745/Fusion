@@ -13,7 +13,7 @@ namespace Fusion {
 		void Bind();
 		void Unbind();
 
-		auto GetByteCode(EShaderType InModuleType)
+		auto GetByteCode(EShaderStage InModuleType)
 		{
 			if (m_CompiledData.ModuleByteCodes.find(InModuleType) == m_CompiledData.ModuleByteCodes.end())
 				return std::vector<uint32_t>();
@@ -21,13 +21,13 @@ namespace Fusion {
 			return m_CompiledData.ModuleByteCodes[InModuleType];
 		}
 
-		const auto& GetReflectedModules() const { return m_CompiledData.ReflectionData; }
+		const auto& GetShaderData() const { return m_CompiledData; }
 
 		const auto& GetShaderModules() const { return m_ShaderModules; }
 
 	private:
 		CompiledShaderData m_CompiledData;
-		std::unordered_map<EShaderType, VkShaderModule> m_ShaderModules;
+		std::unordered_map<EShaderStage, VkShaderModule> m_ShaderModules;
 	};
 
 }

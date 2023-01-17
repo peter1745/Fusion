@@ -37,13 +37,6 @@ namespace Fusion {
 		EFormat DepthStencilFormat = EFormat::Unknown;
 	};
 
-	struct ResourceInfo
-	{
-		std::string Name;
-		uint32_t BindingPoint;
-		EShaderVisibility Visibility;
-	};
-
 	class GraphicsPipeline : public SharedObject
 	{
 	public:
@@ -51,18 +44,20 @@ namespace Fusion {
 
 		void Bind(CommandBuffer* InCmdList);
 
-		const ResourceInfo& GetResourceInfo(const std::string& InName) const { return m_Resources.at(InName); }
 		const GraphicsPipelineInfo& GetInfo() const { return m_CreateInfo; }
 
 		VkPipelineLayout GetPipelineLayout() const { return m_Layout; }
 
+		VkDescriptorSet GetDescriptorSet(uint32_t InSetIndex, uint32_t InFrameIdx) const { return m_DescriptorSets[InFrameIdx][InSetIndex]; }
+
 	private:
 		GraphicsPipelineInfo m_CreateInfo;
 
+		std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
 		VkPipelineLayout m_Layout;
 		VkPipeline m_Pipeline;
-
-		std::unordered_map<std::string, ResourceInfo> m_Resources;
+		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
+		std::vector<std::vector<VkDescriptorSet>> m_DescriptorSets;
 
 	};
 

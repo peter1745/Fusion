@@ -7,10 +7,11 @@
 
 namespace Fusion {
 
-	enum class EShaderType
+	enum class EShaderStage
 	{
-		Vertex,
-		Pixel
+		Vertex = Shift1(0),
+		Pixel = Shift1(1),
+		ScopedBitmaskMark
 	};
 
 	enum class EImageUsage

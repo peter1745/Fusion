@@ -98,34 +98,12 @@ namespace FusionEditor {
 		ImGuiInitInfo.Allocator = nullptr;
 		ImGui_ImplVulkan_Init(&ImGuiInitInfo, m_RenderPass);
 
-		// Upload Fonts
+		Fusion::Renderer::GetCurrent().ExecuteImmediate([](Fusion::CommandBuffer* InCommandBuffer)
 		{
-			auto CommandAllocator = InContext->GetTemporaryCommandAllocator();
-			auto CommandList = CommandAllocator->AllocateCommandBuffer();
-			auto CmdList = dynamic_cast<Fusion::CommandBuffer*>(CommandList)->GetBuffer();
+			ImGui_ImplVulkan_CreateFontsTexture(InCommandBuffer->GetBuffer());
+		}, true);
 
-			vkResetCommandBuffer(CmdList, 0);
-
-			VkCommandBufferBeginInfo BeginInfo = {};
-			BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			vkBeginCommandBuffer(CmdList, &BeginInfo);
-
-			ImGui_ImplVulkan_CreateFontsTexture(CmdList);
-
-			vkEndCommandBuffer(CmdList);
-
-			VkSubmitInfo SubmitInfo = {};
-			SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			SubmitInfo.commandBufferCount = 1;
-			SubmitInfo.pCommandBuffers = &CmdList;
-			vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
-
-			InContext->GetDevice()->Wait();
-
-			ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-			CommandAllocator->DestroyCommandBuffer(CommandList);
-		}
+		ImGui_ImplVulkan_DestroyFontUploadObjects();
 
 		m_FrameBuffers.resize(m_SwapChain->GetImageCount(), VK_NULL_HANDLE);
 

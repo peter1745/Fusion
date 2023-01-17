@@ -144,10 +144,10 @@ namespace FusionEditor {
 
 	void FusionEditorApp::OnInit()
 	{
+		m_Renderer = MakeUnique<Renderer>(m_Context, RendererInfo{ m_SwapChain });
+
 		m_ImGuiContext = ImGuiPlatformContext::Create();
 		m_ImGuiContext->Init(GetWindow(), m_Context, m_SwapChain);
-
-		m_Renderer = MakeUnique<Renderer>(m_Context, RendererInfo{ m_SwapChain });
 
 		CoreVerify(NFD::Init() == NFD_OKAY);
 

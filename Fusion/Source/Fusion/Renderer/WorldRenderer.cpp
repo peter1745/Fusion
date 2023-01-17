@@ -10,7 +10,7 @@
 
 namespace Fusion {
 
-	//Shared<Texture2D> Texture;
+	Shared<Texture2D> Texture;
 	Unique<ShaderCompiler> Compiler;
 
 	WorldRenderer::WorldRenderer(const Shared<World>& InWorld)
@@ -42,7 +42,7 @@ namespace Fusion {
 		//TransformUploadBufferInfo.Alignment = 16;
 		//m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
 
-		//Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
+		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
 	}
 
 	void WorldRenderer::Begin(const Camera& InCamera, const glm::mat4& InViewMatrix)
@@ -54,6 +54,8 @@ namespace Fusion {
 	void WorldRenderer::Render()
 	{
 		auto* CmdList = Renderer::GetCurrent().GetCurrentCommandList();
+		CmdList->SetTexture(m_Pipeline.get(), "InTexture", Texture, Renderer::GetCurrent().GetCurrentFrame());
+
 		m_Pipeline->Bind(CmdList);
 
 		const auto& MeshActors = m_World->FindAllActorsWith<TransformComponent, MeshComponent>();
@@ -70,14 +72,12 @@ namespace Fusion {
 
 			m_TransformData.Transform = glm::translate(glm::mat4(1.0f), TransformComp->Location) * glm::toMat4(TransformComp->GetRotation()) * glm::scale(glm::mat4(1.0f), TransformComp->Scale);
 			m_TransformData.ActorID = Actor->GetActorID();
-			CmdList->SetPushConstants(m_Pipeline.get(), EShaderType::Vertex, sizeof(TransformData), &m_TransformData);
+			CmdList->SetPushConstants(m_Pipeline.get(), EShaderStage::Vertex, sizeof(TransformData), &m_TransformData);
 
 			VertexBufferView View = {};
 			View.VertexBuffer = ActorMesh->GetMesh()->GetVertexBuffer();
 			View.VertexStride = sizeof(Vertex);
 			CmdList->SetVertexBuffer(View);
-
-			//CmdList->SetTexture(m_Pipeline.get(), "InTexture", Texture);
 
 			IndexBufferView IndexView = {};
 			IndexView.IndexBuffer = ActorMesh->GetMesh()->GetIndexBuffer();

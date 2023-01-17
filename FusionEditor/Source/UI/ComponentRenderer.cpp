@@ -2,6 +2,7 @@
 #include "UILibrary.hpp"
 
 #include <Fusion/Core/Application.hpp>
+#include <Fusion/IO/TextureLoader.hpp>
 
 namespace FusionEditor {
 

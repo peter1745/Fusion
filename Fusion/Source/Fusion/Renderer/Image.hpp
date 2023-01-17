@@ -28,7 +28,6 @@ namespace Fusion {
 		glm::vec4 ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 		uint32_t Channels = 0;
-		Byte* InitialData = nullptr;
 
 		bool IsMappable = false;
 	};
@@ -57,6 +56,7 @@ namespace Fusion {
 		void Transition(CommandBuffer* InCmdList, EImageState InState);
 
 		void CopyTo(CommandBuffer* InCmdList, const ImageRegion& InRegion, Buffer* InBuffer);
+		void CopyFrom(CommandBuffer* InCmdList, const ImageRegion& InRegion, Buffer* InBuffer);
 
 		EImageState GetState() const { return m_State; }
 

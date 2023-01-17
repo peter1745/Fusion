@@ -180,6 +180,35 @@ namespace Fusion {
 		CoreVerify(vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, Fence) == VK_SUCCESS);
 	}
 
+	void Renderer::ExecuteImmediate(const std::function<void(CommandBuffer*)>& InFunc, bool InWaitBeforeExit)
+	{
+		auto CommandAllocator = m_Context->GetTemporaryCommandAllocator();
+		auto* CommandList = CommandAllocator->AllocateCommandBuffer();
+		CommandList->Reset();
+		CommandList->BeginRecording();
+
+		InFunc(CommandList);
+
+		CommandList->EndRecording();
+
+		const auto& QueueInfo = m_Context->GetDevice()->GetQueueInfo();
+		VkCommandBuffer NativeBuffer = CommandList->GetBuffer();
+
+		VkSubmitInfo SubmitInfo = {};
+		SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		SubmitInfo.commandBufferCount = 1;
+		SubmitInfo.pCommandBuffers = &NativeBuffer;
+		vkQueueSubmit(QueueInfo.Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
+
+		if (InWaitBeforeExit)
+			vkQueueWaitIdle(QueueInfo.Queue);
+
+		SubmitResourceForDestruction(2, [CommandAllocator, CommandList]() mutable
+		{
+			CommandAllocator->DestroyCommandBuffer(CommandList);
+		});
+	}
+
 	void Renderer::Release()
 	{
 		for (auto& ImageSemaphores : m_ImageAvailableSemaphores)

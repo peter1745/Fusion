@@ -8,6 +8,7 @@ namespace Fusion {
 
 	class CommandPool;
 	class GraphicsPipeline;
+	class Texture2D;
 
 	class CommandBuffer
 	{
@@ -20,9 +21,9 @@ namespace Fusion {
 		void BeginRecording();
 		void SetViewports(const std::vector<Viewport>& InViewports);
 
-		void SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData);
+		void SetPushConstants(GraphicsPipeline* InPipeline, EShaderStage InShaderStage, uint32_t InSize, const void* InData);
 
-		//void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture);
+		void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture, uint32_t InFrameIndex);
 		void SetVertexBuffer(const VertexBufferView& InBufferView);
 
 		void DrawInstanced(uint32_t InInstanceVertexCount, uint32_t InInstanceCount, uint32_t InStartVertexLocation, uint32_t InStartInstanceLocation);

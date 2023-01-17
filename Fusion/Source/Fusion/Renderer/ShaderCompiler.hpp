@@ -12,6 +12,7 @@ namespace Fusion {
 
 	struct ShaderIOParameter
 	{
+		EShaderStage Stage;
 		std::string Name;
 		uint32_t Location;
 		EIOParameterType Type;
@@ -27,26 +28,49 @@ namespace Fusion {
 
 	struct PushConstantData
 	{
+		EShaderStage Stages;
 		std::string Name;
 		uint32_t Size;
 
 		std::vector<UniformInfo> Uniforms;
 	};
 
-	struct VulkanModuleReflectionData
+	enum class EShaderResourceType
 	{
+		CombinedImageSampler,
+		Count
+	};
+
+	struct ShaderResource
+	{
+		EShaderStage Stages;
+		EShaderResourceType Type;
+		std::string Name;
+		uint32_t Binding;
+	};
+
+	struct SamplerShaderResource : public ShaderResource
+	{
+		uint32_t Dimensions;
+	};
+
+	struct ShaderDescriptorSet
+	{
+		uint32_t Index;
+		std::unordered_map<uint32_t, ShaderResource> Resources;
+	};
+
+	struct CompiledShaderData
+	{
+		std::unordered_map<EShaderStage, std::vector<uint32_t>> ModuleByteCodes;
+
 		std::vector<ShaderIOParameter> InputParameters;
 		// NOTE(Peter): Even though Vulkan currently only allows one push constant per shader module
 		//              SPIRV-Cross offers us an array in case that restriction is lifted at some point
 		//              so we'll also support it
 		std::vector<PushConstantData> PushConstants;
+		std::vector<ShaderDescriptorSet> DescriptorSets;
 		std::vector<ShaderIOParameter> OutputParameters;
-	};
-
-	struct CompiledShaderData
-	{
-		std::unordered_map<EShaderType, std::vector<uint32_t>> ModuleByteCodes;
-		std::unordered_map<EShaderType, VulkanModuleReflectionData> ReflectionData;
 	};
 
 	class Shader;
@@ -57,9 +81,11 @@ namespace Fusion {
 		Shared<Shader> CreateShader(const Shared<Device>& InDevice, const std::filesystem::path& InFilePath);
 
 	private:
-		void TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderType InShaderType, CompiledShaderData& OutData);
-		shaderc::SpvCompilationResult TryCompileModule(const std::filesystem::path& InFilePath, EShaderType InShaderType);
-		void ReflectShader(const std::vector<uint32_t>& InByteCode, VulkanModuleReflectionData& OutReflectionData);
+		void TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType, CompiledShaderData& OutData);
+		shaderc::SpvCompilationResult TryCompileModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType);
+		void ReflectShader(EShaderStage InStage, CompiledShaderData& InCompiledData);
+
+		void PrintReflectionData(const CompiledShaderData& InShaderData) const;
 	};
 
 }

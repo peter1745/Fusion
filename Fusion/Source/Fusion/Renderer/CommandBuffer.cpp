@@ -3,8 +3,11 @@
 #include "CommandPool.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Buffer.hpp"
+#include "Texture.hpp"
 
-#include "Fusion/Renderer/CommonTypes.hpp"
+#include "CommonTypes.hpp"
+
+#include <ranges>
 
 namespace Fusion {
 
@@ -15,6 +18,7 @@ namespace Fusion {
 
 	void CommandBuffer::Reset()
 	{
+		vkResetCommandBuffer(m_CommandBuffer, 0);
 	}
 
 	void CommandBuffer::BeginRecording()
@@ -47,15 +51,47 @@ namespace Fusion {
 		vkCmdSetScissor(m_CommandBuffer, 0, uint32_t(Scissors.size()), Scissors.data());
 	}
 
-	void CommandBuffer::SetPushConstants(GraphicsPipeline* InPipeline, EShaderType InShaderStage, uint32_t InSize, const void* InData)
+	void CommandBuffer::SetPushConstants(GraphicsPipeline* InPipeline, EShaderStage InShaderStage, uint32_t InSize, const void* InData)
 	{
 		VkPipelineLayout PipelineLayout = static_cast<GraphicsPipeline*>(InPipeline)->GetPipelineLayout();
 		vkCmdPushConstants(m_CommandBuffer, PipelineLayout, ShaderTypeToVkShaderStageFlags(InShaderStage), 0, InSize, InData);
 	}
 
-	/*void CommandBuffer::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture)
+	void CommandBuffer::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture, uint32_t InFrameIndex)
 	{
-	}*/
+		uint32_t DescriptorSetIndex = UINT32_MAX;
+		uint32_t Binding = UINT32_MAX;
+
+		const auto& ShaderData = InPipeline->GetInfo().PipelineShader->GetShaderData();
+		for (const auto& DescriptorSet : ShaderData.DescriptorSets)
+		{
+			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			{
+				if (Resource.Name == InName)
+				{
+					DescriptorSetIndex = DescriptorSet.Index;
+					Binding = Resource.Binding;
+				}
+			}
+		}
+
+		CoreVerify(DescriptorSetIndex != UINT32_MAX && Binding != UINT32_MAX);
+
+		VkDescriptorImageInfo DescriptorImageInfo = {};
+		DescriptorImageInfo.sampler = InTexture->GetSampler();
+		DescriptorImageInfo.imageView = InTexture->GetImageView();
+		DescriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		VkWriteDescriptorSet WriteDescriptorSet = {};
+		WriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		WriteDescriptorSet.pNext = nullptr;
+		WriteDescriptorSet.dstSet = InPipeline->GetDescriptorSet(DescriptorSetIndex, InFrameIndex);
+		WriteDescriptorSet.dstBinding = Binding;
+		WriteDescriptorSet.descriptorCount = 1;
+		WriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		WriteDescriptorSet.pImageInfo = &DescriptorImageInfo;
+		vkUpdateDescriptorSets(GraphicsContext::Get()->GetDevice()->GetLogicalDevice(), 1, &WriteDescriptorSet, 0, nullptr);
+	}
 
 	void CommandBuffer::SetVertexBuffer(const VertexBufferView& InBufferView)
 	{

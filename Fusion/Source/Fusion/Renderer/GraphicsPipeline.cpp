@@ -1,31 +1,30 @@
 #include "FusionPCH.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Shader.hpp"
+#include "Renderer.hpp"
+
+#include <ranges>
 
 namespace Fusion {
 
-	static VkShaderStageFlags ShaderTypeToShaderStageFlags(EShaderType InType)
+	static VkShaderStageFlags ShaderTypeToShaderStageFlags(EShaderStage InStage)
 	{
-		switch (InType)
-		{
-		case EShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-		case EShaderType::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
-		}
+		uint64_t Result = 0;
 
-		CoreVerify(false);
-		return static_cast<VkShaderStageFlags>(-1);
+		if ((InStage & EShaderStage::Vertex) != 0) Result |= VK_SHADER_STAGE_VERTEX_BIT;
+		if ((InStage & EShaderStage::Pixel) != 0) Result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		return static_cast<VkShaderStageFlags>(Result);
 	}
 
-	static VkShaderStageFlagBits ShaderTypeToShaderStageFlagBits(EShaderType InType)
+	static VkShaderStageFlagBits ShaderTypeToShaderStageFlagBits(EShaderStage InStage)
 	{
-		switch (InType)
-		{
-		case EShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-		case EShaderType::Pixel: return VK_SHADER_STAGE_FRAGMENT_BIT;
-		}
+		uint64_t Result = 0;
 
-		CoreVerify(false);
-		return static_cast<VkShaderStageFlagBits>(-1);
+		if ((InStage & EShaderStage::Vertex) != 0) Result |= VK_SHADER_STAGE_VERTEX_BIT;
+		if ((InStage & EShaderStage::Pixel) != 0) Result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		return static_cast<VkShaderStageFlagBits>(Result);
 	}
 
 	static VkPrimitiveTopology PrimitiveTopologyToVkPrimitiveTopology(EPrimitiveTopology InTopology)
@@ -39,6 +38,17 @@ namespace Fusion {
 		return static_cast<VkPrimitiveTopology>(-1);
 	}
 
+	static VkDescriptorType ShaderResourceTypeToDescriptorType(EShaderResourceType InType)
+	{
+		switch (InType)
+		{
+		case EShaderResourceType::CombinedImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		}
+
+		CoreVerify(false);
+		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+	}
+
 	GraphicsPipeline::GraphicsPipeline(const Shared<GraphicsContext>& InContext, const GraphicsPipelineInfo& InCreateInfo)
 	    : m_CreateInfo(InCreateInfo)
 	{
@@ -46,11 +56,12 @@ namespace Fusion {
 		std::vector<VkPushConstantRange> PushConstantRanges;
 
 		const auto& ShaderModules = InCreateInfo.PipelineShader->GetShaderModules();
+		const auto& ShaderData = InCreateInfo.PipelineShader->GetShaderData();
 
 		std::vector<VkVertexInputBindingDescription> InputBindings;
 		std::vector<VkVertexInputAttributeDescription> InputAttributes;
 
-		for (const auto& [ShaderStage, ReflectionData] : InCreateInfo.PipelineShader->GetReflectedModules())
+		for (const auto& [ShaderStage, ShaderModule] : ShaderModules)
 		{
 			auto& ShaderStageInfo = ShaderStageCreateInfos.emplace_back();
 			ShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -58,36 +69,67 @@ namespace Fusion {
 			ShaderStageInfo.stage = ShaderTypeToShaderStageFlagBits(ShaderStage);
 			ShaderStageInfo.module = ShaderModules.at(ShaderStage);
 			ShaderStageInfo.pName = "main";
+		}
 
-			if (ShaderStage == EShaderType::Vertex)
+		{
+			// Currently only support 1 input binding (e.g 1 vertex buffer as input data)
+			auto& InputBinding = InputBindings.emplace_back();
+			InputBinding.binding = 0;
+			uint32_t InputAttribOffset = 0;
+
+			for (const auto& InputParam : ShaderData.InputParameters)
 			{
-				auto& InputBinding = InputBindings.emplace_back();
-				InputBinding.binding = 0;
+				if (InputParam.Stage != EShaderStage::Vertex)
+					continue;
 
-				uint32_t InputAttribOffset = 0;
+				auto& InputAttrib = InputAttributes.emplace_back();
+				InputAttrib.location = InputParam.Location;
+				InputAttrib.binding = 0;
+				InputAttrib.format = EFormatToVkFormat(InputParam.Format);
+				InputAttrib.offset = InputAttribOffset;
 
-				for (const auto& InputParam : ReflectionData.InputParameters)
-				{
-					auto& InputAttrib = InputAttributes.emplace_back();
-					InputAttrib.location = InputParam.Location;
-					InputAttrib.binding = 0;
-					InputAttrib.format = EFormatToVkFormat(InputParam.Format);
-					InputAttrib.offset = InputAttribOffset;
-
-					InputAttribOffset += GetFormatSize(InputParam.Format);
-				}
-
-				InputBinding.stride = InputAttribOffset;
-				InputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+				InputAttribOffset += GetFormatSize(InputParam.Format);
 			}
 
-			for (const auto& PushConstantInfo : ReflectionData.PushConstants)
+			InputBinding.stride = InputAttribOffset;
+			InputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		}
+
+		for (const auto& PushConstantInfo : ShaderData.PushConstants)
+		{
+			auto& PushConstantRangeInfo = PushConstantRanges.emplace_back();
+			PushConstantRangeInfo.stageFlags = ShaderTypeToShaderStageFlags(PushConstantInfo.Stages);
+			PushConstantRangeInfo.offset = 0;
+			PushConstantRangeInfo.size = PushConstantInfo.Size;
+		}
+
+		m_DescriptorSetLayouts.resize(ShaderData.DescriptorSets.size());
+		for (size_t Idx = 0; Idx < ShaderData.DescriptorSets.size(); Idx++)
+		{
+			const auto& DescriptorSet = ShaderData.DescriptorSets.at(Idx);
+
+			std::vector<VkDescriptorSetLayoutBinding> LayoutBindings(DescriptorSet.Resources.size());
+
+			size_t BindingIdx = 0;
+			for (const auto& DescriptorResource : DescriptorSet.Resources | std::views::values)
 			{
-				auto& PushConstantRangeInfo = PushConstantRanges.emplace_back();
-				PushConstantRangeInfo.stageFlags = ShaderTypeToShaderStageFlags(ShaderStage);
-				PushConstantRangeInfo.offset = 0;
-				PushConstantRangeInfo.size = PushConstantInfo.Size;
+				auto& LayoutBinding = LayoutBindings[BindingIdx];
+				LayoutBinding.binding = DescriptorResource.Binding;
+				LayoutBinding.descriptorType = ShaderResourceTypeToDescriptorType(DescriptorResource.Type);
+				LayoutBinding.descriptorCount = 1; // TODO(Peter): Support arrays?
+				LayoutBinding.stageFlags = ShaderTypeToShaderStageFlags(DescriptorResource.Stages);
+				LayoutBinding.pImmutableSamplers = nullptr;
+				BindingIdx++;
 			}
+
+			VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo = {};
+			DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			DescriptorSetLayoutInfo.pNext = nullptr;
+			DescriptorSetLayoutInfo.flags = 0;
+			DescriptorSetLayoutInfo.bindingCount = LayoutBindings.size();
+			DescriptorSetLayoutInfo.pBindings = LayoutBindings.data();
+
+			vkCreateDescriptorSetLayout(InContext->GetDevice()->GetLogicalDevice(), &DescriptorSetLayoutInfo, nullptr, &m_DescriptorSetLayouts[Idx]);
 		}
 
 		VkPipelineVertexInputStateCreateInfo VertexInputInfo = {};
@@ -100,8 +142,8 @@ namespace Fusion {
 		VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = {};
 		PipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		PipelineLayoutCreateInfo.flags = 0;
-		PipelineLayoutCreateInfo.setLayoutCount = 0;
-		PipelineLayoutCreateInfo.pSetLayouts = nullptr;
+		PipelineLayoutCreateInfo.setLayoutCount = m_DescriptorSetLayouts.size();
+		PipelineLayoutCreateInfo.pSetLayouts = m_DescriptorSetLayouts.data();
 		PipelineLayoutCreateInfo.pushConstantRangeCount = PushConstantRanges.size();
 		PipelineLayoutCreateInfo.pPushConstantRanges = PushConstantRanges.data();
 
@@ -218,11 +260,56 @@ namespace Fusion {
 		PipelineCreateInfo.basePipelineIndex = 0;
 
 		vkCreateGraphicsPipelines(InContext->GetDevice()->GetLogicalDevice(), VK_NULL_HANDLE, 1, &PipelineCreateInfo, nullptr, &m_Pipeline);
+
+		std::unordered_map<EShaderResourceType, VkDescriptorPoolSize> DescriptorPoolSizeMap;
+		for (const auto& DescriptorSet : ShaderData.DescriptorSets)
+		{
+			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			{
+				auto& DescriptorPoolSize = DescriptorPoolSizeMap[Resource.Type];
+				DescriptorPoolSize.type = ShaderResourceTypeToDescriptorType(Resource.Type);
+				DescriptorPoolSize.descriptorCount++;
+			}
+		}
+
+		std::vector<VkDescriptorPoolSize> DescriptorPoolSizes;
+		for (const auto& DescriptorPoolSize : DescriptorPoolSizeMap | std::views::values)
+		{
+			for (size_t FrameIdx = 0; FrameIdx < Renderer::GetCurrent().GetFramesInFlight(); FrameIdx++)
+				DescriptorPoolSizes.push_back(DescriptorPoolSize);
+		}
+
+		VkDescriptorPoolCreateInfo DescriptorPoolInfo = {};
+		DescriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		DescriptorPoolInfo.pNext = nullptr;
+		DescriptorPoolInfo.flags = 0;
+		DescriptorPoolInfo.maxSets = ShaderData.DescriptorSets.size() * Renderer::GetCurrent().GetFramesInFlight();
+		DescriptorPoolInfo.poolSizeCount = DescriptorPoolSizes.size();
+		DescriptorPoolInfo.pPoolSizes = DescriptorPoolSizes.data();
+
+		vkCreateDescriptorPool(InContext->GetDevice()->GetLogicalDevice(), &DescriptorPoolInfo, nullptr, &m_DescriptorPool);
+
+		m_DescriptorSets.resize(Renderer::GetCurrent().GetFramesInFlight());
+		for (size_t FrameIdx = 0; FrameIdx < Renderer::GetCurrent().GetFramesInFlight(); FrameIdx++)
+		{
+			m_DescriptorSets[FrameIdx].resize(ShaderData.DescriptorSets.size());
+
+			VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = {};
+			DescriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			DescriptorSetAllocateInfo.pNext = nullptr;
+			DescriptorSetAllocateInfo.descriptorPool = m_DescriptorPool;
+			DescriptorSetAllocateInfo.descriptorSetCount = ShaderData.DescriptorSets.size();
+			DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.data();
+			VkResult result = vkAllocateDescriptorSets(InContext->GetDevice()->GetLogicalDevice(), &DescriptorSetAllocateInfo, &m_DescriptorSets[FrameIdx][0]);
+			LogInfo("Fusion", "Hello");
+		}
 	}
 
 	void GraphicsPipeline::Bind(CommandBuffer* InCmdList)
 	{
+		uint32_t CurrentFrame = Renderer::GetCurrent().GetCurrentFrame();
 		vkCmdBindPipeline(InCmdList->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+		vkCmdBindDescriptorSets(InCmdList->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_Layout, 0, m_DescriptorSets[CurrentFrame].size(), m_DescriptorSets[CurrentFrame].data(), 0, nullptr);
 	}
 
 }

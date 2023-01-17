@@ -38,7 +38,7 @@ namespace Fusion {
 		return GraphicsContext::Get()->GetAllocator()->MapMemory(m_Allocation);
 	}
 
-	void Buffer::Unmap(Byte* InPtr)
+	void Buffer::Unmap()
 	{
 		GraphicsContext::Get()->GetAllocator()->UnmapMemory(m_Allocation);
 	}

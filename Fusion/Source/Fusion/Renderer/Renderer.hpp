@@ -62,6 +62,8 @@ namespace Fusion {
 			DestroyInfo.DestroyFunc = InFunc;
 		}
 
+		void ExecuteImmediate(const std::function<void(CommandBuffer*)>& InFunc, bool InWaitBeforeExit = false);
+
 		void Release();
 
 	public:
