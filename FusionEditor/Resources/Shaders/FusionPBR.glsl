@@ -46,11 +46,18 @@ layout(location = 2) in flat uvec2 InActorID;
 layout(location = 0) out vec4 OutColor;
 layout(location = 1) out uvec2 OutActorID;
 
+// Material Data
 layout(set = 0, binding = 0) uniform sampler2D InTexture;
+
+// Lighting Data
+layout(set = 1, binding = 0) uniform LightData
+{
+    vec4 Color;
+} InLightData;
 
 void main()
 {
-    OutColor = texture(InTexture, InData.TexCoord);
+    OutColor = InLightData.Color * texture(InTexture, InData.TexCoord);
     OutActorID = InActorID;
 }
 

@@ -37,6 +37,7 @@ namespace Fusion {
 
 	enum class EShaderResourceType
 	{
+		UniformBuffer,
 		CombinedImageSampler,
 		Count
 	};
@@ -49,6 +50,20 @@ namespace Fusion {
 		uint32_t Binding;
 	};
 
+	struct UniformResource
+	{
+		std::string Name;
+		EFormat Format;
+		uint32_t Size;
+		uint32_t Offset;
+	};
+
+	struct UniformBufferShaderResource : public ShaderResource
+	{
+		uint32_t Size;
+		std::vector<UniformResource> Uniforms;
+	};
+
 	struct SamplerShaderResource : public ShaderResource
 	{
 		uint32_t Dimensions;
@@ -57,7 +72,7 @@ namespace Fusion {
 	struct ShaderDescriptorSet
 	{
 		uint32_t Index;
-		std::unordered_map<uint32_t, ShaderResource> Resources;
+		std::unordered_map<uint32_t, ShaderResource*> Resources;
 	};
 
 	struct CompiledShaderData

@@ -57,6 +57,42 @@ namespace Fusion {
 		vkCmdPushConstants(m_CommandBuffer, PipelineLayout, ShaderTypeToVkShaderStageFlags(InShaderStage), 0, InSize, InData);
 	}
 
+	void CommandBuffer::SetUniformBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InBuffer, uint32_t InFrameIndex)
+	{
+		uint32_t DescriptorSetIndex = UINT32_MAX;
+		uint32_t Binding = UINT32_MAX;
+
+		const auto& ShaderData = InPipeline->GetInfo().PipelineShader->GetShaderData();
+		for (const auto& DescriptorSet : ShaderData.DescriptorSets)
+		{
+			for (const auto* Resource : DescriptorSet.Resources | std::views::values)
+			{
+				if (Resource->Type != EShaderResourceType::UniformBuffer)
+					continue;
+
+				DescriptorSetIndex = DescriptorSet.Index;
+				Binding = Resource->Binding;
+			}
+		}
+
+		CoreVerify(DescriptorSetIndex != UINT32_MAX && Binding != UINT32_MAX);
+
+		VkDescriptorBufferInfo DescriptorBufferInfo = {};
+		DescriptorBufferInfo.buffer = InBuffer->GetBuffer();
+		DescriptorBufferInfo.offset = 0;
+		DescriptorBufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet WriteDescriptorSet = {};
+		WriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		WriteDescriptorSet.pNext = nullptr;
+		WriteDescriptorSet.dstSet = InPipeline->GetDescriptorSet(DescriptorSetIndex, InFrameIndex);
+		WriteDescriptorSet.dstBinding = Binding;
+		WriteDescriptorSet.descriptorCount = 1;
+		WriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		WriteDescriptorSet.pBufferInfo = &DescriptorBufferInfo;
+		vkUpdateDescriptorSets(GraphicsContext::Get()->GetDevice()->GetLogicalDevice(), 1, &WriteDescriptorSet, 0, nullptr);
+	}
+
 	void CommandBuffer::SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture, uint32_t InFrameIndex)
 	{
 		uint32_t DescriptorSetIndex = UINT32_MAX;
@@ -65,12 +101,12 @@ namespace Fusion {
 		const auto& ShaderData = InPipeline->GetInfo().PipelineShader->GetShaderData();
 		for (const auto& DescriptorSet : ShaderData.DescriptorSets)
 		{
-			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			for (const auto* Resource : DescriptorSet.Resources | std::views::values)
 			{
-				if (Resource.Name == InName)
+				if (Resource->Name == InName)
 				{
 					DescriptorSetIndex = DescriptorSet.Index;
-					Binding = Resource.Binding;
+					Binding = Resource->Binding;
 				}
 			}
 		}

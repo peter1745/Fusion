@@ -100,6 +100,7 @@ namespace FusionEditor {
 		void RenderWindows();
 		void OnRender();
 		void OnUpdate(float InDeltaTime);
+		void OnProjectChanged(std::shared_ptr<Project> InProject);
 
 	private:
 		std::unordered_map<uint32_t, WindowData> m_Windows;

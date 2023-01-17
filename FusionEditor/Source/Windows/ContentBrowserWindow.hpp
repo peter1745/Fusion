@@ -20,7 +20,7 @@ namespace FusionEditor {
 		ContentBrowserWindow(const std::shared_ptr<Project>& InProject);
 		~ContentBrowserWindow();
 
-		void SetCurrentProject(const std::shared_ptr<Project>& InProject);
+		void OnProjectChanged(std::shared_ptr<Project> InProject) override;
 
 		void NavigateToFolder(size_t InFolderIndex);
 

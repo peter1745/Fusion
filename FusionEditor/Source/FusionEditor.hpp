@@ -34,6 +34,11 @@ namespace FusionEditor {
 
 		void ShowImportWindowForFile(const std::filesystem::path& InFilePath);
 
+		void ScheduleProjectForLoad(const std::filesystem::path& InProjectPath)
+		{
+			m_ScheduledProject = InProjectPath;
+		}
+
 	private:
 		void InitWindows();
 		void DrawUI();
@@ -65,6 +70,8 @@ namespace FusionEditor {
 		std::shared_ptr<Project> m_CurrentProject;
 
 		std::string m_PopupToOpen = "";
+
+		std::filesystem::path m_ScheduledProject = "";
 	};
 
 }

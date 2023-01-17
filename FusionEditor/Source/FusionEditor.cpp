@@ -12,6 +12,7 @@
 #include "Windows/ActorDetailsWindow.hpp"
 #include "Windows/ContentBrowserWindow.hpp"
 #include "Windows/AssetSystem/AssetListWindow.hpp"
+#include "Windows/ProjectPropertiesWindow.hpp"
 
 #include "UI/UILibrary.hpp"
 
@@ -176,6 +177,12 @@ namespace FusionEditor {
 		DrawUI();
 
 		m_Renderer->EndFrame();
+
+		if (!m_ScheduledProject.empty())
+		{
+			LoadProject(m_ScheduledProject);
+			m_ScheduledProject = "";
+		}
 	}
 
 	void FusionEditorApp::OnShutdown()
@@ -219,6 +226,7 @@ namespace FusionEditor {
 		m_WindowManager->RegisterWindow<GameViewportWindow>(true, m_World);
 		m_WindowManager->RegisterWindow<ContentBrowserWindow>(true, nullptr);
 		m_WindowManager->RegisterWindow<AssetListWindow>(false, "Assets");
+		m_WindowManager->RegisterWindow<ProjectPropertiesWindow>(false, nullptr);
 
 		m_AssetImporterWindows[EAssetType::Mesh] = m_WindowManager->RegisterWindow<MeshImporterWindow>(false);
 	}
@@ -358,6 +366,21 @@ namespace FusionEditor {
 
 			const auto& Windows = m_WindowManager->GetAllWindows();
 
+			if (ImGui::BeginMenu("Edit"))
+			{
+				for (const auto& [WindowID, Data] : Windows)
+				{
+					if (Data.Window->GetMenuBarLocation() == EMenuBarLocation::Edit)
+					{
+						std::string_view Title = Data.Window->GetTitle();
+						if (ImGui::MenuItem(Title.data(), nullptr, nullptr, !Data.Window->IsDisabled()))
+							m_WindowManager->OpenWindowByID(WindowID);
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("View"))
 			{
 				for (const auto& [WindowID, Data] : Windows)
@@ -365,7 +388,7 @@ namespace FusionEditor {
 					if (Data.Window->GetMenuBarLocation() == EMenuBarLocation::View)
 					{
 						std::string_view Title = Data.Window->GetTitle();
-						if (ImGui::MenuItem(Title.data()))
+						if (ImGui::MenuItem(Title.data(), nullptr, nullptr, !Data.Window->IsDisabled()))
 							m_WindowManager->OpenWindowByID(WindowID);
 					}
 				}
@@ -400,7 +423,7 @@ namespace FusionEditor {
 
 		m_CurrentProject = NewProject;
 
-		m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->SetCurrentProject(m_CurrentProject);
+		m_WindowManager->OnProjectChanged(m_CurrentProject);
 	}
 
 	void FusionEditorApp::LoadProject(const std::filesystem::path& InProjectPath)
@@ -410,7 +433,7 @@ namespace FusionEditor {
 
 		SetTitle(fmt::format("Fusion Editor - {}", m_CurrentProject->Name));
 
-		m_WindowManager->GetWindowOfType<ContentBrowserWindow>()->SetCurrentProject(m_CurrentProject);
+		m_WindowManager->OnProjectChanged(m_CurrentProject);
 
 		for (const auto& It : std::filesystem::recursive_directory_iterator(m_CurrentProject->BaseDirectory / "Content"))
 		{
@@ -511,5 +534,10 @@ Fusion::Application* Fusion::CreateApplication([[maybe_unused]] int ArgC, [[mayb
 	auto& RenderSettings = Fusion::RenderSettings::Get();
 	RenderSettings.API = ERendererAPI::Vulkan;
 
-	return new FusionEditor::FusionEditorApp(specification);
+	FusionEditor::FusionEditorApp* App = new FusionEditor::FusionEditorApp(specification);
+
+	if (ArgC > 1)
+		App->ScheduleProjectForLoad(ArgV[1]);
+
+	return App;
 }

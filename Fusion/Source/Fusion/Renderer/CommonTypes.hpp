@@ -113,6 +113,7 @@ namespace Fusion {
 		Index = Shift1(1),
 		CopyDestination = Shift1(2),
 		CopySource = Shift1(3),
+		UniformBuffer = Shift1(4),
 		ScopedBitmaskMark
 	};
 

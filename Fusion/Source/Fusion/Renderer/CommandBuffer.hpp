@@ -22,7 +22,7 @@ namespace Fusion {
 		void SetViewports(const std::vector<Viewport>& InViewports);
 
 		void SetPushConstants(GraphicsPipeline* InPipeline, EShaderStage InShaderStage, uint32_t InSize, const void* InData);
-
+		void SetUniformBuffer(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Buffer>& InBuffer, uint32_t InFrameIndex);
 		void SetTexture(GraphicsPipeline* InPipeline, const std::string& InName, const Shared<Texture2D>& InTexture, uint32_t InFrameIndex);
 		void SetVertexBuffer(const VertexBufferView& InBufferView);
 

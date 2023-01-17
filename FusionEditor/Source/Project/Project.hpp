@@ -8,6 +8,7 @@ namespace FusionEditor {
 	{
 		std::filesystem::path BaseDirectory;
 		std::string Name;
+		std::filesystem::path DefaultWorldPath = "";
 	};
 
 }

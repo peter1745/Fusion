@@ -42,6 +42,7 @@ namespace Fusion {
 	{
 		switch (InType)
 		{
+		case EShaderResourceType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		case EShaderResourceType::CombinedImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		}
 
@@ -111,13 +112,13 @@ namespace Fusion {
 			std::vector<VkDescriptorSetLayoutBinding> LayoutBindings(DescriptorSet.Resources.size());
 
 			size_t BindingIdx = 0;
-			for (const auto& DescriptorResource : DescriptorSet.Resources | std::views::values)
+			for (const auto* DescriptorResource : DescriptorSet.Resources | std::views::values)
 			{
 				auto& LayoutBinding = LayoutBindings[BindingIdx];
-				LayoutBinding.binding = DescriptorResource.Binding;
-				LayoutBinding.descriptorType = ShaderResourceTypeToDescriptorType(DescriptorResource.Type);
+				LayoutBinding.binding = DescriptorResource->Binding;
+				LayoutBinding.descriptorType = ShaderResourceTypeToDescriptorType(DescriptorResource->Type);
 				LayoutBinding.descriptorCount = 1; // TODO(Peter): Support arrays?
-				LayoutBinding.stageFlags = ShaderTypeToShaderStageFlags(DescriptorResource.Stages);
+				LayoutBinding.stageFlags = ShaderTypeToShaderStageFlags(DescriptorResource->Stages);
 				LayoutBinding.pImmutableSamplers = nullptr;
 				BindingIdx++;
 			}
@@ -264,10 +265,10 @@ namespace Fusion {
 		std::unordered_map<EShaderResourceType, VkDescriptorPoolSize> DescriptorPoolSizeMap;
 		for (const auto& DescriptorSet : ShaderData.DescriptorSets)
 		{
-			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			for (const auto* Resource : DescriptorSet.Resources | std::views::values)
 			{
-				auto& DescriptorPoolSize = DescriptorPoolSizeMap[Resource.Type];
-				DescriptorPoolSize.type = ShaderResourceTypeToDescriptorType(Resource.Type);
+				auto& DescriptorPoolSize = DescriptorPoolSizeMap[Resource->Type];
+				DescriptorPoolSize.type = ShaderResourceTypeToDescriptorType(Resource->Type);
 				DescriptorPoolSize.descriptorCount++;
 			}
 		}
@@ -300,8 +301,7 @@ namespace Fusion {
 			DescriptorSetAllocateInfo.descriptorPool = m_DescriptorPool;
 			DescriptorSetAllocateInfo.descriptorSetCount = ShaderData.DescriptorSets.size();
 			DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.data();
-			VkResult result = vkAllocateDescriptorSets(InContext->GetDevice()->GetLogicalDevice(), &DescriptorSetAllocateInfo, &m_DescriptorSets[FrameIdx][0]);
-			LogInfo("Fusion", "Hello");
+			vkAllocateDescriptorSets(InContext->GetDevice()->GetLogicalDevice(), &DescriptorSetAllocateInfo, &m_DescriptorSets[FrameIdx][0]);
 		}
 	}
 

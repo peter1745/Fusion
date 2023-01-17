@@ -68,6 +68,7 @@ namespace Fusion {
 		if ((InUsage & EBufferUsage::Index) != 0) Result |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		if ((InUsage & EBufferUsage::CopyDestination) != 0) Result |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		if ((InUsage & EBufferUsage::CopySource) != 0) Result |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		if ((InUsage & EBufferUsage::UniformBuffer) != 0) Result |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
 		return static_cast<VkBufferUsageFlags>(Result);
 	}

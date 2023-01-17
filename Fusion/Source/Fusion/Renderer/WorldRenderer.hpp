@@ -29,11 +29,17 @@ namespace Fusion {
 			uint64_t ActorID;
 		} m_TransformData;
 
+		struct LightData
+		{
+			glm::vec4 Color;
+		} m_LightData;
+
 	private:
 		Shared<World> m_World = nullptr;
 		Unique<GraphicsPipeline> m_Pipeline = nullptr;
-		Shared<Buffer> m_TransformBuffer = nullptr;
-		Shared<Buffer> m_TransformUploadBuffer = nullptr;
+		std::vector<Shared<Buffer>> m_LightDataBuffers;
+		float m_Intensity = 1.0f;
+		float m_IntensityModifier = 0.025f;
 	};
 
 }

@@ -9,7 +9,7 @@ namespace FusionEditor {
 	ContentBrowserWindow::ContentBrowserWindow(const std::shared_ptr<Project>& InProject)
 		: EditorWindow("Content Browser")
 	{
-		SetCurrentProject(InProject);
+		OnProjectChanged(InProject);
 	}
 
 	ContentBrowserWindow::~ContentBrowserWindow()
@@ -18,7 +18,7 @@ namespace FusionEditor {
 		m_CurrentProject = nullptr;
 	}
 
-	void ContentBrowserWindow::SetCurrentProject(const std::shared_ptr<Project>& InProject)
+	void ContentBrowserWindow::OnProjectChanged(std::shared_ptr<Project> InProject)
 	{
 		m_CurrentProject = InProject;
 

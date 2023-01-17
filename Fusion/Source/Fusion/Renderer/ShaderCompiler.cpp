@@ -21,6 +21,7 @@ namespace Fusion {
 	};
 
 	static std::unordered_map<EShaderResourceType, const char*> s_ShaderResourceTypeNames = {
+		{ EShaderResourceType::UniformBuffer, "UniformBuffer" },
 		{ EShaderResourceType::CombinedImageSampler, "CombinedImageSampler" }
 	};
 
@@ -247,6 +248,54 @@ namespace Fusion {
 			}
 		}
 
+		for (const auto& UniformResource : Resources.uniform_buffers)
+		{
+			uint32_t DescriptorSetIndex = Compiler.get_decoration(UniformResource.id, spv::DecorationDescriptorSet);
+
+			if (DescriptorSetIndex >= InCompiledData.DescriptorSets.size())
+				InCompiledData.DescriptorSets.resize(DescriptorSetIndex + 1);
+
+			auto& DescriptorSet = InCompiledData.DescriptorSets[DescriptorSetIndex];
+			DescriptorSet.Index = DescriptorSetIndex;
+
+			const auto& BufferType = Compiler.get_type(UniformResource.base_type_id);
+
+			CoreVerify(BufferType.basetype == spirv_cross::SPIRType::Struct);
+
+			uint32_t Binding = Compiler.get_decoration(UniformResource.id, spv::DecorationBinding);
+
+			if (DescriptorSet.Resources.find(Binding) != DescriptorSet.Resources.end())
+			{
+				// Binding already exists, just update the stage
+				auto* Resource = DescriptorSet.Resources[Binding];
+				Resource->Stages |= InStage;
+			}
+			else
+			{
+				auto* Resource = new UniformBufferShaderResource();
+				Resource->Stages = InStage;
+				Resource->Type = EShaderResourceType::UniformBuffer;
+				Resource->Name = Compiler.get_name(UniformResource.id);
+				Resource->Binding = Binding;
+
+				auto MemberCount = uint32_t(BufferType.member_types.size());
+
+				for (uint32_t MemberIdx = 0; MemberIdx < MemberCount; MemberIdx++)
+				{
+					auto& UniformData = Resource->Uniforms.emplace_back();
+					const auto& MemberType = Compiler.get_type(BufferType.member_types[MemberIdx]);
+					UniformData.Name = Compiler.get_member_name(BufferType.self, MemberIdx);
+					UniformData.Format = GetResourceFormat(MemberType);
+					UniformData.Size = Compiler.get_declared_struct_member_size(BufferType, MemberIdx);
+					UniformData.Offset = Compiler.type_struct_member_offset(BufferType, MemberIdx);
+
+					Resource->Size += UniformData.Size;
+				}
+
+				DescriptorSet.Resources[Binding] = Resource;
+			}
+		}
+
 		for (const auto& SamplerResource : Resources.sampled_images)
 		{
 			uint32_t DescriptorSetIndex = Compiler.get_decoration(SamplerResource.id, spv::DecorationDescriptorSet);
@@ -265,16 +314,16 @@ namespace Fusion {
 			{
 				// Binding already exists, just update the stage
 				auto& Resource = DescriptorSet.Resources[Binding];
-				Resource.Stages |= InStage;
+				Resource->Stages |= InStage;
 			}
 			else
 			{
-				SamplerShaderResource Resource = {};
-				Resource.Stages = InStage;
-				Resource.Type = EShaderResourceType::CombinedImageSampler;
-				Resource.Name = SamplerResource.name;
-				Resource.Binding = Binding;
-				Resource.Dimensions = BaseType.image.dim;
+				auto* Resource = new SamplerShaderResource();
+				Resource->Stages = InStage;
+				Resource->Type = EShaderResourceType::CombinedImageSampler;
+				Resource->Name = SamplerResource.name;
+				Resource->Binding = Binding;
+				Resource->Dimensions = BaseType.image.dim;
 				DescriptorSet.Resources[Binding] = Resource;
 			}
 		}
@@ -366,24 +415,37 @@ namespace Fusion {
 			LogInfo("Fusion", "\tIndex: {}", DescriptorSet.Index);
 			LogInfo("Fusion", "\tResources:");
 
-			for (const auto& Resource : DescriptorSet.Resources | std::views::values)
+			for (const auto* Resource : DescriptorSet.Resources | std::views::values)
 			{
-				LogInfo("Fusion", "\t\tName: {}", Resource.Name);
+				LogInfo("Fusion", "\t\tName: {}", Resource->Name);
 
 				LogInfo("Fusion", "\t\tShader Stages:");
 
-				if ((Resource.Stages & EShaderStage::Vertex) != 0) LogInfo("Fusion", "\t\t\t- Vertex");
-				if ((Resource.Stages & EShaderStage::Pixel) != 0) LogInfo("Fusion", "\t\t\t- Pixel");
+				if ((Resource->Stages & EShaderStage::Vertex) != 0) LogInfo("Fusion", "\t\t\t- Vertex");
+				if ((Resource->Stages & EShaderStage::Pixel) != 0) LogInfo("Fusion", "\t\t\t- Pixel");
 
-				LogInfo("Fusion", "\t\tType: {}", s_ShaderResourceTypeNames.at(Resource.Type));
-				LogInfo("Fusion", "\t\tBinding: {}", Resource.Binding);
+				LogInfo("Fusion", "\t\tType: {}", s_ShaderResourceTypeNames.at(Resource->Type));
+				LogInfo("Fusion", "\t\tBinding: {}", Resource->Binding);
 
-				switch (Resource.Type)
+				switch (Resource->Type)
 				{
+				case EShaderResourceType::UniformBuffer:
+				{
+					const auto* UniformBufferResource = (const UniformBufferShaderResource*) Resource;
+					LogInfo("Fusion", "\t\tSize: {}", UniformBufferResource->Size);
+					LogInfo("Fusion", "\t\tMembers:");
+					for (const auto& UniformData : UniformBufferResource->Uniforms)
+					{
+						LogInfo("Fusion", "\t\t\t- Name: {}", UniformData.Name);
+						//LogInfo("Fusion", "\t\t\tName: {}", UniformData.Name);
+						LogInfo("Fusion", "\t\t\tSize: {}", UniformData.Size);
+						LogInfo("Fusion", "\t\t\tOffset: {}", UniformData.Offset);
+					}
+				}
 				case EShaderResourceType::CombinedImageSampler:
 				{
-					const auto& SamplerResource = (const SamplerShaderResource&)Resource;
-					LogInfo("Fusion", "\t\tDimensions: {}", SamplerResource.Dimensions);
+					const auto* SamplerResource = (const SamplerShaderResource*)Resource;
+					LogInfo("Fusion", "\t\tDimensions: {}", SamplerResource->Dimensions);
 					break;
 				}
 				}

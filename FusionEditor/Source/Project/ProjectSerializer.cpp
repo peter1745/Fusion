@@ -15,6 +15,7 @@ namespace FusionEditor {
 		YAML::Emitter Emitter;
 		Emitter << YAML::BeginMap;
 		Emitter << YAML::Key << "Project" << YAML::Value << InProject->Name;
+		Emitter << YAML::Key << "DefaultWorldPath" << YAML::Value << InProject->DefaultWorldPath.string();
 		Emitter << YAML::EndMap;
 
 		std::ofstream StreamOut(InProject->BaseDirectory / (InProject->Name + ".fproj"));
@@ -35,6 +36,7 @@ namespace FusionEditor {
 		std::shared_ptr<Project> NewProject = std::make_shared<Project>();
 		NewProject->Name = RootNode["Project"].as<std::string>();
 		NewProject->BaseDirectory = InFilePath.parent_path();
+		NewProject->DefaultWorldPath = RootNode["DefaultWorldPath"].as<std::string>("");
 		return NewProject;
 	}
 

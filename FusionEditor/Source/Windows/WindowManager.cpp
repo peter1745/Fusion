@@ -46,4 +46,10 @@ namespace FusionEditor {
 		}
 	}
 
+	void WindowManager::OnProjectChanged(std::shared_ptr<Project> InProject)
+	{
+		for (auto& [WindowID, Data] : m_Windows)
+			Data.Window->OnProjectChanged(InProject);
+	}
+
 }

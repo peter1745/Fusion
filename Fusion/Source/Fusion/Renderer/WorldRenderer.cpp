@@ -28,19 +28,14 @@ namespace Fusion {
 		PipelineInfo.DepthStencilFormat = EFormat::D24UnormS8UInt;
 		m_Pipeline = MakeUnique<GraphicsPipeline>(GraphicsContext::Get(), PipelineInfo);
 
-		//BufferInfo TransformDataBufferInfo = {};
-		//TransformDataBufferInfo.HeapType = EHeapType::Default;
-		//TransformDataBufferInfo.State = BufferStates::Constant;
-		//TransformDataBufferInfo.Size = sizeof(TransformData);
-		//TransformDataBufferInfo.Alignment = 16;
-		//m_TransformBuffer = Buffer::Create(TransformDataBufferInfo);
+		uint32_t FramesInFlight = Renderer::GetCurrent().GetFramesInFlight();
+		m_LightDataBuffers.resize(FramesInFlight);
 
-		//BufferInfo TransformUploadBufferInfo = {};
-		//TransformUploadBufferInfo.HeapType = EHeapType::Upload;
-		//TransformUploadBufferInfo.State = BufferStates::Constant;
-		//TransformUploadBufferInfo.Size = sizeof(TransformData);
-		//TransformUploadBufferInfo.Alignment = 16;
-		//m_TransformUploadBuffer = Buffer::Create(TransformUploadBufferInfo);
+		BufferInfo LightDataBufferInfo = {};
+		LightDataBufferInfo.Usage = EBufferUsage::UniformBuffer;
+		LightDataBufferInfo.Size = sizeof(LightData);
+		for (uint32_t Idx = 0; Idx < FramesInFlight; Idx++)
+			m_LightDataBuffers[Idx] = Shared<Buffer>::Create(LightDataBufferInfo);
 
 		Texture = TextureLoader::LoadFromFile("Resources/Textures/Test.png");
 	}
@@ -53,8 +48,16 @@ namespace Fusion {
 
 	void WorldRenderer::Render()
 	{
+		uint32_t CurrentFrame = Renderer::GetCurrent().GetCurrentFrame();
 		auto* CmdList = Renderer::GetCurrent().GetCurrentCommandList();
-		CmdList->SetTexture(m_Pipeline.get(), "InTexture", Texture, Renderer::GetCurrent().GetCurrentFrame());
+
+		m_LightData.Color = { 0.25f, 0.3f, 0.8f, 1.0f };
+		void* BufferData = m_LightDataBuffers[CurrentFrame]->Map();
+		memcpy(BufferData, &m_LightData, sizeof(LightData));
+		m_LightDataBuffers[CurrentFrame]->Unmap();
+
+		CmdList->SetTexture(m_Pipeline.get(), "InTexture", Texture, CurrentFrame);
+		CmdList->SetUniformBuffer(m_Pipeline.get(), "InLightData", m_LightDataBuffers[CurrentFrame], CurrentFrame);
 
 		m_Pipeline->Bind(CmdList);
 

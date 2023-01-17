@@ -3,13 +3,15 @@
 #include "Fusion/Memory/Shared.hpp"
 #include "Fusion/Events/Event.hpp"
 
+#include "Project/Project.hpp"
+
 #include <string>
 
 #include <imgui.h>
 
 namespace FusionEditor {
 
-	enum class EMenuBarLocation { None, View };
+	enum class EMenuBarLocation { None, Edit, View };
 	
 	class EditorWindow : public Fusion::SharedObject
 	{
@@ -22,6 +24,7 @@ namespace FusionEditor {
 		virtual void OnRender() {}
 		virtual void OnUpdate([[maybe_unused]] float InDeltaTime) {}
 		virtual void OnEvent([[maybe_unused]] Fusion::Event& InEvent) {}
+		virtual void OnProjectChanged(std::shared_ptr<Project> InProject) {};
 
 		uint32_t GetWindowWidth() const { return m_Width; }
 		uint32_t GetWindowHeight() const { return m_Height; }
@@ -32,6 +35,7 @@ namespace FusionEditor {
 		uint32_t GetID() const { return m_WindowID; }
 
 		virtual constexpr EMenuBarLocation GetMenuBarLocation() const = 0;
+		virtual bool IsDisabled() const { return false; }
 
 		std::string_view GetTitle() const { return m_Title; }
 
