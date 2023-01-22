@@ -24,98 +24,11 @@
 #include <Fusion/IO/FileIO.hpp>
 #include <Fusion/IO/Keyboard.hpp>
 
-#include <Fission/Collision/BoxShape.hpp>
-
 #include <NFD-Extended/nfd.hpp>
 
 #include <GLFW/glfw3.h>
 
 namespace FusionEditor {
-
-	static void TestSignedVolumeProjection()
-	{
-		Fission::BoxShape Shape({ 0.5f, 0.5f, 0.5f });
-
-		std::array<glm::vec3, 4> OrgPts = {
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
-		};
-
-		std::array<glm::vec3, 4> Pts;
-		glm::vec4 Lambdas;
-		glm::vec3 V(0.0f);
-
-		{
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				Pts[Idx] = OrgPts[Idx] + glm::vec3(1.0f);
-
-			Lambdas = Shape.ProjectSignedVolume3D(Pts[0], Pts[1], Pts[2], Pts[3]);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				V += Pts[Idx] * Lambdas[Idx];
-
-			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
-		}
-
-		{
-			V = glm::vec3(0.0f);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				Pts[Idx] = OrgPts[Idx] + glm::vec3(-1.0f) * 0.25f;
-
-			Lambdas = Shape.ProjectSignedVolume3D(Pts[0], Pts[1], Pts[2], Pts[3]);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				V += Pts[Idx] * Lambdas[Idx];
-
-			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
-		}
-
-		{
-			V = glm::vec3(0.0f);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				Pts[Idx] = OrgPts[Idx] + glm::vec3(-1.0f);
-
-			Lambdas = Shape.ProjectSignedVolume3D(Pts[0], Pts[1], Pts[2], Pts[3]);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				V += Pts[Idx] * Lambdas[Idx];
-
-			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
-		}
-
-		{
-			V = glm::vec3(0.0f);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				Pts[Idx] = OrgPts[Idx] + glm::vec3(1.0f, 1.0f, -0.5f);
-
-			Lambdas = Shape.ProjectSignedVolume3D(Pts[0], Pts[1], Pts[2], Pts[3]);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				V += Pts[Idx] * Lambdas[Idx];
-
-			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
-		}
-
-		{
-			Pts[0] = { 51.1996613f, 26.1989613f, 1.91339576f };
-			Pts[1] = { -51.0567360f, -26.0565681f, -0.436143428f };
-			Pts[2] = { 50.8978920f, -24.1035538f, -1.04042661f };
-			Pts[3] = { -49.1021080f, 25.8964462f, -1.04042661f };
-			Lambdas = Shape.ProjectSignedVolume3D(Pts[0], Pts[1], Pts[2], Pts[3]);
-
-			V = glm::vec3(0.0f);
-
-			for (size_t Idx = 0; Idx < 4; Idx++)
-				V += Pts[Idx] * Lambdas[Idx];
-
-			Fusion::LogInfo("Fusion Editor", "Lambdas: {}, V: {}", Lambdas, V);
-		}
-	}
 
 	FusionEditorApp::FusionEditorApp(const ApplicationSpecification& specification)
 	    : Application(specification, this)
@@ -139,8 +52,6 @@ namespace FusionEditor {
 			SetTitle("Fusion Editor (Vulkan)");
 			break;
 		}
-
-		TestSignedVolumeProjection();
 	}
 
 	void FusionEditorApp::OnInit()

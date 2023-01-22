@@ -55,9 +55,12 @@ layout(set = 1, binding = 0) uniform LightData
     vec4 Color;
 } InLightData;
 
+const float c_AmbientStrength = 1.0;
+
 void main()
 {
-    OutColor = InLightData.Color * texture(InTexture, InData.TexCoord);
+    vec4 AmbientLighting = InLightData.Color * c_AmbientStrength;
+    OutColor = AmbientLighting * texture(InTexture, InData.TexCoord);
     OutActorID = InActorID;
 }
 

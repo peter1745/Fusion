@@ -93,7 +93,7 @@ namespace Fusion {
 	class ShaderCompiler
 	{
 	public:
-		Shared<Shader> CreateShader(const Shared<Device>& InDevice, const std::filesystem::path& InFilePath);
+		Shared<Shader> CompileFromFile(const std::filesystem::path& InFilePath);
 
 	private:
 		void TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType, CompiledShaderData& OutData);

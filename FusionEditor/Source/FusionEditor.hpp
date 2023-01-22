@@ -4,7 +4,6 @@
 #include <Fusion/Renderer/Renderer.hpp>
 //#include <Fusion/Renderer/Texture.hpp>
 #include <Fusion/World/World.hpp>
-#include <Fusion/Renderer/WorldRenderer.hpp>
 #include <Fusion/Renderer/Mesh.hpp>
 #include <Fusion/IO/TextureLoader.hpp>
 #include <Fusion/AssetSystem/Asset.hpp>
@@ -14,6 +13,7 @@
 #include "Windows/AssetSystem/MeshImporterWindow.hpp"
 
 #include "Renderer/ViewportCamera.hpp"
+#include "Renderer/WorldRenderer.hpp"
 
 #include "UI/ImGuiPlatformContext.hpp"
 #include "Project/Project.hpp"
@@ -57,7 +57,6 @@ namespace FusionEditor {
 		Unique<Renderer> m_Renderer = nullptr;
 
 		Shared<Mesh> m_CubeMesh = nullptr;
-		//Shared<Texture2D> m_Texture = nullptr;
 
 		Shared<World> m_World = nullptr;
 		Shared<World> m_BackupWorld = nullptr;

@@ -10,7 +10,7 @@ namespace Fusion {
 
 	struct LogSystemData
 	{
-		std::unordered_map<std::string_view, std::unique_ptr<Logger>> Loggers;
+		std::unordered_map<std::string, std::unique_ptr<Logger>> Loggers;
 	};
 
 	static LogSystemData* s_Data = nullptr;

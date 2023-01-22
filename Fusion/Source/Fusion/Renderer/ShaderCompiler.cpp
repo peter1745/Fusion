@@ -1,6 +1,7 @@
 #include "FusionPCH.hpp"
 #include "ShaderCompiler.hpp"
 #include "Shader.hpp"
+#include "GraphicsContext.hpp"
 
 #include "Fusion/IO/FileIO.hpp"
 
@@ -139,7 +140,7 @@ namespace Fusion {
 		return EFormat::Unknown;
 	}
 
-	Shared<Shader> ShaderCompiler::CreateShader(const Shared<Device>& InDevice, const std::filesystem::path& InFilePath)
+	Shared<Shader> ShaderCompiler::CompileFromFile(const std::filesystem::path& InFilePath)
 	{
 		CompiledShaderData ShaderData = {};
 
@@ -148,7 +149,7 @@ namespace Fusion {
 
 		PrintReflectionData(ShaderData);
 
-		return Shared<Shader>::Create(InDevice, ShaderData);
+		return Shared<Shader>::Create(GraphicsContext::Get()->GetDevice(), ShaderData);
 	}
 
 	void ShaderCompiler::TryCompileAndReflectModule(const std::filesystem::path& InFilePath, EShaderStage InShaderType, CompiledShaderData& OutData)
@@ -205,8 +206,7 @@ namespace Fusion {
 		std::string ShaderName = InFilePath.filename().string();
 		shaderc::SpvCompilationResult Module = Compiler.CompileGlslToSpv(Source, ShaderKind, ShaderName.c_str(), Options);
 
-		if (Module.GetCompilationStatus() != shaderc_compilation_status_success)
-			LogError("Fusion", "Failed! Error: {}", Module.GetErrorMessage());
+		CoreVerify(Module.GetCompilationStatus() == shaderc_compilation_status_success, "Failed! Error: {}", Module.GetErrorMessage());
 
 		return Module;
 	}

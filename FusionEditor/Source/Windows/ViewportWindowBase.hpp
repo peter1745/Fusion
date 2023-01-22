@@ -4,7 +4,8 @@
 
 #include "UI/ImGuiRenderTextureImage.hpp"
 
-#include <Fusion/Renderer/WorldRenderer.hpp>
+#include "Renderer/WorldRenderer.hpp"
+
 #include <Fusion/Renderer/RenderTexture.hpp>
 
 namespace FusionEditor {
@@ -31,7 +32,7 @@ namespace FusionEditor {
 
 	protected:
 		Fusion::Shared<Fusion::World> m_World = nullptr;
-		Fusion::Unique<Fusion::WorldRenderer> m_WorldRenderer = nullptr;
+		Fusion::Unique<WorldRenderer> m_WorldRenderer = nullptr;
 		std::vector<Fusion::Shared<Fusion::RenderTexture>> m_RenderTextures;
 
 		float m_MinRenderBoundX = 0;

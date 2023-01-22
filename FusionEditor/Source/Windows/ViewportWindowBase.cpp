@@ -3,6 +3,8 @@
 #include "Fusion/Core/Application.hpp"
 #include "Fusion/Renderer/Renderer.hpp"
 
+#include "Renderer/SimpleWorldRenderer.hpp"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -13,7 +15,7 @@ namespace FusionEditor {
 	ViewportWindowBase::ViewportWindowBase(const std::string& InTitle, const Fusion::Shared<Fusion::World>& InWorld)
 	    : EditorWindow(InTitle, 300, 300), m_World(InWorld)
 	{
-		m_WorldRenderer = Fusion::MakeUnique<Fusion::WorldRenderer>(InWorld);
+		m_WorldRenderer = Fusion::MakeUnique<SimpleWorldRenderer>(InWorld);
 
 		Fusion::RenderTextureAttachment ColorAttachment = {};
 		ColorAttachment.Format = Fusion::EFormat::RGBA8Unorm;
@@ -89,7 +91,7 @@ namespace FusionEditor {
 		ImVec2 MaxBound = ImGui::GetContentRegionMax();
 		
 		m_MinRenderBoundX = MinBound.x;
-		m_MinRenderBoundY = ImGui::GetCursorStartPos().y + ImGui::GetCurrentWindow()->TitleBarHeight();
+		m_MinRenderBoundY = ImGui::GetCursorPos().y + ImGui::GetCurrentWindow()->TitleBarHeight();
 		m_RenderWidth = MaxBound.x - MinBound.x;
 		m_RenderHeight = glm::max(0.0f, MaxBound.y - MinBound.y);
 
