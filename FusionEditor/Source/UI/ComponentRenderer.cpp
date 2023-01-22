@@ -4,6 +4,8 @@
 #include <Fusion/Core/Application.hpp>
 #include <Fusion/IO/TextureLoader.hpp>
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace FusionEditor {
 
 	void ComponentUI<Fusion::TransformComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::TransformComponent* InComp)
@@ -33,13 +35,14 @@ namespace FusionEditor {
 
 	void ComponentUI<Fusion::MeshComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::MeshComponent* InComp)
 	{
-		if (!InComp->MeshHandle.IsValid())
+		auto AssetStorage = Fusion::Application::Get().GetAssetStorage();
+		if (!InComp->MeshHandle.IsValid() || AssetStorage->GetAsset<Fusion::MeshAsset>(InComp->MeshHandle) == nullptr)
 		{
 			ImGui::Button("Null");
 		}
 		else
 		{
-			const auto& Databank = Fusion::Application::Get().GetAssetStorage()->GetDatabank(InComp->MeshHandle);
+			const auto& Databank = AssetStorage->GetDatabank(InComp->MeshHandle);
 			std::string Name = Databank.FilePath.filename().string();
 			ImGui::Button(Name.c_str());
 		}
@@ -62,6 +65,11 @@ namespace FusionEditor {
 	void ComponentUI<Fusion::SphereShapeComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::SphereShapeComponent* InComp)
 	{
 		ImGui::DragFloat("Radius", &InComp->Radius);
+	}
+
+	void ComponentUI<Fusion::BoxShapeComponent>::Render([[maybe_unused]] Fusion::Shared<Fusion::Actor> InActor, Fusion::BoxShapeComponent* InComp)
+	{
+		ImGui::DragFloat3("Half Size", glm::value_ptr(InComp->HalfSize));
 	}
 
 }

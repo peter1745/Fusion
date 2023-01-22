@@ -67,7 +67,8 @@ namespace FusionEditor::UI {
 		Fusion::CameraComponent,
 		Fusion::MeshComponent,
 		Fusion::PhysicsBodyComponent,
-		Fusion::SphereShapeComponent
+		Fusion::SphereShapeComponent,
+		Fusion::BoxShapeComponent
 	>;
 
 }

@@ -3,8 +3,8 @@
 #include "Components/AllComponents.hpp"
 
 #include <Fission/Body/Body.hpp>
-#include <Fission/Collision/SphereShape.hpp>
-#include <Fission/Collision/BoxShape.hpp>
+#include <Fission/Collision/Shapes/SphereShape.hpp>
+#include <Fission/Collision/Shapes/BoxShape.hpp>
 
 namespace Fusion {
 
@@ -47,7 +47,7 @@ namespace Fusion {
 	{
 		m_State = EWorldState::Simulating;
 
-		m_PhysicsWorld.Initialize(5000);
+		m_PhysicsWorld.Init();
 
 		auto PhysicsActors = FindAllActorsWith<PhysicsBodyComponent>();
 		for (auto Actor : PhysicsActors)
@@ -56,26 +56,24 @@ namespace Fusion {
 			const auto* PhysicsBodyComp = FindActorComponent<PhysicsBodyComponent>(Actor->GetActorID());
 
 			Fission::BodySettings Settings = {};
-			Settings.InitialLocation = ActorTransform->Location;
-			Settings.InitialOrientation = ActorTransform->GetRotation();
+			Settings.BodyType = PhysicsBodyComp->Mass <= 0.0f ? Fission::EBodyType::Static : Fission::EBodyType::Dynamic;
+			Settings.Position = ActorTransform->Location;
+			Settings.Rotation = ActorTransform->GetRotation();
 			Settings.Mass = PhysicsBodyComp->Mass;
-			
-			const auto* BoxShape = FindActorComponent<BoxShapeComponent>(Actor->GetActorID());
+
 			const auto* SphereShape = FindActorComponent<SphereShapeComponent>(Actor->GetActorID());
-			if (BoxShape)
-			{
-				Settings.Shape = new Fission::BoxShape(BoxShape->HalfSize);
-				Settings.Shape->SetRestitution(1.0f);
-				Settings.Shape->SetFriction(0.1f);
-			}
-			else if (SphereShape)
+			if (SphereShape)
 			{
 				float LargestComponent = glm::max(ActorTransform->Scale.x, glm::max(ActorTransform->Scale.y, ActorTransform->Scale.z));
-				Settings.Shape = new Fission::SphereShape(LargestComponent * SphereShape->Radius);
-				Settings.Shape->SetRestitution(1.0f);
-				Settings.Shape->SetFriction(0.1f);
+				Settings.CollisionShape = new Fission::SphereShape(LargestComponent * SphereShape->Radius);
 			}
 
+			const auto* BoxShape = FindActorComponent<BoxShapeComponent>(Actor->GetActorID());
+			if (BoxShape)
+			{
+				Settings.CollisionShape = new Fission::BoxShape(BoxShape->HalfSize * ActorTransform->Scale);
+			}
+			
 			m_ActorIDToPhysicsBodyIDMap[Actor->GetActorID()] = m_PhysicsWorld.CreateBody(Settings);
 		}
 	}
@@ -91,15 +89,13 @@ namespace Fusion {
 		for (const auto& [ActorID, BodyID] : m_ActorIDToPhysicsBodyIDMap)
 		{
 			auto* ActorTransform = FindActorComponent<TransformComponent>(ActorID);
-			Fission::Body* Body = m_PhysicsWorld.GetBody(BodyID);
-			ActorTransform->Location = Body->Location;
+			//Fission::Body* Body = m_PhysicsWorld.GetBody(BodyID);
+			ActorTransform->Location = BodyID->GetPosition();
 		}
 	}
 
 	void World::StopSimulation()
 	{
-		for (const auto& [ActorID, BodyID] : m_ActorIDToPhysicsBodyIDMap)
-			m_PhysicsWorld.RemoveBody(BodyID);
 		m_ActorIDToPhysicsBodyIDMap.clear();
 		m_PhysicsWorld.Shutdown();
 	}

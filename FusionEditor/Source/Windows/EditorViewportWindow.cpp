@@ -109,9 +109,9 @@ namespace FusionEditor {
 			GroundActor->AddComponent<Fusion::PhysicsBodyComponent>()->Mass = 0.0f;
 			GroundActor->AddComponent<Fusion::BoxShapeComponent>()->HalfSize = { 50.0f, 5.0f, 50.0f };
 			GroundActor->AddComponent<Fusion::MeshComponent>()->MeshHandle = Fusion::AssetHandle(45758489989359767);
-		}
+		}*/
 
-		if (m_World->GetState() & Fusion::WorldStates::None)
+		if ((m_World->GetState() & Fusion::EWorldState::None) != 0)
 		{
 			if (ImGui::Button("Play"))
 			{
@@ -127,7 +127,7 @@ namespace FusionEditor {
 				m_World->Restore(m_BackupWorld);
 				m_BackupWorld = nullptr;
 			}
-		}*/
+		}
 
 		ViewportWindowBase::RenderContents();
 

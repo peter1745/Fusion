@@ -91,6 +91,7 @@ namespace FusionEditor {
 		RenderComponentMenuItem<MeshComponent>("Mesh");
 		RenderComponentMenuItem<PhysicsBodyComponent>("Physics Body");
 		RenderComponentMenuItem<SphereShapeComponent>("Sphere Shape");
+		RenderComponentMenuItem<BoxShapeComponent>("Box Shape");
 
 		ImGui::EndPopup();
 	}

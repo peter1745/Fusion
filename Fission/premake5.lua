@@ -21,6 +21,13 @@ project "Fission"
         "%{IncludeDirs.Tracy}"
     }
 
+    filter "action:vs*"
+        pchheader "FissionPCH.hpp"
+        pchsource "Source/FissionPCH.cpp"
+
+    filter "action:not vs*"
+        pchheader "FissionPCH.hpp"
+
     defines {
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
         "GLM_ENABLE_EXPERIMENTAL"

@@ -5,7 +5,7 @@
 
 #include <FTL/EnumBitmask.hpp>
 
-#include <Fission/World/DynamicsWorld.hpp>
+#include <Fission/World/PhysicsWorld.hpp>
 
 #include <vector>
 #include <EnTT/entt.hpp>
@@ -141,8 +141,8 @@ namespace Fusion {
 		std::unordered_map<ActorID, entt::entity> m_ActorIDMap;
 		std::unordered_map<ActorID, Shared<Actor>> m_Actors;
 
-		Fission::DynamicsWorld m_PhysicsWorld;
-		std::unordered_map<ActorID, Fission::BodyID> m_ActorIDToPhysicsBodyIDMap;
+		Fission::PhysicsWorld m_PhysicsWorld;
+		std::unordered_map<ActorID, Fission::Body*> m_ActorIDToPhysicsBodyIDMap;
 	};
 
 	template<typename TComponent, typename... TComponentParams>

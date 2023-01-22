@@ -131,6 +131,22 @@ namespace Fusion {
 		}
 	};
 
+	template <>
+	struct ComponentSerializer<BoxShapeComponent>
+	{
+		inline static const std::string Name = "BoxShapeComponent";
+
+		static void Serialize(WorldYAMLWriter& InWriter, const BoxShapeComponent* InComponent)
+		{
+			InWriter.Write("HalfSize", InComponent->HalfSize);
+		}
+
+		static void Deserialize(const WorldYAMLReader& InReader, BoxShapeComponent& InComponent)
+		{
+			InComponent.HalfSize = InReader.Read<glm::vec3>("HalfSize", glm::vec3(0.0f));
+		}
+	};
+
 	namespace ComponentUtils {
 
 		template<typename TFunc, typename... TComponents>

@@ -1,33 +1,51 @@
 #pragma once
 
-#include "BodyID.hpp"
-
-#include "Fission/Collision/ShapeBase.hpp"
+#include "Fission/Collision/Shapes/Shape.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <memory>
+
 namespace Fission {
+
+	enum class EBodyType : uint8_t { Static, Dynamic, Kinematic };
 
 	struct BodySettings
 	{
-		glm::vec3 InitialLocation;
-		glm::quat InitialOrientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		float Mass;
-		ShapeBase* Shape = nullptr;
+		EBodyType BodyType = EBodyType::Dynamic;
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::quat Rotation = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float Mass = 1000.0f;
+		Shape* CollisionShape = nullptr;
 	};
 
-	struct Body
+	class Body
 	{
-		BodyID ID = BodyID::InvalidID;
-		glm::vec3 Location = { 0.0f, 0.0f, 0.0f };
-		glm::quat Orientation = { 1.0f, 0.0f, 0.0f, 0.0f };
+	public:
+		const glm::vec3& GetPosition() const { return m_Position; }
+		void SetPosition(const glm::vec3& InPosition) { m_Position = InPosition; }
 
-		float InverseMass = 0.0f;
-		ShapeBase* Shape = nullptr;
+		virtual constexpr EBodyType GetType() const { return EBodyType::Static; }
 
-		glm::vec3 LinearVelocity = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 AngularVelocity = { 0.0f, 0.0f, 0.0f };
+		template<typename TBodyType>
+		TBodyType* As()
+		{
+			return static_cast<TBodyType*>(this);
+		}
+
+	public:
+		Shape* GetShape() const { return m_Shape; }
+
+	private:
+		glm::vec3 m_Position;
+		glm::quat m_Rotation;
+
+		// TODO(Peter): Make this a unique_ptr, body should own it's shape
+		Shape* m_Shape = nullptr;
+
+	private:
+		friend class PhysicsWorld;
 	};
 
 }

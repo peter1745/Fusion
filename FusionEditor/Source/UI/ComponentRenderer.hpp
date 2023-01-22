@@ -53,4 +53,13 @@ namespace FusionEditor {
 		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::SphereShapeComponent* InComp);
 	};
 
+	template <>
+	class ComponentUI<Fusion::BoxShapeComponent>
+	{
+	public:
+		static constexpr std::string_view DisplayName = "Box Shape";
+
+		static void Render(Fusion::Shared<Fusion::Actor> InActor, Fusion::BoxShapeComponent* InComp);
+	};
+
 }

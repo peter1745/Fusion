@@ -14,7 +14,8 @@ namespace Fusion {
 		CameraComponent,
 		MeshComponent,
 		PhysicsBodyComponent,
-		SphereShapeComponent
+		SphereShapeComponent,
+		BoxShapeComponent
 	>;
 
 	namespace ComponentUtils {
