@@ -10,3 +10,6 @@
 [submodule "FusionTemplateLibrary"]
 	path = FusionTemplateLibrary
 	url = https://github.com/peter1745/FusionTemplateLibrary
+[submodule "Fission"]
+	path = Fission
+	url = https://github.com/peter1745/Fission
