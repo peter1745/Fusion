@@ -57,8 +57,8 @@ namespace Fusion {
 
 			Fission::BodySettings Settings = {};
 			Settings.BodyType = PhysicsBodyComp->Mass <= 0.0f ? Fission::EBodyType::Static : Fission::EBodyType::Dynamic;
-			Settings.Position = ActorTransform->Location;
-			Settings.Rotation = ActorTransform->GetRotation();
+			Settings.Position = Fission::Math::Vec3(ActorTransform->Location.x, ActorTransform->Location.y, ActorTransform->Location.z);
+			//Settings.Rotation = ActorTransform->GetRotation();
 			Settings.Mass = PhysicsBodyComp->Mass;
 
 			const auto* SphereShape = FindActorComponent<SphereShapeComponent>(Actor->GetActorID());
@@ -71,7 +71,8 @@ namespace Fusion {
 			const auto* BoxShape = FindActorComponent<BoxShapeComponent>(Actor->GetActorID());
 			if (BoxShape)
 			{
-				Settings.CollisionShape = new Fission::BoxShape(BoxShape->HalfSize * ActorTransform->Scale);
+				auto HalfSize = Fission::Math::Vec3(BoxShape->HalfSize.x, BoxShape->HalfSize.y, BoxShape->HalfSize.z);
+				Settings.CollisionShape = new Fission::BoxShape(HalfSize * Fission::Math::Vec3(ActorTransform->Scale.x, ActorTransform->Scale.y, ActorTransform->Scale.z));
 			}
 			
 			m_ActorIDToPhysicsBodyIDMap[Actor->GetActorID()] = m_PhysicsWorld.CreateBody(Settings);
@@ -90,7 +91,8 @@ namespace Fusion {
 		{
 			auto* ActorTransform = FindActorComponent<TransformComponent>(ActorID);
 			//Fission::Body* Body = m_PhysicsWorld.GetBody(BodyID);
-			ActorTransform->Location = BodyID->GetPosition();
+			const auto& ActorPosition = BodyID->GetPosition();
+			ActorTransform->Location = glm::vec3(ActorPosition.GetX(), ActorPosition.GetY(), ActorPosition.GetZ());
 		}
 	}
 
