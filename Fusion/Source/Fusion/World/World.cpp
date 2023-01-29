@@ -57,8 +57,8 @@ namespace Fusion {
 
 			Fission::BodySettings Settings = {};
 			Settings.BodyType = PhysicsBodyComp->Mass <= 0.0f ? Fission::EBodyType::Static : Fission::EBodyType::Dynamic;
-			Settings.Position = Fission::Math::Vec3(ActorTransform->Location.x, ActorTransform->Location.y, ActorTransform->Location.z);
-			//Settings.Rotation = ActorTransform->GetRotation();
+			Settings.Position = Fission::Math::FVec3(ActorTransform->Location.x, ActorTransform->Location.y, ActorTransform->Location.z);
+			Settings.Rotation = Fission::Math::FQuat(ActorTransform->GetRotation().x, ActorTransform->GetRotation().y, ActorTransform->GetRotation().z, ActorTransform->GetRotation().w);
 			Settings.Mass = PhysicsBodyComp->Mass;
 
 			const auto* SphereShape = FindActorComponent<SphereShapeComponent>(Actor->GetActorID());
@@ -71,8 +71,8 @@ namespace Fusion {
 			const auto* BoxShape = FindActorComponent<BoxShapeComponent>(Actor->GetActorID());
 			if (BoxShape)
 			{
-				auto HalfSize = Fission::Math::Vec3(BoxShape->HalfSize.x, BoxShape->HalfSize.y, BoxShape->HalfSize.z);
-				Settings.CollisionShape = new Fission::BoxShape(HalfSize * Fission::Math::Vec3(ActorTransform->Scale.x, ActorTransform->Scale.y, ActorTransform->Scale.z));
+				auto HalfSize = Fission::Math::FVec3(BoxShape->HalfSize.x, BoxShape->HalfSize.y, BoxShape->HalfSize.z);
+				Settings.CollisionShape = new Fission::BoxShape(HalfSize * Fission::Math::FVec3(ActorTransform->Scale.x, ActorTransform->Scale.y, ActorTransform->Scale.z));
 			}
 			
 			m_ActorIDToPhysicsBodyIDMap[Actor->GetActorID()] = m_PhysicsWorld.CreateBody(Settings);
@@ -92,7 +92,7 @@ namespace Fusion {
 			auto* ActorTransform = FindActorComponent<TransformComponent>(ActorID);
 			//Fission::Body* Body = m_PhysicsWorld.GetBody(BodyID);
 			const auto& ActorPosition = BodyID->GetPosition();
-			ActorTransform->Location = glm::vec3(ActorPosition.GetX(), ActorPosition.GetY(), ActorPosition.GetZ());
+			ActorTransform->Location = glm::vec3(ActorPosition.X, ActorPosition.Y, ActorPosition.Z);
 		}
 	}
 
